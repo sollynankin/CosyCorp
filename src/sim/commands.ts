@@ -16,6 +16,8 @@ import { spendEnergy } from './energy';
 import { checkWarp } from './warp';
 import { endDay } from './day';
 import { buy, collectOverflow, ship } from './shop';
+import { pickupMachine, placeMachine, rotateMachine } from './placement';
+import { chestMove } from './machineInteract';
 
 export type Command =
   | { type: 'move'; dx: number; dy: number }
@@ -27,7 +29,11 @@ export type Command =
   | { type: 'sleep' }
   | { type: 'buy'; shop: string; item: string; n: number }
   | { type: 'ship'; slot: number; n: number }
-  | { type: 'collectOverflow' };
+  | { type: 'collectOverflow' }
+  | { type: 'place'; item: string; x: number; y: number; dir: Dir }
+  | { type: 'pickup'; x: number; y: number }
+  | { type: 'rotate'; x: number; y: number; dir?: Dir }
+  | { type: 'chest'; entity: number; fromBackpack: boolean; index: number };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -171,5 +177,13 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       return ship(state, ctx, cmd.slot, cmd.n);
     case 'collectOverflow':
       return collectOverflow(state);
+    case 'place':
+      return placeMachine(state, ctx, cmd.item, cmd.x, cmd.y, cmd.dir);
+    case 'pickup':
+      return pickupMachine(state, ctx, cmd.x, cmd.y);
+    case 'rotate':
+      return rotateMachine(state, cmd.x, cmd.y, cmd.dir);
+    case 'chest':
+      return chestMove(state, ctx, cmd.entity, cmd.fromBackpack, cmd.index);
   }
 }
