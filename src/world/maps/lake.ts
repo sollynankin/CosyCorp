@@ -1,0 +1,45 @@
+import type { MapDef } from '../types';
+
+// Stillmere Lake. Fish from the shore or the dock. Ilo's hut sits on the east shore.
+export const LAKE: MapDef = {
+  id: 'lake',
+  name: 'Stillmere',
+  fishing: 'lake',
+  rows: [
+    'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP',
+    'P..............................T.......P',
+    'P.............sssssssssss....b.........P',
+    'P..TT....TsssssssssOsssssssss..........P',
+    'P...TT..ssssOOOOOOOOOOOOOOOssss.T......P',
+    'P.*....sssOOOOOOOOOOOOOOOOOOOsss.......P',
+    'P....sssOOOOOOOOOOOOOOOOOOOOOOOsss.T...P',
+    'P..T.ssOOOOOOOOOOOOOOOOOOOOOOOOOss....TP',
+    'P...ssOOOOOOOOOOOOOOOOOOOOOOOOOOOss....P',
+    'P...ssOOOOOOOOOOOOOOOOOOOOOOOOOOOssb...P',
+    'P..ssOOOOOOOOOOOOOOOOOOOOOOOOOOOOOss...P',
+    'P...ssOOOOOOOOOOOOOOOOOOOOOOOOOOOss....P',
+    'P.*TssOOOOOOOOOOOOO==OOOOOOOOOOOOss....P',
+    'P....ssOOOOOOOOOOOO==OOOOOOOOOOOss....TP',
+    'P....sssOOOOOOOOOOO==OOOOOOOOOOsss.....P',
+    'Pb...T*sssOOOOOOOOO==OOOOOOOOsss.......P',
+    'P..*....ssssOOOOOOO==OOOOOOssss........P',
+    'P...b....*sssssssss==ssssssss......T...P',
+    'P.............sssss==ssss.....#####..*.P',
+    'P.....T............==.....b...#####....P',
+    'P...*T.T...T.*..........::T...#####....P',
+    'P..........T......b.....::....#####....P',
+    'P.*..b..................::T.....:......P',
+    'P...........b...........::..........T..P',
+    'P...............b.......::......b......P',
+    'P........T...T.T........::.............P',
+    'P...T........*.........T::....b........P',
+    'PPPPPPPPPPPPPPPPPPPPPPPP::PPPPPPPPPPPPPP',
+  ],
+  buildings: [
+    { id: 'ilo_hut', name: "Ilo's Hut", style: 'hut', x: 30, y: 18, w: 5, h: 4, door: { x: 32, y: 21 }, doorDir: 2, panel: 'home:ilo', wall: '#a8b8c0', roof: '#c8a03a' },
+  ],
+  warps: [
+    { x: 24, y: 27, to: 'town', tx: 30, ty: 1, dir: 2 },
+    { x: 25, y: 27, to: 'town', tx: 31, ty: 1, dir: 2 },
+  ],
+};
