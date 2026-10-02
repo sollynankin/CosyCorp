@@ -15,6 +15,7 @@ import type { GameState } from './state';
 import { spendEnergy } from './energy';
 import { checkWarp } from './warp';
 import { endDay } from './day';
+import { buy, collectOverflow, ship } from './shop';
 
 export type Command =
   | { type: 'move'; dx: number; dy: number }
@@ -23,7 +24,10 @@ export type Command =
   | { type: 'select'; slot: number }
   | { type: 'swap'; a: number; b: number }
   | { type: 'eat'; slot: number }
-  | { type: 'sleep' };
+  | { type: 'sleep' }
+  | { type: 'buy'; shop: string; item: string; n: number }
+  | { type: 'ship'; slot: number; n: number }
+  | { type: 'collectOverflow' };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -161,5 +165,11 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       if (state.player.map !== 'farm') return fail('Your bed is at the farmhouse.');
       endDay(state, ctx, false);
       return OK;
+    case 'buy':
+      return buy(state, ctx, cmd.shop, cmd.item, cmd.n);
+    case 'ship':
+      return ship(state, ctx, cmd.slot, cmd.n);
+    case 'collectOverflow':
+      return collectOverflow(state);
   }
 }

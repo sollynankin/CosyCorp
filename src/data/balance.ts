@@ -191,3 +191,16 @@ export const FORAGE_PER_DAY: Record<string, number> = { forest: 6, lake: 3, town
 // ---- Day report -------------------------------------------------------------------------------------
 export const PROCESSED_SCORE = 5;
 export const SPOIL_SCORE = 3;
+
+// ---- Shop prices for things without a crop or ore price ---------------------------------------------
+export const SHOP_PRICES: Record<string, number> = {
+  chest: 150,
+  radish_salad: 140,
+  tomato_soup: 200,
+  pancakes: 260,
+  recipe_tomato_soup: 300,
+  recipe_pancakes: 400,
+  recipe_corn_chowder: 500,
+  ribbon_charm: 500,
+  promise_lantern: 2000,
+};

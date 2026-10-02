@@ -129,7 +129,7 @@ export interface RecipeDef {
   output: { item: ItemId; count: number };
   /** crafter recipes only */
   workMinutes?: number;
-  /** recipe must be learned (in state.recipes) unless this is false */
+  /** known from the start when true; otherwise it must be learned (in state.recipes). Crafter recipes ignore this */
   learned?: boolean;
   requiresReward?: string;
 }
