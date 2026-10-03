@@ -123,6 +123,9 @@ function buildMachine(type: string): MachineMesh {
       };
     case 'conveyor':
       return { body: merge(beltBed(BRASS, 3)), lampY: -1 };
+    case 'conveyor_gold':
+      // Stretch-goal cosmetic: polished rails.
+      return { body: merge(beltBed('#f4cc4a', 3)), lampY: -1 };
     case 'swift_conveyor':
       return { body: merge([...beltBed('#4a8ac8', 0), ...chevron(-0.32, 0.131, '#a8d0f0'), ...chevron(-0.18, 0.131, '#a8d0f0'), ...chevron(0.12, 0.131, '#a8d0f0'), ...chevron(0.26, 0.131, '#a8d0f0')]), lampY: -1 };
     case 'splitter':

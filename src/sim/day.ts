@@ -13,6 +13,7 @@ import { emptyDayStats } from './stats';
 import { rollWeather } from './weather';
 import { regrowTrees, respawnForage } from './worldDaily';
 import { overnightHooks, morningHooks } from './hooks';
+import { checkGoals } from './goals';
 
 export function endDay(state: GameState, ctx: DayContext, passedOut: boolean): void {
   // 1. Machines finish the day (sleeping early never loses production).
@@ -29,6 +30,7 @@ export function endDay(state: GameState, ctx: DayContext, passedOut: boolean): v
   const notes = overnightHooks(state, ctx);
   state.report = buildReport(state, ctx);
   state.report.notes.push(...notes);
+  state.report.goalsCompleted = checkGoals(state);
   // 5. Overnight growth uses today's season and heat.
   growOvernight(state, ctx.heat);
   regrowTrees(state);

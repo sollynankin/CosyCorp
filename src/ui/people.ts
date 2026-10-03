@@ -3,6 +3,7 @@
 import { MAX_HEARTS, POD_COUNT, FESTIVAL_ACTIVITY_MINUTES } from '../data/balance';
 import { getItem, getVillager, VILLAGERS } from '../data';
 import { FESTIVALS } from '../data/festivals';
+import { GOALS } from '../data/goals';
 import type { Objective } from '../data/types';
 import type { Game } from '../game/game';
 import { portraitUrl } from '../render/iconRender';
@@ -15,6 +16,7 @@ import {
   heartsOf,
   objectiveProgress,
   questDef,
+  seasonOf,
   simMinute,
   villagerPos,
   type GameState,
@@ -75,7 +77,7 @@ export function describeObjective(o: Objective): string {
 export class People {
   private sceneLine = 0;
   private sceneId: string | null = null;
-  private journalTab: 'quests' | 'friends' = 'quests';
+  private journalTab: 'quests' | 'friends' | 'goals' = 'quests';
 
   constructor(private readonly game: Game, private readonly modals: Modals, private readonly renderer: Renderer) {}
 
@@ -185,9 +187,10 @@ export class People {
   }
 
   private renderJournal(): HTMLElement {
-    const tab = (id: 'quests' | 'friends', label: string) =>
+    const tab = (id: 'quests' | 'friends' | 'goals', label: string) =>
       h(`button.tab${this.journalTab === id ? '.on' : ''}`, { onclick: () => { this.journalTab = id; this.modals.refresh(); } }, label);
-    return h('div', h('div.tabs', tab('quests', 'Quests'), tab('friends', 'Friends')), this.journalTab === 'quests' ? this.renderQuests() : this.renderFriends());
+    const body = this.journalTab === 'quests' ? this.renderQuests() : this.journalTab === 'friends' ? this.renderFriends() : this.renderGoals();
+    return h('div', h('div.tabs', tab('quests', 'Quests'), tab('friends', 'Friends'), tab('goals', 'Stretch goals')), body);
   }
 
   private renderQuests(): HTMLElement {
@@ -211,6 +214,19 @@ export class People {
       board.length ? h('div', h('h3', 'Quest board'), board.map((b) => h('div.small', `${getVillager(b.villager).name.split(' ')[0]}: ${b.count} ${getItem(b.item).name} (${b.reward}g, by Sunday)`))) : null,
       s.quests.done.length ? h('div', h('h3', 'Done'), h('div.small.muted', s.quests.done.map((id) => questDef(id).title).join(' · '))) : null,
     );
+  }
+
+  private renderGoals(): HTMLElement {
+    const s = this.s;
+    const season = seasonOf(s.day);
+    return h('div.scroll.journal',
+      h('p.muted.small', 'Optional optimisation challenges. Each season has its own; they never block the story.'),
+      GOALS.map((g) => {
+        const done = s.rewards.includes(g.id);
+        const now = g.season === season;
+        return h(`div.quest${done ? '' : now ? '.main' : '.dim'}`,
+          h('div.grow', h('div.b', g.title, h('span.arc', done ? 'Done' : g.season)), h('div.small.muted', `Reward: ${g.rewardText}`)));
+      }));
   }
 
   private renderFriends(): HTMLElement {

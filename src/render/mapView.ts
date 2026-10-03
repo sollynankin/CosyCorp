@@ -114,9 +114,27 @@ export class MapView {
       }
     }
     if (this.mapId === 'town') this.dressTown(state);
+    if (this.mapId === 'farm') this.dressFarm(state);
     this.decor.end();
     this.decorGlow.end();
     this.glass.end();
+  }
+
+  /** Stretch-goal cosmetics on the farm (DESIGN.md §13). */
+  private dressFarm(state: GameState): void {
+    this.dressKey = state.rewards.join(',');
+    const r = state.rewards;
+    if (r.includes('yard_bunting')) {
+      for (const x of [6, 19]) this.decor.add(D.buntingPole(), tileMatrix(x + 0.5, 7.5, 0, 0));
+      this.decor.add(D.buntingRun(13), tileMatrix(6.5, 7.5, 0, 0));
+    }
+    if (r.includes('farm_lanterns')) {
+      for (let x = 12; x < 43; x += 5) {
+        this.decor.add(D.lanternPost(), tileMatrix(x + 0.5, 7.5, 0, 0));
+        this.decorGlow.add(D.lanternBody(), tileMatrix(x + 0.5, 7.5, 0, 0));
+      }
+    }
+    if (r.includes('weathervane')) this.decor.add(D.weathervane(), tileMatrix(10, 4.5, 3.0, 0));
   }
 
   private townDressKey(state: GameState): string {
@@ -161,6 +179,7 @@ export class MapView {
   update(state: GameState, season: SeasonId, time: number): void {
     if (season !== this.season) this.rebuildSeason(state, season);
     if (this.mapId === 'town' && this.townDressKey(state) !== this.dressKey) this.buildDecor(state);
+    if (this.mapId === 'farm' && state.rewards.join(',') !== this.dressKey) this.buildDecor(state);
     if (state.flags.join(',') !== this.builtFlags) {
       this.buildBuildings(state);
       this.buildDecor(state);

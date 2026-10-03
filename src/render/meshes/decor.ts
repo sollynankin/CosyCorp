@@ -106,3 +106,17 @@ export const stall = (color: string) =>
 /** A paper lantern hung on a short post (body is the glowing part). */
 export const lanternPost = () => once('lpost', () => merge([cyl(0.03, 0.04, 1.9, '#4a3a2a', {}, 5), box(0.5, 0.03, 0.03, '#4a3a2a', { x: 0.2, y: 1.9 })]));
 export const lanternBody = () => once('lbody', () => merge([ball(0.17, '#ffb060', { x: 0.4, y: 1.62, sy: 1.25 }, 1), cyl(0.06, 0.06, 0.05, '#4a3a2a', { x: 0.4, y: 1.82 }, 6)]));
+
+/** Stretch-goal cosmetic: a brass heron weathervane. */
+export const weathervane = () =>
+  once('vane', () =>
+    merge([
+      cyl(0.025, 0.03, 0.9, '#8a6a3a', {}, 5),
+      box(0.5, 0.03, 0.03, '#c89a3a', { y: 0.55 }),
+      box(0.03, 0.03, 0.5, '#c89a3a', { y: 0.55 }),
+      ball(0.07, '#d8aa4a', { y: 0.92 }, 0),
+      box(0.42, 0.14, 0.03, '#d8aa4a', { y: 1.0 }),
+      cone(0.05, 0.22, '#d8aa4a', { x: 0.28, y: 1.02, rz: -Math.PI / 2 }, 4),
+      cyl(0.012, 0.012, 0.22, '#d8aa4a', { x: -0.05, y: 1.06, rz: 0.4 }, 4),
+    ]),
+  );

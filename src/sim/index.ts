@@ -30,3 +30,4 @@ export { festivalOn, podTiles, secretFriend } from './festival';
 export { warpTo } from './warp';
 export { interactTile } from './interact';
 export { boardPool, fulfilBoard, postBoard } from './board';
+export { checkGoals, goalMet } from './goals';

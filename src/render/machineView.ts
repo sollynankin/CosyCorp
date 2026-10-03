@@ -50,6 +50,7 @@ export class MachineView {
   private readonly lamps = new Batcher(lampMat, { cast: false, receive: false });
   private readonly items = new Batcher();
   private layoutRev = -1;
+  private rewardsKey = '';
   /** render-only spin phase per entity id */
   private readonly phase = new Map<number, number>();
 
@@ -60,12 +61,14 @@ export class MachineView {
   /** frac: 0..1 progress through the current in-game minute. */
   update(state: GameState, dt: number, tickAlpha: number, entityFactor: Record<number, number>): void {
     const ents = state.farm.entities;
-    if (state.farm.layoutRev !== this.layoutRev) {
+    const golden = state.rewards.includes('golden_belts');
+    if (state.farm.layoutRev !== this.layoutRev || String(golden) !== this.rewardsKey) {
       this.layoutRev = state.farm.layoutRev;
+      this.rewardsKey = String(golden);
       this.bodies.begin();
       this.glows.begin();
       for (const e of ents) {
-        const mm = machineMesh(e.type);
+        const mm = machineMesh(golden && e.type === 'conveyor' ? 'conveyor_gold' : e.type);
         const mtx = tileMatrix(e.x + 0.5, e.y + 0.5, 0, machineYaw(e));
         this.bodies.add(mm.body, mtx);
         if (mm.glow) this.glows.add(mm.glow, mtx);
