@@ -1,6 +1,7 @@
 // Procedural item icons drawn on a 2D canvas and cached as data URLs. Shape comes from ItemDef.icon,
 // colour from ItemDef.color; tools and machines get their own little drawings.
 import { getItem } from '../data';
+import { machineIconUrl } from '../render/iconRender';
 
 const cache = new Map<string, string>();
 const S = 48;
@@ -30,6 +31,11 @@ export function itemIcon(id: string): string {
   const hit = cache.get(id);
   if (hit) return hit;
   const def = getItem(id);
+  if (def.category === 'machine' && def.places) {
+    const url = machineIconUrl(def.places);
+    cache.set(id, url);
+    return url;
+  }
   const [c, g] = ctx2d();
   const col = def.color;
   g.lineJoin = 'round';

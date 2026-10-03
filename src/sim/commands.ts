@@ -18,6 +18,8 @@ import { endDay } from './day';
 import { buy, collectOverflow, ship } from './shop';
 import { pickupMachine, placeMachine, rotateMachine } from './placement';
 import { chestMove } from './machineInteract';
+import { craftRecipe } from './crafting';
+import { entityAt } from './placement';
 
 export type Command =
   | { type: 'move'; dx: number; dy: number }
@@ -33,7 +35,8 @@ export type Command =
   | { type: 'place'; item: string; x: number; y: number; dir: Dir }
   | { type: 'pickup'; x: number; y: number }
   | { type: 'rotate'; x: number; y: number; dir?: Dir }
-  | { type: 'chest'; entity: number; fromBackpack: boolean; index: number };
+  | { type: 'chest'; entity: number; fromBackpack: boolean; index: number }
+  | { type: 'craft'; recipe: string; n: number };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -104,6 +107,8 @@ function cmdUse(state: GameState, ctx: DayContext, x: number, y: number): Comman
     return did ? OK : fail('Nothing to do there.');
   }
   if (item.category === 'seed') return plantFromSlot(state, ctx, x, y);
+  // A machine in hand goes down on an empty tile, its front facing away from the player.
+  if (item.category === 'machine' && p.map === 'farm' && !entityAt(state, x, y)) return placeMachine(state, ctx, slot.id, x, y, p.facing);
   // Anything else falls back to interacting (placing machines, feeding hoppers, eating is separate).
   return interactTile(state, ctx, x, y);
 }
@@ -185,5 +190,7 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       return rotateMachine(state, cmd.x, cmd.y, cmd.dir);
     case 'chest':
       return chestMove(state, ctx, cmd.entity, cmd.fromBackpack, cmd.index);
+    case 'craft':
+      return craftRecipe(state, ctx, cmd.recipe, cmd.n);
   }
 }

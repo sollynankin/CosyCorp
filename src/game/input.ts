@@ -1,8 +1,10 @@
 // Keyboard + mouse input. Produces commands for the Game; never touches state directly.
 // InputSource is the extension point for a gamepad: implement moveVector() and the action callbacks.
 import { HOTBAR_SLOTS } from '../data/balance';
-import { facingTile, inReach, isBlocked, type Command } from '../sim';
-import { DX, DY, findPath, parseMap } from '../world';
+import { entityAt, facingTile, inReach, isBlocked, placementProblem, type Command } from '../sim';
+import { getItem } from '../data';
+import type { Dir } from '../data/types';
+import { DX, DY, dirFromVector, findPath, parseMap } from '../world';
 import type { Renderer } from '../render/renderer';
 import type { Game } from './game';
 
@@ -27,7 +29,7 @@ export class Input implements InputSource {
   private pending: PendingAction = null;
   private stuck = 0;
   private lastPos = { x: 0, y: 0 };
-  buildMode: { onClick(x: number, y: number, button: number): void; onHover(x: number, y: number): void } | null = null;
+  buildMode: { active: boolean; onClick(x: number, y: number, button: number): void; onHover(x: number, y: number): void; onRelease(): void } | null = null;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -44,6 +46,7 @@ export class Input implements InputSource {
     canvas.addEventListener('mouseleave', () => (this.mouse.inside = false));
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('mousedown', (e) => this.click(e));
+    window.addEventListener('mouseup', () => this.buildMode?.onRelease());
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       if (e.shiftKey || e.ctrlKey) {
@@ -76,8 +79,23 @@ export class Input implements InputSource {
     if (t) {
       const ok = inReach(this.game.state, t[0], t[1]);
       this.renderer.hover = { x: t[0], y: t[1], ok };
-      this.buildMode?.onHover(t[0], t[1]);
-    } else this.renderer.hover = null;
+      if (this.buildMode?.active) this.buildMode.onHover(t[0], t[1]);
+      else this.renderer.ghost = this.heldMachineGhost(t[0], t[1], ok);
+    } else {
+      this.renderer.hover = null;
+      if (!this.buildMode?.active) this.renderer.ghost = null;
+    }
+  }
+
+  /** With a machine in hand, preview where it would go (its front faces away from the player). */
+  private heldMachineGhost(x: number, y: number, inReachNow: boolean) {
+    const s = this.game.state;
+    const st = s.player.inventory[s.player.selected];
+    if (!st || s.player.map !== 'farm') return null;
+    const item = getItem(st.id);
+    if (item.category !== 'machine' || !item.places || entityAt(s, x, y)) return null;
+    const dir = dirFromVector(x + 0.5 - s.player.x, y + 0.5 - s.player.y, s.player.facing) as Dir;
+    return { type: item.places, x, y, dir, ok: inReachNow && placementProblem(s, item.places, x, y) === null };
   }
 
   hoverTile(): [number, number] | null {
@@ -109,10 +127,8 @@ export class Input implements InputSource {
       return;
     }
     switch (e.code) {
-      case 'Space':
-      case 'KeyC': {
+      case 'Space': {
         e.preventDefault();
-        if (e.code === 'KeyC') return;
         const [x, y] = this.actionTile();
         g.send({ type: 'use', x, y });
         break;
@@ -142,7 +158,7 @@ export class Input implements InputSource {
     if (this.cb.modalOpen()) return;
     const t = this.hoverTile();
     if (!t) return;
-    if (this.buildMode) {
+    if (this.buildMode?.active) {
       this.buildMode.onClick(t[0], t[1], e.button);
       return;
     }

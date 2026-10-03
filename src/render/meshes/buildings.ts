@@ -162,7 +162,7 @@ export function waterWheel(r: number): THREE.Group {
   const parts: Part[] = [torus(r, 0.05, '#7a5636', {}, 5, 16), torus(r * 0.45, 0.04, '#6a4a2e', {}, 4, 10), cyl(0.09, 0.09, 0.3, '#4a4a52', { rx: Math.PI / 2, z: -0.15 }, 8)];
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI * 2;
-    parts.push(box(0.06, r, 0.06, '#8a6440', { x: (Math.cos(a) * r) / 2, y: (Math.sin(a) * r) / 2 - r / 2, rz: a - Math.PI / 2 }));
+    parts.push(box(0.06, r, 0.06, '#8a6440', { rz: a - Math.PI / 2 }));
     parts.push(box(0.32, 0.06, 0.3, '#9a7450', { x: Math.cos(a) * r, y: Math.sin(a) * r - 0.03, z: -0.15, rz: a }));
   }
   const spin = new THREE.Mesh(merge(parts), vertexMat);

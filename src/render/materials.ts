@@ -36,3 +36,14 @@ export function mat(color: THREE.ColorRepresentation, opts: { transparent?: bool
 export function flatMat(color: THREE.ColorRepresentation, opacity = 1): THREE.MeshBasicMaterial {
   return new THREE.MeshBasicMaterial({ color, transparent: opacity < 1, opacity, depthWrite: false });
 }
+
+/** Unlit, tinted per instance: status lamps glow the same day and night. */
+export const lampMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+
+/** Flow overlay layers: unlit, instance-tinted, translucent, drawn over the ground. */
+export const overlayFaint = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.22, depthWrite: false, depthTest: false });
+export const overlayStrong = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.8, depthWrite: false, depthTest: false });
+export const overlayDim = new THREE.MeshBasicMaterial({ color: '#0a0c18', transparent: true, opacity: 0.5, depthWrite: false, depthTest: false });
+
+/** Build-mode ghost: translucent, tinted green (ok) or red (blocked). */
+export const ghostMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, transparent: true, opacity: 0.55, emissive: new THREE.Color('#000000'), depthWrite: false });

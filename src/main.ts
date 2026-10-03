@@ -3,7 +3,7 @@ import './style.css';
 import { newGame } from './sim';
 import { Game } from './game/game';
 import { Input } from './game/input';
-import { loadLocal, loadPrefs } from './game/save';
+import { loadLocal, loadPrefs, saveLocal } from './game/save';
 import { Renderer } from './render/renderer';
 import { App } from './ui/app';
 import { $ } from './ui/dom';
@@ -20,6 +20,7 @@ const input = new Input(canvas, game, renderer, {
   modalOpen: () => app.modals.open,
 });
 
+input.buildMode = app.build;
 window.addEventListener('resize', () => renderer.resize());
 
 let last = performance.now();
@@ -30,10 +31,10 @@ function frame(now: number): void {
   const alpha = game.advance(dt);
   const p = game.state.player;
   renderer.render(game.state, { px0: game.prev.x, py0: game.prev.y, px1: p.x, py1: p.y, alpha }, dt);
-  app.hud.render();
+  app.frame();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
 // Debug handles for the browser console (see CLAUDE.md).
-Object.assign(window, { game, renderer, app });
+Object.assign(window, { game, renderer, app, saveLocal });

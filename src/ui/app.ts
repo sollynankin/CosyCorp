@@ -8,17 +8,31 @@ import { showMenu } from './menu';
 import { Modals } from './modal';
 import { Panels } from './panels';
 import { renderReport } from './report';
+import { BuildMode } from './build';
+import { FlowLegend, WorksPanels } from './works';
 
 export class App {
   readonly hud: Hud;
   readonly modals: Modals;
   readonly panels: Panels;
+  readonly works: WorksPanels;
+  readonly build: BuildMode;
+  readonly legend: FlowLegend;
 
   constructor(root: HTMLElement, readonly game: Game, readonly renderer: Renderer) {
     this.hud = new Hud(root, game);
     this.modals = new Modals(root, game);
     this.panels = new Panels(game, this.modals);
+    this.works = new WorksPanels(game, this.modals, renderer);
+    this.build = new BuildMode(root, game, renderer, (t) => this.toast(t));
+    this.legend = new FlowLegend(root, game, renderer);
     game.on((e) => this.onEvent(e));
+  }
+
+  /** Per-frame UI work that is not driven by game changes. */
+  frame(): void {
+    this.hud.render();
+    this.legend.render();
   }
 
   toast(text: string): void {
@@ -27,6 +41,10 @@ export class App {
 
   /** Returns true if the key was handled (and should not reach movement). */
   onKey(key: string, e: KeyboardEvent): boolean {
+    if (key === 'Escape' && this.build.active && !this.modals.open) {
+      this.build.exit();
+      return true;
+    }
     if (key === 'Escape') {
       if (!this.modals.closeTop()) showMenu(this.game, this.modals, this.renderer, (t) => this.toast(t));
       return true;
@@ -37,7 +55,24 @@ export class App {
       else if (!this.modals.open) this.panels.inventory();
       return true;
     }
-    void e;
+    if (this.modals.open || e.repeat) return false;
+    if (k === 'b') {
+      this.build.toggle();
+      return true;
+    }
+    if (k === 'c') {
+      this.works.crafting('craft');
+      return true;
+    }
+    if (k === 'f') {
+      this.renderer.flowOn = !this.renderer.flowOn;
+      if (this.renderer.flowOn && this.game.state.player.map !== 'farm') this.toast('The Flow view shows the farm.');
+      return true;
+    }
+    if (k === 'r' && this.build.active) {
+      this.build.rotate();
+      return true;
+    }
     return false;
   }
 
@@ -67,6 +102,9 @@ export class App {
     if (panel === 'home') this.panels.home();
     else if (panel === 'ship') this.panels.shipping();
     else if (panel.startsWith('shop:')) this.panels.shop(panel.slice(5));
+    else if (panel.startsWith('machine:')) this.works.machine(Number(panel.slice(8)));
+    else if (panel.startsWith('chest:')) this.works.chest(Number(panel.slice(6)));
+    else if (panel === 'craft' || panel === 'cook') this.works.crafting(panel);
     else this.toast('Nobody answers the door.');
   }
 }

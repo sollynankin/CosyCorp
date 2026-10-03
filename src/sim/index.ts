@@ -19,3 +19,5 @@ export { placeMachine, pickupMachine, rotateMachine, entityAt, placementProblem 
 export { canAccept, splitterOutputs, storedCount, availableRecipes } from './transfer';
 export { findRipeInReach, findPlantableInReach } from './machines';
 export { spoilOvernight } from './spoilage';
+export { knowsRecipe, knownRecipes, learnRecipes } from './crafting';
+export { crafterAccepts, planterSeed } from './transfer';

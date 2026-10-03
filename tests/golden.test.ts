@@ -63,5 +63,7 @@ describe('golden layout', () => {
     expect(r.stats.spoiled).toBe(2);
     expect(r.score).toBe(14_975);
     expect([storedCount(a), storedCount(b), storedCount(p)]).toEqual([40, 40, 0]);
+    // The press is the bottleneck of line B, so its feed belt jams and the report says so.
+    expect(r.notes.some((n) => n.includes('Conveyor at (6, 11) was jammed'))).toBe(true);
   });
 });

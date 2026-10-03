@@ -503,3 +503,86 @@ table.mtable td:first-child {
 .note.good {
   background: #dff0c8;
 }
+
+/* ---------- The Works: build bar, crafting, inspector, flow legend ---------- */
+.build-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  background: var(--paper);
+  border: 2px solid var(--wood);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 8px 12px;
+  max-width: min(92vw, 900px);
+  pointer-events: auto;
+}
+.build-title { font-weight: 700; letter-spacing: 0.04em; color: var(--wood-dark); }
+.build-items { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.build-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  border: 2px solid var(--paper-2);
+  border-radius: 10px;
+  cursor: pointer;
+  background: #fff8e8;
+}
+.build-item.sel { border-color: var(--accent); background: #ffe8d0; }
+.build-item img { width: 32px; height: 32px; }
+.build-n { font-weight: 700; font-size: 12px; color: var(--ink-soft); }
+.build-name { font-size: 13px; }
+.build-help, .build-empty { font-size: 12px; color: var(--ink-soft); }
+
+.craft-list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.craft-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #fff8e8; border-radius: 10px; }
+.craft-row.dim { opacity: 0.6; }
+.craft-out { width: 40px; height: 40px; }
+.craft-inputs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
+.craft-in { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; }
+.craft-in img { width: 20px; height: 20px; }
+.craft-in.ok { color: var(--good); }
+.craft-in.miss { color: var(--bad); }
+
+.mach { display: flex; flex-direction: column; gap: 8px; }
+.mach h3 { margin: 6px 0 4px; font-size: 15px; }
+.mach-head { display: flex; align-items: center; gap: 10px; }
+.mach-head img { width: 44px; height: 44px; }
+.status-chip { color: #fff; font-weight: 700; font-size: 12px; padding: 3px 9px; border-radius: 99px; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); }
+.facts { display: grid; grid-template-columns: 1fr; gap: 2px; font-size: 14px; }
+.fact { display: flex; gap: 10px; }
+.fact .muted { width: 70px; flex: none; }
+.stacks { display: flex; gap: 4px; flex-wrap: wrap; }
+.progress { display: flex; align-items: center; gap: 8px; }
+.progress img { width: 28px; height: 28px; }
+.progress .bar { flex: 1; height: 10px; background: var(--paper-2); border-radius: 6px; overflow: hidden; }
+.progress .bar div { height: 100%; background: var(--good); }
+.recipes { display: flex; flex-direction: column; gap: 3px; }
+.recipe { display: flex; align-items: center; gap: 6px; }
+.recipe > img { width: 22px; height: 22px; }
+.recipe .arrow { color: var(--ink-soft); }
+
+.flow-legend {
+  position: absolute;
+  top: 70px;
+  left: 12px;
+  background: rgba(20, 22, 40, 0.86);
+  color: #f0ecff;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 330px;
+  pointer-events: none;
+}
+.flow-legend .muted { color: #b8b4d0; }
+.legend-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.legend-row .dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; margin-left: 4px; }
+.legend-row .grad { width: 44px; height: 10px; border-radius: 3px; display: inline-block; background: linear-gradient(90deg, #2a4a9a, #3ad07a, #f0e040); }

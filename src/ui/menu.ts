@@ -16,7 +16,7 @@ export const CONTROLS: [string, string][] = [
   ['[ and ]', 'rotate the camera'],
   ['I or Tab', 'backpack'],
   ['C', 'crafting'],
-  ['B', 'build mode (place machines)'],
+  ['B', 'build mode: click to place, drag to paint belts, R rotate, right click pick up'],
   ['F', 'Flow overlay'],
   ['J', 'journal: quests and friends'],
   ['Esc', 'close / menu'],

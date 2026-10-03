@@ -14,6 +14,13 @@ import { toolGeometry } from './meshes/items';
 import { vertexMat } from './materials';
 import { lightAt } from './palette';
 import { Particles } from './particles';
+import { computePower, contextKey, type PowerInfo } from '../sim';
+import { getMachine } from '../data';
+import type { Dir } from '../data/types';
+import { FlowOverlay } from './flowOverlay';
+import { MachineView, yawFor } from './machineView';
+import { ghostMat } from './materials';
+import { arrowGeo, machineMesh } from './meshes/machines';
 
 export type Quality = 0 | 1 | 2;
 
@@ -45,6 +52,14 @@ export class Renderer {
   /** tile under the mouse, set by input */
   hover: { x: number; y: number; ok: boolean } | null = null;
   readonly world = new THREE.Group();
+  readonly machines = new MachineView();
+  readonly flow = new FlowOverlay();
+  /** build ghost: a machine preview under the cursor */
+  ghost: { type: string; x: number; y: number; dir: Dir; ok: boolean } | null = null;
+  private readonly ghostBody = new THREE.Mesh(undefined, ghostMat);
+  private readonly ghostArrow = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9, depthTest: false }));
+  private powerKey = '';
+  private powerInfo: PowerInfo | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement, quality: Quality) {
     this.quality = quality;
@@ -65,6 +80,8 @@ export class Renderer {
     this.cursor = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ color: '#fff8e0', transparent: true, opacity: 0.85, depthWrite: false }));
     this.cursor.renderOrder = 5;
     this.scene.add(this.cursor);
+    this.ghostArrow.renderOrder = 30;
+    this.scene.add(this.flow.group, this.ghostBody, this.ghostArrow);
     this.effects = new Effects(this.scene);
     this.particles = new Particles(this.scene, quality);
     this.resize();
@@ -121,6 +138,8 @@ export class Renderer {
     }
     this.mapView = new MapView(state, seasonOf(state.day), this.quality);
     this.world.add(this.mapView.group);
+    if (state.player.map === 'farm') this.world.add(this.machines.group);
+    else this.world.remove(this.machines.group);
     this.effects.clear();
     this.rig.snap(new THREE.Vector3(state.player.x, 0, state.player.y));
   }
@@ -179,6 +198,21 @@ export class Renderer {
     this.lantern.intensity = L.night * 6;
     this.lantern.position.set(px, 2.2, py + 0.4);
 
+    // Machines, the Flow overlay and the build ghost (farm only).
+    const onFarm = state.player.map === 'farm';
+    if (onFarm) {
+      const power = this.power(state);
+      this.machines.update(state, dt, interp.alpha, power.entityFactor);
+      this.flow.group.visible = this.flowOn;
+      this.flow.ghostRange = null;
+      if (this.ghost) {
+        const def = getMachine(this.ghost.type);
+        if (def.radius && (def.kind === 'sprinkler' || def.kind === 'harvester' || def.kind === 'planter' || def.kind === 'heater')) this.flow.ghostRange = { kind: def.kind, x: this.ghost.x, y: this.ghost.y, r: def.radius };
+      }
+      this.flow.update(state, power);
+    } else this.flow.group.visible = false;
+    this.drawGhost(onFarm);
+
     // Cursor
     if (this.hover) {
       this.cursor.visible = true;
@@ -189,5 +223,35 @@ export class Renderer {
     this.effects.update(dt, state.player.map);
     this.particles.update(dt, focus, season, state.weather, L.night, indoor, this.mapView!.chimneys, this.time);
     this.gl.render(this.scene, this.rig.camera);
+  }
+
+  /** Flow overlay toggle (F). */
+  flowOn = false;
+
+  /** Power for the current layout, cached by the sim's context key. */
+  power(state: GameState): PowerInfo {
+    const key = contextKey(state);
+    if (key !== this.powerKey || !this.powerInfo) {
+      this.powerKey = key;
+      this.powerInfo = computePower(state);
+    }
+    return this.powerInfo;
+  }
+
+  private drawGhost(onFarm: boolean): void {
+    const g = this.ghost;
+    const show = !!g && onFarm;
+    this.ghostBody.visible = show;
+    this.ghostArrow.visible = show;
+    if (!g || !show) return;
+    this.ghostBody.geometry = machineMesh(g.type).body;
+    const yaw = yawFor(g.dir);
+    this.ghostBody.position.set(g.x + 0.5, 0.01, g.y + 0.5);
+    this.ghostBody.rotation.y = g.type === 'water_wheel' ? 0 : yaw;
+    ghostMat.color.set(g.ok ? '#b8ffb8' : '#ff9a8a');
+    ghostMat.emissive.set(g.ok ? '#1a5a1a' : '#6a1a1a');
+    this.ghostArrow.position.set(g.x + 0.5, 0.25, g.y + 0.5);
+    this.ghostArrow.rotation.y = yaw;
+    (this.ghostArrow.material as THREE.MeshBasicMaterial).color.set(g.ok ? '#e8ffe0' : '#ffb0a0');
   }
 }

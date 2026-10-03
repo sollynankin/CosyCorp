@@ -191,6 +191,10 @@ export const FORAGE_PER_DAY: Record<string, number> = { forest: 6, lake: 3, town
 // ---- Day report -------------------------------------------------------------------------------------
 export const PROCESSED_SCORE = 5;
 export const SPOIL_SCORE = 3;
+/** report hints: a belt jammed for this share of the day, a crafter idle this share of its minutes */
+export const REPORT_JAM_FRAC = 0.2;
+export const REPORT_STARVED_FRAC = 0.6;
+export const REPORT_MAX_HINTS = 3;
 
 // ---- Shop prices for things without a crop or ore price ---------------------------------------------
 export const SHOP_PRICES: Record<string, number> = {
