@@ -2,7 +2,7 @@
 // game (DESIGN.md §15). Commands return a player-facing reason instead of throwing.
 import { HOTBAR_SLOTS, ITEM_ENERGY, PLAYER_SPEED, REACH, TOOL_SWING_TICKS } from '../data/balance';
 import { getItem } from '../data';
-import type { Dir } from '../data/types';
+import type { Dir, ToolId } from '../data/types';
 import { dirFromVector, inBounds, parseMap } from '../world';
 import { emit, toast, type DayContext } from './context';
 import { moveCircle } from './collision';
@@ -15,7 +15,8 @@ import type { GameState } from './state';
 import { spendEnergy } from './energy';
 import { checkWarp } from './warp';
 import { endDay } from './day';
-import { buy, collectOverflow, ship } from './shop';
+import { buy, collectOverflow, ship, upgradeTool } from './shop';
+import { collectAnimalBox, fillFeeder, petAnimal } from './animals';
 import { pickupMachine, placeMachine, rotateMachine } from './placement';
 import { chestMove } from './machineInteract';
 import { craftRecipe } from './crafting';
@@ -26,6 +27,8 @@ import { exhibit, secretFriendGift } from './festival';
 import { simMinute, villagerAtTile, villagerPos } from './schedule';
 import { VILLAGERS } from '../data';
 import { fulfilBoard } from './board';
+import { reel, stopFishing } from './fishing';
+import { takeLift } from './mine';
 import { giveGift, talkTo } from './villagers';
 
 export type Command =
@@ -48,7 +51,14 @@ export type Command =
   | { type: 'deliver'; quest: string }
   | { type: 'exhibit'; slot: number }
   | { type: 'board'; index: number }
-  | { type: 'talk'; villager: string };
+  | { type: 'talk'; villager: string }
+  | { type: 'reel'; hold: boolean }
+  | { type: 'stopFishing' }
+  | { type: 'lift'; floor: number }
+  | { type: 'pet'; animal: number }
+  | { type: 'feed'; building: 'coop' | 'barn' }
+  | { type: 'collectAnimals' }
+  | { type: 'upgrade'; tool: ToolId };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -234,5 +244,21 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       return fulfilBoard(state, ctx, cmd.index);
     case 'talk':
       return talkIndoors(state, ctx, cmd.villager);
+    case 'reel':
+      reel(state, cmd.hold);
+      return OK;
+    case 'stopFishing':
+      stopFishing(state);
+      return OK;
+    case 'lift':
+      return takeLift(state, ctx, cmd.floor);
+    case 'pet':
+      return petAnimal(state, ctx, cmd.animal);
+    case 'feed':
+      return fillFeeder(state, cmd.building);
+    case 'collectAnimals':
+      return collectAnimalBox(state);
+    case 'upgrade':
+      return upgradeTool(state, ctx, cmd.tool);
   }
 }

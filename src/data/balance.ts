@@ -251,3 +251,62 @@ export const BOARD_SIZE = 3;
 export const BOARD_REWARD_MULT = 2;
 export const BOARD_MIN_REWARD = 60;
 export const BOARD_POINTS = 60;
+
+// ---- Mine (DESIGN.md §12) -----------------------------------------------------------------------------
+/** rocks per floor: base + per floor */
+export const MINE_ROCKS_BASE = 22;
+export const MINE_ROCKS_PER_FLOOR = 2;
+/** chance a rock is an ore rock, by floor 1..10 */
+export const MINE_ORE_CHANCE = [0, 0.12, 0.14, 0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3];
+/** ore table by floor band: [item, weight] */
+export const MINE_ORE_TABLE: { from: number; ores: [string, number][] }[] = [
+  { from: 1, ores: [['copper_ore', 6], ['coal', 3]] },
+  { from: 3, ores: [['copper_ore', 5], ['coal', 3], ['quartz', 2]] },
+  { from: 5, ores: [['copper_ore', 3], ['iron_ore', 4], ['coal', 3], ['quartz', 2]] },
+  { from: 8, ores: [['iron_ore', 5], ['coal', 3], ['quartz', 2], ['amethyst', 2]] },
+];
+export const MINE_ROCK_HP = 2;
+export const MINE_ORE_HP = 3;
+/** the ladder appears after this many rocks even if its rock is still standing */
+export const LADDER_ROCK_LIMIT = 12;
+/** dust bunnies per floor: base + per floor (floor 1 has none) */
+export const BUNNIES_BASE = 0;
+export const BUNNIES_PER_FLOOR = 0.6;
+/** a bunny hops one tile toward you every this many ticks */
+export const BUNNY_HOP_TICKS = 8;
+export const BUNNY_ENERGY = 4;
+/** bunnies only notice you within this many tiles */
+export const BUNNY_SIGHT = 6;
+/** floors with a lift stop */
+export const LIFT_FLOORS = [1, 5, 10];
+
+// ---- Fishing (DESIGN.md §12) --------------------------------------------------------------------------
+export const BITE_MIN_TICKS = 15;
+export const BITE_MAX_TICKS = 60;
+/** catch zone height on the 0..1 bar, by rod tier */
+export const FISH_ZONE_SIZE = [0.24, 0.3, 0.36];
+export const FISH_ZONE_LIFT = 0.012;
+export const FISH_ZONE_GRAVITY = 0.008;
+export const FISH_ZONE_DAMP = 0.86;
+export const FISH_CATCH_RATE = 0.022;
+export const FISH_DRAIN_RATE = 0.014;
+export const FISH_START_PROGRESS = 0.3;
+/** quality chances from fishing skill: gold = base + level × per; silver = 2 × gold */
+export const FISH_GOLD_BASE = 0.03;
+export const FISH_GOLD_PER_LEVEL = 0.04;
+
+// ---- Animals (DESIGN.md §12) -----------------------------------------------------------------------
+export const COOP_CAPACITY = 4;
+export const BARN_CAPACITY = 3;
+export const BUILD_COOP_COST = { coins: 1200, wood: 100, stone: 40 };
+export const BUILD_BARN_COST = { coins: 3000, wood: 180, stone: 80 };
+export const CHICKEN_PRICE = 350;
+export const COW_PRICE = 900;
+/** friendship 0..1000; petting adds this once a day, missing a meal costs MISSED_MEAL_POINTS */
+export const PET_POINTS = 30;
+export const MISSED_MEAL_POINTS = 40;
+/** product quality from friendship: gold above, silver above */
+export const ANIMAL_GOLD_AT = 800;
+export const ANIMAL_SILVER_AT = 400;
+/** animals start producing after this many days */
+export const ANIMAL_MATURE_DAYS = 3;

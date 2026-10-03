@@ -135,6 +135,10 @@ const specialItems: ItemDef[] = [
   { id: 'promise_lantern', name: 'Promise Lantern', category: 'special', spoils: false, color: '#f6c84a', icon: 'bottle', description: 'Give to your sweetheart at 10 hearts.' },
   { id: 'logbook', name: "Hollis's Logbook", category: 'special', spoils: false, color: '#5a3a2a', icon: 'box', description: 'Water-stained. The last entry is underlined twice.' },
   { id: 'seed_tin', name: 'Seed Tin', category: 'special', spoils: false, color: '#8a9aa8', icon: 'box', description: 'A dented tin with "Rook" scratched on the lid.' },
+  { id: 'build_coop', name: 'Coop', category: 'special', spoils: false, color: '#d8b47a', icon: 'box', description: 'Bram builds a coop for up to 4 chickens on the plot north of the field.' },
+  { id: 'build_barn', name: 'Barn', category: 'special', spoils: false, color: '#b8463a', icon: 'box', description: 'Bram builds a barn for up to 3 cows next to the coop.' },
+  { id: 'chicken', name: 'Chicken', category: 'special', spoils: false, color: '#f4ead8', icon: 'egg', description: 'Lays an egg every day it is fed. Lives in the coop.' },
+  { id: 'cow', name: 'Cow', category: 'special', spoils: false, color: '#f0e8e0', icon: 'bottle', description: 'Gives milk every day it is fed. Lives in the barn.' },
   { id: 'seed_pod', name: 'Seed Pod', category: 'special', spoils: false, color: '#e8a0c0', icon: 'egg', description: 'A painted pod from the Blossom Fair hunt.' },
 ];
 

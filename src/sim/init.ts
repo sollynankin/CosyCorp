@@ -76,6 +76,8 @@ export function newGame(seed: number): GameState {
     },
     maps,
     mineDeepest: 0,
+    mineBroken: 0,
+    feeders: { coop: 0, barn: 0 },
     animals: [],
     nextAnimalId: 1,
     overflow: [],

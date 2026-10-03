@@ -9,6 +9,7 @@ import { interactMachine } from './machineInteract';
 import { updateQuests } from './quests';
 import { villagerAtTile } from './schedule';
 import { talkTo } from './villagers';
+import { climbDown } from './mine';
 
 const OK: CommandResult = { ok: true };
 
@@ -28,6 +29,7 @@ export function interactTile(state: GameState, ctx: DayContext, x: number, y: nu
     emit(ctx, { type: 'fx', fx: 'harvest', map: p.map, x, y });
     return OK;
   }
+  if (o?.kind === 'ladder') return climbDown(state, ctx);
   if (o?.kind === 'story') {
     if (p.map === 'town' && collectPod(state, ctx, x, y)) {
       emit(ctx, { type: 'fx', fx: 'sparkle', map: p.map, x, y });

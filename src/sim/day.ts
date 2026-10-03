@@ -26,8 +26,9 @@ export function endDay(state: GameState, ctx: DayContext, passedOut: boolean): v
   state.season.coins += t.coinsShipped + t.coinsChute + t.coinsOther;
   state.season.crafted += t.crafted;
   // 4. Story/relationship/animal/goal hooks that look at today, then the report.
-  overnightHooks(state, ctx);
+  const notes = overnightHooks(state, ctx);
   state.report = buildReport(state, ctx);
+  state.report.notes.push(...notes);
   // 5. Overnight growth uses today's season and heat.
   growOvernight(state, ctx.heat);
   regrowTrees(state);

@@ -28,6 +28,11 @@ export interface FishingState {
   ty: number;
   /** festival derby tally counts this catch */
   derby: boolean;
+  /** the reel button is held (set by the reel command) */
+  holding: boolean;
+  /** ticks until the fish picks a new target */
+  retarget: number;
+  fishTarget: number;
 }
 
 export interface PlayerState {
@@ -251,6 +256,10 @@ export interface GameState {
   maps: Record<MapId, MapState>;
   /** deepest mine floor reached (lift unlocks at 5 and 10) */
   mineDeepest: number;
+  /** rocks broken on the current mine floor since entering (ladder reveal) */
+  mineBroken: number;
+  /** hay in the coop and barn feeders */
+  feeders: { coop: number; barn: number };
   animals: Animal[];
   nextAnimalId: number;
   /** items that did not fit in the backpack, waiting in the farmhouse box */

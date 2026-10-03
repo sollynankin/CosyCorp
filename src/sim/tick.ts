@@ -5,6 +5,7 @@ import { ensureContext, toast, type DayContext } from './context';
 import { endDay } from './day';
 import { factoryStep } from './factory';
 import { tickFishing } from './fishingTick';
+import { tickMine } from './mine';
 import type { GameState } from './state';
 import { festivalTick } from './festival';
 import { updateQuests } from './quests';
@@ -34,6 +35,7 @@ export function step(state: GameState, ctx: DayContext, commands: Command[] = []
   const p = state.player;
   if (p.swing > 0) p.swing -= 1;
   tickFishing(state, ctx);
+  tickMine(state, ctx);
 
   if (p.energy <= 0) {
     endDay(state, ctx, true);

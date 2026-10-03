@@ -3,6 +3,7 @@ import { MINE_FLOORS, mineFloorNumber, parseMap } from '../world';
 import type { DayContext } from './context';
 import { festivalTick, maybeStartFestival } from './festival';
 import { updateQuests } from './quests';
+import { enterMine } from './mine';
 import { checkSceneTriggers } from './scenes';
 import type { GameState } from './state';
 
@@ -17,6 +18,7 @@ export function enterMap(state: GameState, ctx: DayContext, from: string, to: st
   const floor = mineFloorNumber(to);
   if (floor > 0) {
     state.mineDeepest = Math.min(MINE_FLOORS, Math.max(state.mineDeepest, floor));
+    enterMine(state, ctx, from, to);
     placeStoryObjects(state, to, floor);
   }
   if (to === 'town') maybeStartFestival(state, ctx);
