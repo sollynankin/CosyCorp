@@ -3,6 +3,8 @@
 import * as THREE from 'three';
 import { vertexMat } from './materials';
 import { machineMesh } from './meshes/machines';
+import { buildCharacter } from './meshes/characters';
+import type { Appearance } from '../data/types';
 
 const SIZE = 96;
 let gl: THREE.WebGLRenderer | null = null;
@@ -51,5 +53,26 @@ export function machineIconUrl(type: string): string {
   const url = gl!.domElement.toDataURL();
   scene.remove(group);
   cache.set(type, url);
+  return url;
+}
+
+const portraits = new Map<string, string>();
+let pcam: THREE.PerspectiveCamera | null = null;
+
+/** Head-and-shoulders portrait of a character, rendered once and cached by key. */
+export function portraitUrl(key: string, look: Appearance): string {
+  const hit = portraits.get(key);
+  if (hit) return hit;
+  if (!gl) setup();
+  pcam ??= new THREE.PerspectiveCamera(28, 1, 0.1, 20);
+  const rig = buildCharacter(look);
+  scene.add(rig.root);
+  const h = look.height;
+  pcam.position.set(0.35, h * 0.86, 1.9);
+  pcam.lookAt(0, h * 0.8, 0);
+  gl!.render(scene, pcam);
+  const url = gl!.domElement.toDataURL();
+  scene.remove(rig.root);
+  portraits.set(key, url);
   return url;
 }

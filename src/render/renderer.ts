@@ -19,6 +19,7 @@ import { getMachine } from '../data';
 import type { Dir } from '../data/types';
 import { FlowOverlay } from './flowOverlay';
 import { MachineView, yawFor } from './machineView';
+import { NpcView } from './npcView';
 import { ghostMat } from './materials';
 import { arrowGeo, machineMesh } from './meshes/machines';
 
@@ -54,6 +55,7 @@ export class Renderer {
   readonly world = new THREE.Group();
   readonly machines = new MachineView();
   readonly flow = new FlowOverlay();
+  readonly npcs = new NpcView();
   /** build ghost: a machine preview under the cursor */
   ghost: { type: string; x: number; y: number; dir: Dir; ok: boolean } | null = null;
   private readonly ghostBody = new THREE.Mesh(undefined, ghostMat);
@@ -81,7 +83,7 @@ export class Renderer {
     this.cursor.renderOrder = 5;
     this.scene.add(this.cursor);
     this.ghostArrow.renderOrder = 30;
-    this.scene.add(this.flow.group, this.ghostBody, this.ghostArrow);
+    this.scene.add(this.flow.group, this.ghostBody, this.ghostArrow, this.npcs.group);
     this.effects = new Effects(this.scene);
     this.particles = new Particles(this.scene, quality);
     this.resize();
@@ -198,6 +200,8 @@ export class Renderer {
     this.lantern.intensity = L.night * 6;
     this.lantern.position.set(px, 2.2, py + 0.4);
 
+    this.npcs.update(state, interp.alpha, dt);
+
     // Machines, the Flow overlay and the build ghost (farm only).
     const onFarm = state.player.map === 'farm';
     if (onFarm) {
@@ -223,6 +227,14 @@ export class Renderer {
     this.effects.update(dt, state.player.map);
     this.particles.update(dt, focus, season, state.weather, L.night, indoor, this.mapView!.chimneys, this.time);
     this.gl.render(this.scene, this.rig.camera);
+  }
+
+  /** Screen position (CSS pixels) of a world point, or null when behind the camera. */
+  toScreen(p: THREE.Vector3): { x: number; y: number } | null {
+    const v = p.clone().project(this.rig.camera);
+    if (v.z > 1) return null;
+    const r = this.canvas.getBoundingClientRect();
+    return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height };
   }
 
   /** Flow overlay toggle (F). */

@@ -29,3 +29,4 @@ export { checkSceneTriggers, finishScene, getScene } from './scenes';
 export { festivalOn, podTiles, secretFriend } from './festival';
 export { warpTo } from './warp';
 export { interactTile } from './interact';
+export { boardPool, fulfilBoard, postBoard } from './board';

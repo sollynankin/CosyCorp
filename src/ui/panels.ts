@@ -32,6 +32,8 @@ export function slotEl(st: ItemStack | null, opts: { sel?: boolean; onclick?: (e
 export class Panels {
   /** inventory selection for swapping */
   private picked: number | null = null;
+  /** shopkeeper greeting with a chat button (set by the App, which knows where villagers are) */
+  counter: ((keeper: string, close: () => void) => HTMLElement | null) | null = null;
 
   constructor(private readonly game: Game, private readonly modals: Modals) {}
 
@@ -108,7 +110,8 @@ export class Panels {
         ),
       );
     }
-    return h('div', h('div.shop-coins', 'Your coins: ', h('span.coin'), String(s.player.coins)), list);
+    const greet = this.counter?.(shop.keeper, () => this.modals.close('shop')) ?? null;
+    return h('div', greet, h('div.shop-coins', 'Your coins: ', h('span.coin'), String(s.player.coins)), list);
   }
 
   shipping(): void {

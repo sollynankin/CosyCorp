@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CROP_BALANCE, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
+import { BOARD_SIZE, CROP_BALANCE, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
 import { countItem, endDay, sellPrice } from '../src/sim';
 import { minuteOfClock } from '../src/sim/calendar';
 import { deserialize, serialize } from '../src/sim/serialize';
@@ -66,7 +66,8 @@ describe('save and load', () => {
     delete raw.board;
     delete raw.player.skillXp;
     const s = deserialize(JSON.stringify(raw));
-    expect(s.board).toEqual([]);
+    // Missing fields come from a new game with the same seed, which posts a fresh board.
+    expect(s.board.length).toBe(BOARD_SIZE);
     expect(s.player.skillXp.farming).toBe(0);
   });
 });

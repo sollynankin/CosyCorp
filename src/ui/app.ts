@@ -3,13 +3,17 @@ import type { Game } from '../game/game';
 import { saveLocal } from '../game/save';
 import type { Renderer } from '../render/renderer';
 import type { SimEvent } from '../sim';
+import { getMapDef } from '../world';
+import { BuildMode } from './build';
 import { Hud } from './hud';
 import { showMenu } from './menu';
 import { Modals } from './modal';
 import { Panels } from './panels';
+import { NameTags, People } from './people';
 import { renderReport } from './report';
-import { BuildMode } from './build';
 import { FlowLegend, WorksPanels } from './works';
+
+const ADVANCE_KEYS = new Set([' ', 'Enter', 'e', 'E']);
 
 export class App {
   readonly hud: Hud;
@@ -18,14 +22,24 @@ export class App {
   readonly works: WorksPanels;
   readonly build: BuildMode;
   readonly legend: FlowLegend;
+  readonly people: People;
+  readonly tags: NameTags;
+  /** building id of the last door opened (homes and counters need the door tile) */
+  private lastBuilding: string | undefined;
 
   constructor(root: HTMLElement, readonly game: Game, readonly renderer: Renderer) {
     this.hud = new Hud(root, game);
     this.modals = new Modals(root, game);
+    this.people = new People(game, this.modals, renderer);
     this.panels = new Panels(game, this.modals);
+    this.panels.counter = (keeper, close) => {
+      const b = getMapDef('town').buildings.find((x) => x.panel.startsWith('shop:') && x.id === this.lastBuilding);
+      return b ? this.people.counter(keeper, 'town', b.door, close) : null;
+    };
     this.works = new WorksPanels(game, this.modals, renderer);
     this.build = new BuildMode(root, game, renderer, (t) => this.toast(t));
     this.legend = new FlowLegend(root, game, renderer);
+    this.tags = new NameTags(root, game, renderer);
     game.on((e) => this.onEvent(e));
   }
 
@@ -33,6 +47,8 @@ export class App {
   frame(): void {
     this.hud.render();
     this.legend.render();
+    this.people.frame();
+    this.tags.render(this.modals.open);
   }
 
   toast(text: string): void {
@@ -41,6 +57,15 @@ export class App {
 
   /** Returns true if the key was handled (and should not reach movement). */
   onKey(key: string, e: KeyboardEvent): boolean {
+    const top = this.modals.top;
+    if (top === 'scene' && ADVANCE_KEYS.has(key)) {
+      this.people.advanceOrFinishReply();
+      return true;
+    }
+    if (top === 'dialogue' && ADVANCE_KEYS.has(key)) {
+      this.modals.close('dialogue');
+      return true;
+    }
     if (key === 'Escape' && this.build.active && !this.modals.open) {
       this.build.exit();
       return true;
@@ -51,8 +76,13 @@ export class App {
     }
     const k = key.toLowerCase();
     if (k === 'i' || key === 'Tab') {
-      if (this.modals.top === 'inventory') this.modals.close('inventory');
+      if (top === 'inventory') this.modals.close('inventory');
       else if (!this.modals.open) this.panels.inventory();
+      return true;
+    }
+    if (k === 'j') {
+      if (top === 'journal') this.modals.close('journal');
+      else if (!this.modals.open) this.people.journal();
       return true;
     }
     if (this.modals.open || e.repeat) return false;
@@ -85,7 +115,11 @@ export class App {
         this.renderer.effects.spawn(e.fx, e.map, e.x, e.y);
         break;
       case 'panel':
+        this.lastBuilding = e.building;
         this.openPanel(e.panel);
+        break;
+      case 'dialogue':
+        this.people.dialogue(e.villager, e.text, e.hearts, e.gained);
         break;
       case 'dayEnd': {
         const r = this.game.state.report;
@@ -99,12 +133,18 @@ export class App {
   }
 
   openPanel(panel: string): void {
+    const map = this.game.state.player.map;
+    const building = getMapDef(map).buildings.find((b) => b.id === this.lastBuilding);
     if (panel === 'home') this.panels.home();
     else if (panel === 'ship') this.panels.shipping();
     else if (panel.startsWith('shop:')) this.panels.shop(panel.slice(5));
     else if (panel.startsWith('machine:')) this.works.machine(Number(panel.slice(8)));
     else if (panel.startsWith('chest:')) this.works.chest(Number(panel.slice(6)));
     else if (panel === 'craft' || panel === 'cook') this.works.crafting(panel);
+    else if (panel === 'works') this.people.works();
+    else if (panel === 'board' || panel === 'townhall') this.people.board();
+    else if (panel === 'festival') this.people.festival();
+    else if (panel.startsWith('home:') && building) this.people.home(panel.slice(5), map, building.door);
     else this.toast('Nobody answers the door.');
   }
 }

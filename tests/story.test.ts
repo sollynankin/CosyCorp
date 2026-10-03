@@ -198,3 +198,25 @@ describe('story walk', () => {
     void checkSceneTriggers;
   });
 });
+
+describe('quest board', () => {
+  it('posts on Mondays from in-season items, pays coins and friendship, and expires on Sunday', async () => {
+    const { BOARD_POINTS, BOARD_SIZE } = await import('../src/data/balance');
+    const { boardPool, fulfilBoard } = await import('../src/sim');
+    const sb = sandbox(3);
+    const s = sb.s;
+    expect(s.board.length).toBe(BOARD_SIZE);
+    const pool = boardPool(s.day).map((p) => p.item);
+    for (const b of s.board) expect(pool).toContain(b.item);
+    const b = s.board[0];
+    expect(fulfilBoard(s, sb.ctx, 0).ok).toBe(false);
+    give(s, b.item, b.count);
+    const coins = s.player.coins;
+    expect(fulfilBoard(s, sb.ctx, 0).ok).toBe(true);
+    expect(s.player.coins - coins).toBe(b.reward);
+    expect(s.villagers[b.villager].points).toBe(BOARD_POINTS);
+    // Next Monday a new board replaces it.
+    while (s.day < 7) endDay(s, sb.ctx, false);
+    expect(s.board.every((x) => x.id.startsWith('b7_'))).toBe(true);
+  });
+});

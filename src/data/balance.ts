@@ -244,3 +244,10 @@ export const SCENE_CHECK_MINUTES = 30;
 export const FESTIVAL_GATHER_MINUTES = 60;
 /** dialogue: extra pick weight per condition a line lists (DESIGN.md §9) */
 export const DIALOGUE_SPECIFIC_WEIGHT = 3;
+
+// ---- Quest board (DESIGN.md §10) -------------------------------------------------------------------
+export const BOARD_SIZE = 3;
+/** reward = round(value × count × BOARD_REWARD_MULT), at least BOARD_MIN_REWARD */
+export const BOARD_REWARD_MULT = 2;
+export const BOARD_MIN_REWARD = 60;
+export const BOARD_POINTS = 60;

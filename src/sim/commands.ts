@@ -23,7 +23,9 @@ import { entityAt } from './placement';
 import { finishScene } from './scenes';
 import { deliverAtWorks, deliverToVillager } from './quests';
 import { exhibit, secretFriendGift } from './festival';
-import { villagerAtTile } from './schedule';
+import { simMinute, villagerAtTile, villagerPos } from './schedule';
+import { VILLAGERS } from '../data';
+import { fulfilBoard } from './board';
 import { giveGift, talkTo } from './villagers';
 
 export type Command =
@@ -44,7 +46,9 @@ export type Command =
   | { type: 'craft'; recipe: string; n: number }
   | { type: 'sceneDone'; id: string; choice: number }
   | { type: 'deliver'; quest: string }
-  | { type: 'exhibit'; slot: number };
+  | { type: 'exhibit'; slot: number }
+  | { type: 'board'; index: number }
+  | { type: 'talk'; villager: string };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -170,6 +174,16 @@ function cmdEat(state: GameState, ctx: DayContext, slotIndex: number): CommandRe
   return OK;
 }
 
+/** Talking to a villager who is indoors (behind a shop counter, at home): you must be at their door. */
+function talkIndoors(state: GameState, ctx: DayContext, id: string): CommandResult {
+  const v = VILLAGERS.find((x) => x.id === id);
+  if (!v) return fail('Nobody by that name.');
+  const pos = villagerPos(state, v, simMinute(state));
+  const p = state.player;
+  if (!pos.hidden || pos.map !== p.map || Math.hypot(pos.x - p.x, pos.y - p.y) > REACH + 1.5) return fail(`${v.name.split(' ')[0]} isn't in.`);
+  return talkTo(state, ctx, id);
+}
+
 export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): CommandResult {
   switch (cmd.type) {
     case 'move':
@@ -216,5 +230,9 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       return deliverAtWorks(state, ctx, cmd.quest);
     case 'exhibit':
       return exhibit(state, ctx, cmd.slot);
+    case 'board':
+      return fulfilBoard(state, ctx, cmd.index);
+    case 'talk':
+      return talkIndoors(state, ctx, cmd.villager);
   }
 }
