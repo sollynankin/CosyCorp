@@ -3,6 +3,7 @@ import type { Game } from '../game/game';
 import { exportSave, importSave, loadPrefs, saveLocal, savePrefs } from '../game/save';
 import { dateLabel, newGame } from '../sim';
 import type { Renderer, Quality } from '../render/renderer';
+import type { AudioEngine } from './audio';
 import { h } from './dom';
 import type { Modals } from './modal';
 
@@ -22,7 +23,7 @@ export const CONTROLS: [string, string][] = [
   ['Esc', 'close / menu'],
 ];
 
-export function showMenu(game: Game, modals: Modals, renderer: Renderer, toast: (t: string) => void): void {
+export function showMenu(game: Game, modals: Modals, renderer: Renderer, audio: AudioEngine, toast: (t: string) => void): void {
   const fileInput = h('input', { type: 'file', accept: '.json,application/json', style: { display: 'none' } }) as HTMLInputElement;
   fileInput.addEventListener('change', () => {
     const f = fileInput.files?.[0];
@@ -60,6 +61,7 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, toast: 
             }, label),
           ),
         ),
+        volumeRow(audio),
         h('h3', 'Controls'),
         h('table.controls', CONTROLS.map(([k, v]) => h('tr', h('td.b', k), h('td', v)))),
         h('button', {
@@ -95,4 +97,21 @@ export function showTitle(game: Game, modals: Modals, hasSave: boolean): void {
         h('p.muted.small', 'WASD to walk · click or Space to use a tool · E to talk and interact · I backpack · J journal · C craft · B build · F flow view · Esc menu'),
       ),
   });
+}
+
+/** The volume slider. It updates the label in place: re-rendering the menu mid-drag would drop the thumb. */
+function volumeRow(audio: AudioEngine): HTMLElement {
+  const label = h('span.vol-value', `${Math.round(audio.volume * 100)}%`);
+  const slider = h('input.vol', { type: 'range', min: 0, max: 100, step: 5, value: Math.round(audio.volume * 100), 'aria-label': 'Volume' }) as HTMLInputElement;
+  slider.addEventListener('input', () => {
+    audio.setVolume(Number(slider.value) / 100);
+    label.textContent = `${slider.value}%`;
+  });
+  // Letting go saves the choice and plays a sample, so you can hear where you set it.
+  slider.addEventListener('change', () => {
+    savePrefs({ ...loadPrefs(), volume: audio.volume });
+    audio.unlock();
+    audio.sfx('harvest');
+  });
+  return h('div.row.volume', 'Volume: ', slider, label);
 }

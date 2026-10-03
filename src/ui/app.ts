@@ -14,6 +14,7 @@ import { renderReport } from './report';
 import { FlowLegend, WorksPanels } from './works';
 import { FarmPanels } from './farmPanels';
 import { FishingOverlay } from './fishing';
+import type { AudioEngine } from './audio';
 
 const ADVANCE_KEYS = new Set([' ', 'Enter', 'e', 'E']);
 
@@ -31,7 +32,7 @@ export class App {
   /** building id of the last door opened (homes and counters need the door tile) */
   private lastBuilding: string | undefined;
 
-  constructor(root: HTMLElement, readonly game: Game, readonly renderer: Renderer) {
+  constructor(root: HTMLElement, readonly game: Game, readonly renderer: Renderer, readonly audio: AudioEngine) {
     this.hud = new Hud(root, game);
     this.modals = new Modals(root, game);
     this.people = new People(game, this.modals, renderer);
@@ -84,7 +85,7 @@ export class App {
       return true;
     }
     if (key === 'Escape') {
-      if (!this.modals.closeTop()) showMenu(this.game, this.modals, this.renderer, (t) => this.toast(t));
+      if (!this.modals.closeTop()) showMenu(this.game, this.modals, this.renderer, this.audio, (t) => this.toast(t));
       return true;
     }
     const k = key.toLowerCase();

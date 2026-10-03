@@ -47,10 +47,12 @@ export function importSave(file: File): Promise<GameState> {
 export interface Prefs {
   quality: 0 | 1 | 2;
   seenIntro: boolean;
+  /** master volume, 0..1 */
+  volume: number;
 }
 
 export function loadPrefs(): Prefs {
-  const def: Prefs = { quality: 1, seenIntro: false };
+  const def: Prefs = { quality: 1, seenIntro: false, volume: 0.6 };
   try {
     return { ...def, ...(JSON.parse(localStorage.getItem(PREFS) ?? '{}') as Partial<Prefs>) };
   } catch {
