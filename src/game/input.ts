@@ -1,6 +1,6 @@
 // Keyboard + mouse input. Produces commands for the Game; never touches state directly.
 // InputSource is the extension point for a gamepad: implement moveVector() and the action callbacks.
-import { HOTBAR_SLOTS } from '../data/balance';
+import { HOTBAR_SLOTS, PLAYER_SPEED } from '../data/balance';
 import { entityAt, facingTile, inReach, isBlocked, placementProblem, type Command } from '../sim';
 import { getItem } from '../data';
 import type { Dir } from '../data/types';
@@ -20,6 +20,10 @@ export interface InputCallbacks {
   modalOpen(): boolean;
 }
 
+/** Walking ramps up and down over roughly this many seconds, instead of jumping to full speed and back. */
+const MOVE_RAMP_UP = 0.1;
+const MOVE_RAMP_DOWN = 0.07;
+
 type PendingAction = { cmd: Command; tx: number; ty: number } | null;
 
 export class Input implements InputSource {
@@ -29,6 +33,9 @@ export class Input implements InputSource {
   private pending: PendingAction = null;
   private stuck = 0;
   private lastPos = { x: 0, y: 0 };
+  /** the eased move vector (screen space); a partial length walks proportionally slower */
+  private eased: [number, number] = [0, 0];
+  private lastUpdate = performance.now();
   buildMode: { active: boolean; onClick(x: number, y: number, button: number): void; onHover(x: number, y: number): void; onRelease(): void } | null = null;
 
   constructor(
@@ -80,8 +87,12 @@ export class Input implements InputSource {
 
   /** Called every frame: updates the move intent and the hovered tile. */
   update(): void {
-    const [ix, iy] = this.moveVector();
-    if (ix !== 0 || iy !== 0) this.cancelPath();
+    const now = performance.now();
+    const dt = Math.min(0.1, (now - this.lastUpdate) / 1000);
+    this.lastUpdate = now;
+    const [rx, ry] = this.moveVector();
+    if (rx !== 0 || ry !== 0) this.cancelPath();
+    const [ix, iy] = this.ease(rx, ry, dt);
     const [mx, my] = this.renderer.rig.inputToMap(ix, iy);
     this.game.moveIntent = [mx, my];
     const t = this.hoverTile();
@@ -94,6 +105,21 @@ export class Input implements InputSource {
       this.renderer.hover = null;
       if (!this.buildMode?.active) this.renderer.ghost = null;
     }
+  }
+
+  /**
+   * Eases the raw stick or key vector so the player accelerates and brakes instead of snapping between
+   * standing and full speed. The sim already scales a short vector to a slower step (cmdMove).
+   */
+  private ease(rx: number, ry: number, dt: number): [number, number] {
+    const e = this.eased;
+    for (let k = 0; k < 2; k++) {
+      const target = k === 0 ? rx : ry;
+      const speeding = Math.abs(target) > Math.abs(e[k]);
+      e[k] += (target - e[k]) * (1 - Math.exp(-dt / (speeding ? MOVE_RAMP_UP : MOVE_RAMP_DOWN)));
+      if (target === 0 && Math.abs(e[k]) < 0.03) e[k] = 0;
+    }
+    return [e[0], e[1]];
   }
 
   /** With a machine in hand, preview where it would go (its front faces away from the player). */
@@ -240,9 +266,10 @@ export class Input implements InputSource {
     }
     if (this.path.length === 0) return [];
     const [wx, wy] = this.path[0];
-    const dx = wx + 0.5 - p.x;
-    const dy = wy + 0.5 - p.y;
-    if (Math.hypot(dx, dy) < 0.2) {
+    let dx = wx + 0.5 - p.x;
+    let dy = wy + 0.5 - p.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 0.2) {
       this.path.shift();
       return this.followPath();
     }
@@ -253,6 +280,10 @@ export class Input implements InputSource {
       this.cancelPath();
       return [];
     }
+    // Full speed along the path, but never a step longer than the distance left (no overshoot at corners).
+    const k = Math.min(1, dist / PLAYER_SPEED) / dist;
+    dx *= k;
+    dy *= k;
     return [{ type: 'move', dx, dy }];
   }
 }

@@ -8,7 +8,7 @@ import { terrainColor } from './palette';
 
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
 unitBox.translate(0, -0.5, 0);
-const groundMat = new THREE.MeshStandardMaterial({ flatShading: true, roughness: 1 });
+const groundMat = new THREE.MeshStandardMaterial({ roughness: 1 });
 
 /** Top height of each terrain (metres). */
 export function terrainTop(t: string): number {
@@ -36,7 +36,7 @@ export interface TerrainView {
 }
 
 let waterShader: { uniforms: { uTime: { value: number } } } | null = null;
-const waterMat = new THREE.MeshStandardMaterial({ color: '#4a9ac8', transparent: true, opacity: 0.82, roughness: 0.25, metalness: 0.1, flatShading: true });
+const waterMat = new THREE.MeshStandardMaterial({ color: '#5cb8e4', transparent: true, opacity: 0.8, roughness: 0.25, metalness: 0.1 });
 waterMat.onBeforeCompile = (shader) => {
   shader.uniforms.uTime = { value: 0 };
   shader.vertexShader = shader.vertexShader
@@ -55,7 +55,7 @@ const tuftGeo = (() => {
   for (let k = 0; k < 5; k++) parts.push(leaf(0.16, k % 2 ? '#f4f4f4' : '#dcdcdc', { ry: (k / 5) * Math.PI * 2, rx: -1.15 }));
   return merge(parts);
 })();
-const tuftMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 });
+const tuftMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
 
 export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): TerrainView {
   const group = new THREE.Group();
@@ -113,7 +113,7 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
   }
   // Treat boards as part of the ground; their terrain box top is at the water bed, so add deck meshes.
   if (boards.length) {
-    const deck = new THREE.Mesh(merge(boards), new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.9 }));
+    const deck = new THREE.Mesh(merge(boards), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }));
     deck.castShadow = true;
     deck.receiveShadow = true;
     group.add(deck);

@@ -6,13 +6,15 @@ import { getVillager, VILLAGERS } from '../data';
 import { simMinute, villagersOn, type NpcPos } from '../sim';
 import type { GameState } from '../sim/state';
 import { animateCharacter, buildCharacter, type CharacterRig } from './meshes/characters';
-
-const YAW = [Math.PI, Math.PI / 2, 0, -Math.PI / 2];
+import { damp, dampAngle, FACING_YAW } from './motion';
 
 export class NpcView {
   readonly group = new THREE.Group();
   private readonly rigs = new Map<string, CharacterRig>();
   private readonly phase = new Map<string, number>();
+  /** 0..1 walking blend per villager, eased so they start and stop smoothly */
+  private readonly move = new Map<string, number>();
+  private readonly shown = new Map<string, { x: number; y: number }>();
   /** villagers drawn this frame (for name tags) */
   visible: NpcPos[] = [];
 
@@ -29,17 +31,24 @@ export class NpcView {
     const minute = simMinute(state) + tickAlpha / TICKS_PER_MINUTE;
     this.visible = villagersOn(state, state.player.map, minute);
     for (const rig of this.rigs.values()) rig.root.visible = false;
+    // A villager who was out of sight reappears where they are, not sliding in from where they vanished.
+    const seen = new Set(this.visible.map((p) => p.id));
+    for (const id of [...this.shown.keys()]) if (!seen.has(id)) this.shown.delete(id);
     for (const p of this.visible) {
       const rig = this.rigs.get(p.id)!;
       rig.root.visible = true;
-      rig.root.position.set(p.x, 0, p.y);
-      let dy = YAW[p.facing] - rig.root.rotation.y;
-      while (dy > Math.PI) dy -= Math.PI * 2;
-      while (dy < -Math.PI) dy += Math.PI * 2;
-      rig.root.rotation.y += dy * Math.min(1, dt * 10);
-      const ph = (this.phase.get(p.id) ?? 0) + dt * (p.moving ? 9 : 2);
+      // Ease the drawn position a touch so the step between schedule samples never shows.
+      const prev = this.shown.get(p.id);
+      const jump = !prev || Math.hypot(prev.x - p.x, prev.y - p.y) > 2;
+      const pos = jump ? { x: p.x, y: p.y } : { x: damp(prev.x, p.x, 25, dt), y: damp(prev.y, p.y, 25, dt) };
+      this.shown.set(p.id, pos);
+      rig.root.position.set(pos.x, 0, pos.y);
+      rig.root.rotation.y = dampAngle(rig.root.rotation.y, FACING_YAW[p.facing], 10, dt);
+      const mv = damp(this.move.get(p.id) ?? 0, p.moving ? 1 : 0, 10, dt);
+      this.move.set(p.id, mv);
+      const ph = (this.phase.get(p.id) ?? 0) + dt * (2 + 7 * mv);
       this.phase.set(p.id, ph);
-      animateCharacter(rig, ph, p.moving, 0);
+      animateCharacter(rig, ph, mv, 0);
     }
   }
 

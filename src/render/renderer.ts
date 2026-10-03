@@ -18,6 +18,7 @@ import { computePower, contextKey, type PowerInfo } from '../sim';
 import { getMachine } from '../data';
 import type { Dir } from '../data/types';
 import { FlowOverlay } from './flowOverlay';
+import { damp, dampAngle, FACING_YAW, yawOf } from './motion';
 import { MachineView, yawFor } from './machineView';
 import { NpcView } from './npcView';
 import { AnimalView } from './animalView';
@@ -25,6 +26,12 @@ import { ghostMat } from './materials';
 import { arrowGeo, machineMesh } from './meshes/machines';
 
 export type Quality = 0 | 1 | 2;
+
+/** Light multipliers for the soft look (see render()). */
+const SOFT_FILL = 1.25;
+const SOFT_SUN = 0.8;
+/** Player position easing rate, 1/s. Higher is snappier; about 18 is a ~55 ms lag. */
+const PLAYER_EASE = 18;
 
 export interface Interp {
   /** previous and current player positions for interpolation */
@@ -49,6 +56,12 @@ export class Renderer {
   readonly effects: Effects;
   private particles: Particles;
   private walkPhase = 0;
+  /** 0..1 walking blend, eased so the stride starts and stops smoothly */
+  private walkBlend = 0;
+  /** where the player is drawn: the sim position, eased (the sim moves in 0.35 m steps at 10 Hz) */
+  private shown = { x: 0, y: 0, map: '' };
+  /** the direction the player is actually travelling, for turning smoothly through diagonals */
+  private heading = 0;
   private time = 0;
   quality: Quality = 1;
   /** tile under the mouse, set by input */
@@ -88,8 +101,9 @@ export class Renderer {
     this.quality = quality;
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: quality > 0, powerPreference: 'high-performance' });
     this.gl.outputColorSpace = THREE.SRGBColorSpace;
-    this.gl.toneMapping = THREE.ACESFilmicToneMapping;
-    this.gl.toneMappingExposure = 1.05;
+    // Neutral keeps colours bright and saturated where ACES would crush and desaturate them.
+    this.gl.toneMapping = THREE.NeutralToneMapping;
+    this.gl.toneMappingExposure = 1.1;
     this.rig = new CameraRig(1);
     this.scene.add(this.world, this.hemi, this.sun, this.sun.target, this.lantern);
     this.applyQuality();
@@ -182,24 +196,39 @@ export class Renderer {
     this.scene.fog = new THREE.Fog(L.sky, 30, 70);
     this.hemi.color.copy(L.hemiSky);
     this.hemi.groundColor.copy(L.hemiGround);
-    this.hemi.intensity = L.hemiIntensity;
+    // Soft look: more fill from the sky and a gentler sun, so shadows stay light and colours stay sweet.
+    this.hemi.intensity = L.hemiIntensity * SOFT_FILL;
     this.sun.color.copy(L.sunColor);
-    this.sun.intensity = L.sunIntensity;
+    this.sun.intensity = L.sunIntensity * SOFT_SUN;
     glowMat.emissiveIntensity = L.night * 1.6;
 
     // Player (interpolated)
-    const px = interp.px0 + (interp.px1 - interp.px0) * interp.alpha;
-    const py = interp.py0 + (interp.py1 - interp.py0) * interp.alpha;
     const p = state.player;
+    const ix = interp.px0 + (interp.px1 - interp.px0) * interp.alpha;
+    const iy = interp.py0 + (interp.py1 - interp.py0) * interp.alpha;
+    // Ease toward the interpolated position (a short lag that rounds off every start, stop and corner).
+    const sh = this.shown;
+    if (sh.map !== p.map || Math.hypot(sh.x - ix, sh.y - iy) > 1.5) {
+      sh.x = ix;
+      sh.y = iy;
+      sh.map = p.map;
+    } else {
+      sh.x = damp(sh.x, ix, PLAYER_EASE, dt);
+      sh.y = damp(sh.y, iy, PLAYER_EASE, dt);
+    }
+    const px = sh.x;
+    const py = sh.y;
     this.player.root.position.set(px, 0, py);
-    const targetYaw = [Math.PI, Math.PI / 2, 0, -Math.PI / 2][p.facing];
-    let dy = targetYaw - this.player.root.rotation.y;
-    while (dy > Math.PI) dy -= Math.PI * 2;
-    while (dy < -Math.PI) dy += Math.PI * 2;
-    this.player.root.rotation.y += dy * Math.min(1, dt * 14);
-    const moving = p.moving;
-    this.walkPhase += dt * (moving ? 11 : 2);
-    animateCharacter(this.player, this.walkPhase, moving, p.swing > 0 ? p.swing / 3 : 0);
+    // Face the way we are travelling (so diagonals turn gradually); face the tool target while working.
+    const vx = interp.px1 - interp.px0;
+    const vy = interp.py1 - interp.py0;
+    const travelling = p.moving && Math.hypot(vx, vy) > 0.02;
+    if (travelling) this.heading = yawOf(vx, vy);
+    const targetYaw = travelling && p.swing === 0 && !p.fishing ? this.heading : FACING_YAW[p.facing];
+    this.player.root.rotation.y = dampAngle(this.player.root.rotation.y, targetYaw, 12, dt);
+    this.walkBlend = damp(this.walkBlend, travelling ? 1 : 0, 12, dt);
+    this.walkPhase += dt * (2 + 9.5 * this.walkBlend);
+    animateCharacter(this.player, this.walkPhase, this.walkBlend, p.swing > 0 ? p.swing / 3 : 0);
     const sel = p.inventory[p.selected];
     const tool = sel ? getItem(sel.id).tool : undefined;
     if (tool) {

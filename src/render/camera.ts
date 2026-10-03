@@ -1,6 +1,9 @@
 // Angled 3/4 camera that follows a target, rotates in 90° steps with easing, and zooms.
 import * as THREE from 'three';
 
+/** How quickly the camera catches up with the player, 1/s. Lower trails more and feels floatier. */
+const FOLLOW_RATE = 7;
+
 export class CameraRig {
   readonly camera: THREE.PerspectiveCamera;
   /** 0..3 quarter turns; 0 = looking north */
@@ -37,8 +40,9 @@ export class CameraRig {
     let d = goal - this.yaw;
     while (d > Math.PI) d -= Math.PI * 2;
     while (d < -Math.PI) d += Math.PI * 2;
-    this.yaw += d * Math.min(1, dt * 8);
-    this.target.lerp(focus, Math.min(1, dt * 6));
+    // Exponential easing: the same feel at any frame rate, with no overshoot.
+    this.yaw += d * (1 - Math.exp(-dt * 8));
+    this.target.lerp(focus, 1 - Math.exp(-dt * FOLLOW_RATE));
     const horiz = Math.cos(this.pitch) * this.distance;
     const off = new THREE.Vector3(Math.sin(this.yaw) * horiz, Math.sin(this.pitch) * this.distance, Math.cos(this.yaw) * horiz);
     this.camera.position.copy(this.target).add(off);

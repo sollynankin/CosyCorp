@@ -20,7 +20,7 @@ import { itemShape } from './meshes/items';
 
 // Tilled soil: a low bed with three furrow ridges (one instanced geometry, tinted dry/wet).
 const soilGeo = merge([box(0.94, 0.05, 0.94, '#ffffff', { y: -0.02 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02, z: -0.3 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02, z: 0.3 })]);
-const soilMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 });
+const soilMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
 const glassMat = new THREE.MeshStandardMaterial({ color: '#cfe8f0', transparent: true, opacity: 0.35, roughness: 0.1, depthWrite: false });
 
 const mineRock = new THREE.Color('#c8b8a8');

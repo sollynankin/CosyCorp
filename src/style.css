@@ -9,8 +9,8 @@
   --good: #5aa04a;
   --warn: #e0a030;
   --bad: #d0483a;
-  --shadow: 0 6px 18px rgba(30, 18, 8, 0.35);
-  --radius: 12px;
+  --shadow: 0 10px 28px rgba(90, 56, 30, 0.24);
+  --radius: 20px;
   font-family: 'Nunito', system-ui, sans-serif;
   color: var(--ink);
 }
@@ -61,7 +61,7 @@ button {
   color: var(--ink);
   background: linear-gradient(#fff6e0, #f0d8a8);
   border: 2px solid var(--wood);
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 6px 12px;
   cursor: pointer;
   box-shadow: 0 2px 0 var(--wood-dark);
@@ -95,7 +95,7 @@ button.primary {
 .hud-top > div {
   background: var(--paper);
   border: 2px solid var(--wood);
-  border-radius: 10px;
+  border-radius: 26px;
   padding: 4px 12px;
   box-shadow: var(--shadow);
   font-weight: 700;
@@ -136,7 +136,7 @@ button.primary {
   padding: 6px;
   background: rgba(90, 58, 34, 0.92);
   border: 2px solid var(--wood-dark);
-  border-radius: 12px;
+  border-radius: 18px;
   box-shadow: var(--shadow);
 }
 .slot {
@@ -145,7 +145,7 @@ button.primary {
   height: 52px;
   background: var(--paper);
   border: 2px solid #c8a878;
-  border-radius: 8px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,7 +224,7 @@ button.primary {
   height: 140px;
   background: var(--paper);
   border: 2px solid var(--wood);
-  border-radius: 8px;
+  border-radius: 14px;
   display: flex;
   align-items: flex-end;
   padding: 2px;
@@ -232,7 +232,7 @@ button.primary {
 }
 .energy-fill {
   width: 100%;
-  border-radius: 5px;
+  border-radius: 8px;
   transition: height 0.3s;
 }
 
@@ -250,7 +250,7 @@ button.primary {
 .toast {
   background: rgba(246, 236, 214, 0.95);
   border: 2px solid var(--wood);
-  border-radius: 10px;
+  border-radius: 26px;
   padding: 4px 14px;
   font-weight: 700;
   box-shadow: var(--shadow);
@@ -290,7 +290,7 @@ button.primary {
 .modal {
   background: var(--paper);
   border: 3px solid var(--wood);
-  border-radius: 16px;
+  border-radius: 26px;
   box-shadow: var(--shadow), inset 0 0 0 2px #fff8e8;
   width: min(460px, 94vw);
   max-height: 86vh;
@@ -387,7 +387,7 @@ button.close {
   align-items: center;
   gap: 10px;
   background: var(--paper-2);
-  border-radius: 10px;
+  border-radius: 26px;
   padding: 4px 8px;
 }
 .shop-row img {
@@ -431,7 +431,7 @@ table.controls td {
 }
 .stat {
   background: var(--paper-2);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 8px;
   text-align: center;
 }
@@ -497,7 +497,7 @@ table.mtable td:first-child {
 }
 .note {
   background: #fff3d0;
-  border-radius: 8px;
+  border-radius: 14px;
   padding: 4px 8px;
 }
 .note.good {
@@ -531,7 +531,7 @@ table.mtable td:first-child {
   gap: 4px;
   padding: 4px 8px 4px 4px;
   border: 2px solid var(--paper-2);
-  border-radius: 10px;
+  border-radius: 26px;
   cursor: pointer;
   background: #fff8e8;
 }
@@ -542,7 +542,7 @@ table.mtable td:first-child {
 .build-help, .build-empty { font-size: 12px; color: var(--ink-soft); }
 
 .craft-list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-.craft-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #fff8e8; border-radius: 10px; }
+.craft-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #fff8e8; border-radius: 26px; }
 .craft-row.dim { opacity: 0.6; }
 .craft-out { width: 40px; height: 40px; }
 .craft-inputs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 3px; }
@@ -562,7 +562,7 @@ table.mtable td:first-child {
 .stacks { display: flex; gap: 4px; flex-wrap: wrap; }
 .progress { display: flex; align-items: center; gap: 8px; }
 .progress img { width: 28px; height: 28px; }
-.progress .bar { flex: 1; height: 10px; background: var(--paper-2); border-radius: 6px; overflow: hidden; }
+.progress .bar { flex: 1; height: 10px; background: var(--paper-2); border-radius: 9px; overflow: hidden; }
 .progress .bar div { height: 100%; background: var(--good); }
 .recipes { display: flex; flex-direction: column; gap: 3px; }
 .recipe { display: flex; align-items: center; gap: 6px; }
@@ -588,8 +588,8 @@ table.mtable td:first-child {
 .legend-row .grad { width: 44px; height: 10px; border-radius: 3px; display: inline-block; background: linear-gradient(90deg, #2a4a9a, #3ad07a, #f0e040); }
 
 /* ---------- People: dialogue, scenes, journal, board, name tags ---------- */
-.portrait { width: 84px; height: 84px; border-radius: 12px; background: linear-gradient(#cfe6f2, #f3e7cc); border: 2px solid var(--wood); flex: none; }
-.portrait.small { width: 44px; height: 44px; border-radius: 9px; }
+.portrait { width: 84px; height: 84px; border-radius: 18px; background: linear-gradient(#cfe6f2, #f3e7cc); border: 2px solid var(--wood); flex: none; }
+.portrait.small { width: 44px; height: 44px; border-radius: 14px; }
 .talk { display: flex; gap: 14px; align-items: flex-start; cursor: pointer; }
 .talk-text { font-size: 17px; line-height: 1.45; }
 .talk-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
@@ -607,7 +607,7 @@ table.mtable td:first-child {
 .tab { background: var(--paper-2); }
 .tab.on { background: var(--accent); color: #fff; }
 .journal, .friends { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.quest, .friend { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; background: #fff8e8; border-radius: 10px; }
+.quest, .friend { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; background: #fff8e8; border-radius: 26px; }
 .quest.main { border-left: 4px solid var(--accent); }
 .quest.side { border-left: 4px solid #5a9ad0; }
 .quest.dim { opacity: 0.55; }
@@ -617,7 +617,7 @@ table.mtable td:first-child {
 .prog { font-weight: 700; color: var(--ink-soft); }
 .have { color: var(--good); font-size: 12px; }
 .inl { width: 18px; height: 18px; vertical-align: -4px; margin-right: 3px; }
-.counter { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-bottom: 8px; background: #fff8e8; border-radius: 10px; }
+.counter { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-bottom: 8px; background: #fff8e8; border-radius: 26px; }
 .nametags { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .nametag {
   position: absolute; left: 0; top: 0;
@@ -634,12 +634,23 @@ table.mtable td:first-child {
 }
 .fish-label { font-size: 12px; text-align: center; }
 .fish-row { display: flex; gap: 8px; }
-.fish-bar { position: relative; width: 44px; height: 260px; background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 10px; border: 2px solid #a8c8e8; overflow: hidden; }
-.fish-zone { position: absolute; left: 3px; right: 3px; background: rgba(120, 220, 120, 0.45); border: 2px solid #8ae08a; border-radius: 6px; }
+.fish-bar { position: relative; width: 44px; height: 260px; background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 26px; border: 2px solid #a8c8e8; overflow: hidden; }
+.fish-zone { position: absolute; left: 3px; right: 3px; background: rgba(120, 220, 120, 0.45); border: 2px solid #8ae08a; border-radius: 9px; }
 .fish-zone.hit { background: rgba(140, 255, 140, 0.7); }
 .fish-marker { position: absolute; left: 8px; width: 24px; height: 24px; }
-.fish-meter { width: 12px; height: 260px; background: #1a2a3a; border-radius: 6px; display: flex; flex-direction: column-reverse; overflow: hidden; }
+.fish-meter { width: 12px; height: 260px; background: #1a2a3a; border-radius: 9px; display: flex; flex-direction: column-reverse; overflow: hidden; }
 .fish-meter div { background: linear-gradient(#f0e040, #5ad06a); width: 100%; }
 .upgrades { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
 .title-card { min-width: 320px; }
 .title-card .tagline { font-size: 16px; font-style: italic; color: var(--ink-soft); margin: 0 0 8px; }
+
+/* ---- Soft pass: pillowy buttons and gentle motion ------------------------------------------------------ */
+button {
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
+}
+button:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.02);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}

@@ -5,6 +5,30 @@ import type { Appearance } from '../../data/types';
 import { vertexMat } from '../materials';
 import { ball, box, cone, cyl, merge, shade, sphere, torus, type Part } from './kit';
 
+/** Soft round blob under a character (a shared radial-gradient texture, made on first use in the browser). */
+let blobTexture: THREE.Texture | null = null;
+function blobShadow(radius: number): THREE.Mesh {
+  if (!blobTexture) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(32, 32, 2, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(40,24,40,0.55)');
+    grad.addColorStop(0.6, 'rgba(40,24,40,0.2)');
+    grad.addColorStop(1, 'rgba(40,24,40,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+    blobTexture = new THREE.CanvasTexture(c);
+    blobTexture.colorSpace = THREE.SRGBColorSpace;
+  }
+  const geo = new THREE.PlaneGeometry(radius * 2, radius * 2);
+  geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: blobTexture, transparent: true, depthWrite: false }));
+  m.position.y = 0.03;
+  m.renderOrder = 2;
+  return m;
+}
+
 export interface CharacterRig {
   root: THREE.Group;
   body: THREE.Group;
@@ -26,15 +50,17 @@ function mesh(parts: Part[]): THREE.Mesh {
   return m;
 }
 
-export function buildCharacter(a: Appearance): CharacterRig {
+/** Chibi proportions: a big head, a short body and stubby legs read as friendly at the game's camera distance. */
+export function buildCharacter(a: Appearance, withShadow = true): CharacterRig {
   const H = a.height;
-  const legH = H * 0.42;
-  const torsoH = H * 0.32;
-  const headR = H * 0.105;
+  const legH = H * 0.34;
+  const torsoH = H * 0.3;
+  const headR = H * 0.15;
   const bw = BUILD_W[a.build];
   const root = new THREE.Group();
   const body = new THREE.Group();
   root.add(body);
+  if (withShadow) root.add(blobShadow(bw * 1.25));
 
   // Legs pivot at the hip.
   const mkLeg = (side: number) => {
@@ -81,8 +107,11 @@ export function buildCharacter(a: Appearance): CharacterRig {
   const hp: Part[] = [box(0.08, 0.06, 0.08, a.skin), sphere(headR, a.skin, { y: headR + 0.04 }, 10, 8)];
   const hy = headR + 0.04;
   // eyes and cheeks
-  hp.push(ball(0.018, '#2a2018', { x: headR * 0.38, y: hy + 0.01, z: headR * 0.9 }, 0), ball(0.018, '#2a2018', { x: -headR * 0.38, y: hy + 0.01, z: headR * 0.9 }, 0));
-  hp.push(ball(0.02, '#f0a090', { x: headR * 0.6, y: hy - 0.04, z: headR * 0.75 }, 0), ball(0.02, '#f0a090', { x: -headR * 0.6, y: hy - 0.04, z: headR * 0.75 }, 0));
+  for (const s of [-1, 1]) {
+    hp.push(ball(headR * 0.13, '#2a2018', { x: s * headR * 0.38, y: hy, z: headR * 0.88, sz: 0.6 }, 0));
+    hp.push(ball(headR * 0.05, '#ffffff', { x: s * headR * 0.38 + headR * 0.04, y: hy + headR * 0.06, z: headR * 0.96 }, 0));
+    hp.push(ball(headR * 0.16, '#f4a0a0', { x: s * headR * 0.66, y: hy - headR * 0.3, z: headR * 0.72, sz: 0.5 }, 0));
+  }
   switch (a.hairStyle) {
     case 'short':
       hp.push(sphere(headR * 1.06, a.hair, { y: hy + headR * 0.18, sy: 0.75, z: -0.01 }, 10, 6));
@@ -117,9 +146,9 @@ export function buildCharacter(a: Appearance): CharacterRig {
     for (const s of [-1, 1]) hp.push(torus(goggles ? 0.04 : 0.03, 0.008, goggles ? '#c8a050' : '#3a3030', { x: s * headR * 0.38, y: gy, z: headR * 0.92 }, 4, 10));
     if (goggles) hp.push(torus(headR * 1.02, 0.012, '#5a3a24', { y: gy, rx: Math.PI / 2 }, 4, 16));
   }
-  if (a.accessories.includes('rainhat')) hp.push(cyl(headR * 1.9, headR * 1.9, 0.03, a.accent, { y: hy + headR * 0.55 }, 12), cyl(headR * 0.85, headR * 1.05, headR * 0.7, a.accent, { y: hy + headR * 0.55 }, 10));
+  if (a.accessories.includes('rainhat')) hp.push(cyl(headR * 1.6, headR * 1.6, 0.03, a.accent, { y: hy + headR * 0.55 }, 12), cyl(headR * 0.85, headR * 1.05, headR * 0.7, a.accent, { y: hy + headR * 0.55 }, 10));
   if (a.accessories.includes('flatcap')) hp.push(cyl(headR * 1.05, headR * 1.08, headR * 0.35, a.accent, { y: hy + headR * 0.55 }, 10), box(headR * 1.4, 0.025, headR * 0.8, shade(a.accent, -0.1), { y: hy + headR * 0.58, z: headR * 0.8 }));
-  if (a.accessories.includes('strawhat')) hp.push(cyl(headR * 2.1, headR * 2.1, 0.025, '#e8c870', { y: hy + headR * 0.5 }, 14), cyl(headR * 0.9, headR * 1.0, headR * 0.6, '#e8c870', { y: hy + headR * 0.5 }, 10), torus(headR * 0.98, 0.015, a.accent, { y: hy + headR * 0.62, rx: Math.PI / 2 }, 4, 12));
+  if (a.accessories.includes('strawhat')) hp.push(cyl(headR * 1.7, headR * 1.7, 0.025, '#e8c870', { y: hy + headR * 0.55 }, 14), cyl(headR * 0.9, headR * 1.0, headR * 0.6, '#e8c870', { y: hy + headR * 0.5 }, 10), torus(headR * 0.98, 0.015, a.accent, { y: hy + headR * 0.62, rx: Math.PI / 2 }, 4, 12));
   if (a.accessories.includes('headscarf')) hp.push(sphere(headR * 1.12, a.accent, { y: hy + headR * 0.25, sy: 0.75, z: -0.015 }, 10, 6), ball(headR * 0.3, a.accent, { y: hy + headR * 0.2, z: -headR * 1.05 }, 0));
   head.add(mesh(hp));
   body.add(head);
@@ -135,15 +164,27 @@ export function buildCharacter(a: Appearance): CharacterRig {
   return { root, body, legL, legR, armL, armR, head, hand, height: H };
 }
 
-/** Walk cycle and idle breathing. phase in radians, speed 0..1. */
-export function animateCharacter(r: CharacterRig, phase: number, moving: boolean, swing: number): void {
-  const amp = moving ? 0.6 : 0;
-  r.legL.rotation.x = Math.sin(phase) * amp;
-  r.legR.rotation.x = -Math.sin(phase) * amp;
-  r.armL.rotation.x = -Math.sin(phase) * amp * 0.8;
-  r.armR.rotation.x = swing > 0 ? -2.2 + (1 - swing) * 2.6 : Math.sin(phase) * amp * 0.8;
-  r.body.position.y = moving ? Math.abs(Math.sin(phase)) * 0.04 : Math.sin(phase * 0.5) * 0.008;
-  r.head.rotation.z = moving ? Math.sin(phase) * 0.04 : 0;
+/**
+ * Walk cycle and idle breathing. `phase` is in radians; `move` is 0..1 and blends smoothly between standing
+ * and walking (the caller eases it, so starting and stopping never pop). The body squashes and stretches a
+ * little with each step, which is most of what makes it look bouncy rather than stiff.
+ */
+export function animateCharacter(r: CharacterRig, phase: number, move: number, swing: number): void {
+  const amp = 0.6 * move;
+  const s = Math.sin(phase);
+  r.legL.rotation.x = s * amp;
+  r.legR.rotation.x = -s * amp;
+  r.armL.rotation.x = -s * amp * 0.8;
+  r.armR.rotation.x = swing > 0 ? -2.2 + (1 - swing) * 2.6 : s * amp * 0.8;
+  const hop = Math.abs(s);
+  const breathe = Math.sin(phase * 0.5) * (1 - move);
+  r.body.position.y = hop * 0.07 * move + breathe * 0.01;
+  // Stretch on the way up, squash on landing; volume stays about constant.
+  const sy = 1 + (hop - 0.5) * 0.08 * move + breathe * 0.012;
+  r.body.scale.set(1 / Math.sqrt(sy), sy, 1 / Math.sqrt(sy));
+  r.body.rotation.x = 0.1 * move;
+  r.head.rotation.z = s * 0.06 * move;
+  r.head.rotation.x = -0.05 * move;
 }
 
 export const PLAYER_LOOK: Appearance = {

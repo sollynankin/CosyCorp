@@ -2,6 +2,12 @@
 // non-indexed BufferGeometry with per-vertex colours, so a whole crop, tree or machine is one draw call and
 // can be instanced. All sizes are metres (1 tile = 1 m), origin at the tile centre on the ground.
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/** Largest corner radius (metres) for box(): the soft, toy-like edge. */
+const BOX_ROUNDING = 0.05;
+/** Curved parts never get fewer segments than this, so silhouettes stay round and smooth-shaded. */
+const MIN_RADIAL = 12;
 
 export interface Part {
   geo: THREE.BufferGeometry;
@@ -47,37 +53,41 @@ function xf(geo: THREE.BufferGeometry, t: Xform): THREE.BufferGeometry {
   return place(geo, t.x ?? 0, t.y ?? 0, t.z ?? 0, t.rx ?? 0, t.ry ?? 0, t.rz ?? 0, t.sx ?? 1, t.sy ?? 1, t.sz ?? 1);
 }
 
-/** Box whose bottom sits at y (not centred), so stacking reads naturally. */
+/**
+ * Box whose bottom sits at y (not centred), so stacking reads naturally. Edges are rounded; the radius
+ * follows the thinnest side so planks and slabs keep their shape.
+ */
 export function box(w: number, h: number, d: number, color: THREE.ColorRepresentation, t: Xform = {}): Part {
-  const g = new THREE.BoxGeometry(w, h, d);
+  const r = Math.min(BOX_ROUNDING, Math.min(w, h, d) * 0.45);
+  const g = new RoundedBoxGeometry(w, h, d, 2, r);
   g.translate(0, h / 2, 0);
   return { geo: xf(g, t), color };
 }
 
 /** Cylinder (or cone/frustum) with its bottom at y. */
 export function cyl(rTop: number, rBot: number, h: number, color: THREE.ColorRepresentation, t: Xform = {}, seg = 8): Part {
-  const g = new THREE.CylinderGeometry(rTop, rBot, h, seg);
+  const g = new THREE.CylinderGeometry(rTop, rBot, h, Math.max(seg, MIN_RADIAL));
   g.translate(0, h / 2, 0);
   return { geo: xf(g, t), color };
 }
 
 export function cone(r: number, h: number, color: THREE.ColorRepresentation, t: Xform = {}, seg = 8): Part {
-  const g = new THREE.ConeGeometry(r, h, seg);
+  const g = new THREE.ConeGeometry(r, h, Math.max(seg, MIN_RADIAL));
   g.translate(0, h / 2, 0);
   return { geo: xf(g, t), color };
 }
 
-/** Low-poly ball centred at (x, y, z). detail 0 = icosahedron. */
+/** Ball centred at (x, y, z). Detail 0 is still subdivided once: an icosahedron with detail > 0 shades smooth. */
 export function ball(r: number, color: THREE.ColorRepresentation, t: Xform = {}, detail = 0): Part {
-  return { geo: xf(new THREE.IcosahedronGeometry(r, detail), t), color };
+  return { geo: xf(new THREE.IcosahedronGeometry(r, detail + 1), t), color };
 }
 
 export function sphere(r: number, color: THREE.ColorRepresentation, t: Xform = {}, ws = 8, hs = 6): Part {
-  return { geo: xf(new THREE.SphereGeometry(r, ws, hs), t), color };
+  return { geo: xf(new THREE.SphereGeometry(r, Math.max(ws, 16), Math.max(hs, 12)), t), color };
 }
 
 export function torus(r: number, tube: number, color: THREE.ColorRepresentation, t: Xform = {}, rs = 6, ts = 12): Part {
-  return { geo: xf(new THREE.TorusGeometry(r, tube, rs, ts), t), color };
+  return { geo: xf(new THREE.TorusGeometry(r, tube, Math.max(rs, 8), Math.max(ts, 16)), t), color };
 }
 
 /** Flat quad lying on the ground (XZ), centred. */
@@ -102,20 +112,23 @@ export function gable(w: number, d: number, h: number, color: THREE.ColorReprese
   shape.lineTo(d / 2, 0);
   shape.lineTo(0, h);
   shape.lineTo(-d / 2, 0);
-  const g = new THREE.ExtrudeGeometry(shape, { depth: w, bevelEnabled: false });
+  const g = new THREE.ExtrudeGeometry(shape, { depth: w, bevelEnabled: true, bevelSize: 0.025, bevelThickness: 0.025, bevelSegments: 2 });
   g.translate(0, 0, -w / 2);
   g.rotateY(Math.PI / 2);
   return { geo: xf(g, t), color };
 }
 
-/** Merge parts into one geometry with a `color` attribute (flat-shaded friendly, non-indexed). */
+/**
+ * Merge parts into one geometry with a `color` attribute (non-indexed). Primitives keep their own vertex
+ * normals, so spheres and cylinders shade smoothly while box faces stay crisp between their rounded edges.
+ */
 export function merge(parts: Part[]): THREE.BufferGeometry {
   const positions: number[] = [];
   const normals: number[] = [];
   const colors: number[] = [];
   for (const p of parts) {
     const g = p.geo.index ? p.geo.toNonIndexed() : p.geo;
-    g.computeVertexNormals();
+    if (!g.getAttribute('normal')) g.computeVertexNormals();
     const pos = g.getAttribute('position');
     const nor = g.getAttribute('normal');
     tmpColor.set(p.color);

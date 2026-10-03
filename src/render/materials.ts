@@ -2,12 +2,11 @@
 import * as THREE from 'three';
 
 /** The material for every merged, vertex-coloured mesh (crops, trees, machines, buildings, characters). */
-export const vertexMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
+export const vertexMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0 });
 
 /** Like vertexMat but glows at night (windows, lamps). emissiveIntensity follows the night factor. */
 export const glowMat = new THREE.MeshStandardMaterial({
   vertexColors: true,
-  flatShading: true,
   roughness: 0.6,
   emissive: new THREE.Color('#ffc870'),
   emissiveIntensity: 0,
@@ -21,7 +20,7 @@ export function mat(color: THREE.ColorRepresentation, opts: { transparent?: bool
   if (!m) {
     m = new THREE.MeshStandardMaterial({
       color,
-      flatShading: true,
+      
       roughness: 0.9,
       transparent: !!opts.transparent,
       opacity: opts.opacity ?? 1,
@@ -46,4 +45,4 @@ export const overlayStrong = new THREE.MeshBasicMaterial({ color: '#ffffff', tra
 export const overlayDim = new THREE.MeshBasicMaterial({ color: '#0a0c18', transparent: true, opacity: 0.5, depthWrite: false, depthTest: false });
 
 /** Build-mode ghost: translucent, tinted green (ok) or red (blocked). */
-export const ghostMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, transparent: true, opacity: 0.55, emissive: new THREE.Color('#000000'), depthWrite: false });
+export const ghostMat = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.55, emissive: new THREE.Color('#000000'), depthWrite: false });

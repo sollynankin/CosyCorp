@@ -14,10 +14,11 @@ export interface SeasonPalette {
 }
 
 export const SEASON_PALETTE: Record<SeasonId, SeasonPalette> = {
-  spring: { grass: '#7cc45a', grassAlt: '#80c85d', path: '#dcc496', canopy: ['#6fbf4f', '#8ccf5a', '#f2b8cf'], pine: '#3f7f4f', bush: '#5fae4a', snow: false },
-  summer: { grass: '#5fae45', grassAlt: '#63b248', path: '#d8be8c', canopy: ['#3f9a3c', '#4fa845', '#5cb24a'], pine: '#2f6f42', bush: '#3f9a3c', snow: false },
-  autumn: { grass: '#a3a650', grassAlt: '#a8a954', path: '#ccb080', canopy: ['#e0782c', '#d8a030', '#c0442c'], pine: '#3a6a42', bush: '#b0702c', snow: false },
-  winter: { grass: '#e8eef2', grassAlt: '#e3eaef', path: '#cfc4b4', canopy: ['#e8eef2', '#dfe8ee', '#f2f6f8'], pine: '#3d5f52', bush: '#c8d4da', snow: true },
+  // Sweet, slightly pastel colours: brighter and more saturated than a realistic palette.
+  spring: { grass: '#92dc6c', grassAlt: '#98e072', path: '#ecd7a8', canopy: ['#7fd45c', '#a2e46c', '#f9bdd9'], pine: '#4a9a5c', bush: '#6cc455', snow: false },
+  summer: { grass: '#74c957', grassAlt: '#7acd5c', path: '#e8d0a0', canopy: ['#52b84c', '#64c653', '#78d25e'], pine: '#37845a', bush: '#4cb048', snow: false },
+  autumn: { grass: '#c2b95a', grassAlt: '#c8bf60', path: '#e0c492', canopy: ['#f58f38', '#f0bc40', '#df5a40'], pine: '#43805a', bush: '#c8803a', snow: false },
+  winter: { grass: '#f0f6fb', grassAlt: '#eaf2f8', path: '#ddd2c4', canopy: ['#f0f6fb', '#e6eff6', '#f8fbfd'], pine: '#4a7a6a', bush: '#d2dee6', snow: true },
 };
 
 export function terrainColor(t: Terrain, season: SeasonId, alt: boolean): string {
@@ -34,9 +35,9 @@ export function terrainColor(t: Terrain, season: SeasonId, alt: boolean): string
     case 'sand':
       return p.snow ? '#e4e2da' : '#e6d29a';
     case 'water':
-      return '#3f8fbf';
+      return '#4aa6d6';
     case 'lake':
-      return '#2f78a8';
+      return '#3b8ec2';
     case 'cliff':
       return p.snow ? '#c8ccd0' : '#8a7a68';
     case 'glassfloor':

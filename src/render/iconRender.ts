@@ -65,7 +65,7 @@ export function portraitUrl(key: string, look: Appearance): string {
   if (hit) return hit;
   if (!gl) setup();
   pcam ??= new THREE.PerspectiveCamera(28, 1, 0.1, 20);
-  const rig = buildCharacter(look);
+  const rig = buildCharacter(look, false);
   scene.add(rig.root);
   const h = look.height;
   pcam.position.set(0.35, h * 0.86, 1.9);
