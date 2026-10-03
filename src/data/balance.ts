@@ -77,8 +77,8 @@ export const SAPLING_PRICE = 600;
 // ---- Items: base sell value -------------------------------------------------------------------------
 export const ITEM_VALUE: Record<string, number> = {
   // crops
-  radish: 30, carrot: 40, strawberry: 70, pea: 22, tomato: 50, sweetcorn: 60, melon: 230, sunpepper: 40,
-  wheat: 18, pumpkin: 250, beetroot: 55, frostkale: 95, honeypear: 120,
+  radish: 30, carrot: 40, strawberry: 70, pea: 22, tomato: 50, sweetcorn: 85, melon: 230, sunpepper: 40,
+  wheat: 18, pumpkin: 300, beetroot: 75, frostkale: 95, honeypear: 120,
   // forage
   wild_leek: 25, morel: 60, blackberry: 20, sweet_clover: 30, hazelnut: 35, chanterelle: 70, snowberry: 40,
   winter_root: 45,
@@ -89,9 +89,9 @@ export const ITEM_VALUE: Record<string, number> = {
   // fish
   perch: 40, brook_trout: 65, carp: 30, pike: 100, catfish: 120, bream: 45, eel: 85, glowfin: 400,
   // products
-  strawberry_jam: 230, bramble_jam: 110, pear_butter: 330, pumpkin_butter: 560, melon_jam: 520,
-  pickled_carrots: 160, pickled_beets: 200, pepper_relish: 150, tomato_passata: 180, kale_kraut: 320,
-  radish_pickles: 150, corn_relish: 210, flour: 50, cheese: 230, harvest_medley: 600,
+  strawberry_jam: 230, bramble_jam: 110, pear_butter: 330, pumpkin_butter: 680, melon_jam: 520,
+  pickled_carrots: 160, pickled_beets: 270, pepper_relish: 150, tomato_passata: 180, kale_kraut: 320,
+  radish_pickles: 150, corn_relish: 300, flour: 50, cheese: 230, harvest_medley: 600,
   // dishes
   radish_salad: 110, tomato_soup: 160, corn_chowder: 260, pumpkin_pie: 480, fish_stew: 220, pancakes: 240,
   berry_tart: 300, mushroom_toast: 210,
