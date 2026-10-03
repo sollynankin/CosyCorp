@@ -289,8 +289,34 @@ it takes at most one item per step.
   optional weather or flags. They play when you enter the map while the trigger holds. Each plays once.
 - **Dialogue** (`src/data/dialogue.ts`): each line has conditions (`season`, `weather`, `minHearts`,
   `maxHearts`, `flags`, `notFlags`, `map`, `weekday`, `festival`, `courting`). Selection: among the lines whose
-  conditions all hold, take those with the **most conditions** (most specific wins), then pick one with a
-  deterministic hash of (day, villager). The pick never consumes RNG, so talking never changes the future.
+  conditions all hold, a hash of (day, villager) makes a **weighted** pick, weight `1 + DIALOGUE_SPECIFIC_WEIGHT
+  × conditions`, so context-aware lines (weather, story, hearts) are much more likely than generic ones but
+  never lock a villager into one line for a whole season. (The first version let the most specific line win
+  outright; a test showed Maudie then said the same thing every day of spring.) The pick never consumes RNG,
+  so talking never changes the future.
+
+### How NPC movement is computed (reasoning)
+
+Positions are derived, not simulated, so saves stay tiny and a schedule edit can never strand an NPC. The
+cost is that NPCs cannot react to the player physically, which suits the genre. Concretely:
+
+- A stop `{ time, map, x, y, hidden? }` means: at `time` the villager sets off from the previous stop toward
+  this one. `hidden` stops are indoors (shop counters, homes): the villager is not drawn and cannot be talked
+  to there; the shop panel greets you in their name instead.
+- The route between two stops crosses maps by BFS over the warp graph (town ↔ farm ↔ forest, town ↔ lake).
+  Forest villagers do walk across Penhallow Yard on the farm path. Each leg is a BFS path over the map's
+  *static* walkability (terrain, decor, building footprints except doors, and the map's initial objects),
+  memoised by endpoints. Player-placed machines are ignored: villagers step over belts rather than get stuck.
+- NPCs do not block the player and the player does not block NPCs.
+- Interaction finds a villager whose interpolated position is within `NPC_TALK_RADIUS` of the target tile.
+
+### Relationship maths
+
+`hearts = floor(points / POINTS_PER_HEART)`. Points are clamped to `[0, cap]` where cap is `MAX_POINTS`, or
+`DATING_CAP_HEARTS × POINTS_PER_HEART` for a romanceable villager you are not courting. Gift delta =
+`GIFT_POINTS[pref] × (birthday ? BIRTHDAY_GIFT_MULT : 1)`. Preference lookup order: loved, liked, disliked
+(item id, then `tag:` entries), else neutral. Per-day flags reset each morning, the weekly gift count resets on
+Monday morning. There is no friendship decay: a cozy game should not punish being busy.
 
 ## 10. Quests
 
@@ -302,6 +328,20 @@ it takes at most one item per step.
 - **Quest board** (Town Hall): every Monday the RNG picks `BOARD_SIZE` requests from templates ("Pell would
   like 5 Tomatoes", in-season items only). Each has a deadline (the following Sunday) and a reward of coins
   plus friendship.
+
+### The story state machine (reasoning)
+
+Quests are evaluated, not scripted. Each morning and after every relevant action (shipping, delivering,
+scene end, entering a map, placing a machine) `updateQuests` runs to a fixed point: activate every quest whose
+`requires` are done and whose `earliest` day has come, recount objectives from state, complete the ones
+that are satisfied (rewards apply immediately, a completion scene queues), and repeat until nothing
+changes. Counting from state (e.g. `shippedTotal[item]` minus a snapshot taken at activation, `mineDeepest`,
+`seenScenes`) means progress can never be lost or double-counted, and a save made mid-quest needs nothing
+special. Deliveries are the one stored counter, because handing items over is an event.
+
+The walk test (`tests/story.test.ts`) drives a scripted player who only does the obvious thing for each
+active objective and asserts that the finale scene plays, for both an attentive and a festival-skipping
+player.
 
 ## 11. Festivals
 

@@ -14,7 +14,8 @@ export type SimEvent =
   | { type: 'dayEnd' }
   | { type: 'catch'; item: ItemId; q: Quality }
   | { type: 'escape' }
-  | { type: 'sound'; name: string };
+  | { type: 'sound'; name: string }
+  | { type: 'dialogue'; villager: string; text: string; hearts: number; gained: number };
 
 export interface DayContext {
   /** key the context was built for; see contextKey */

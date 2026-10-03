@@ -4,7 +4,8 @@ import { BASE_ITEMS } from './items';
 import { MACHINES } from './machines';
 import { RECIPES } from './recipes';
 import { SEASONS } from './seasons';
-import type { CropDef, ItemDef, MachineDef, RecipeDef, SeasonDef, SeasonId, TreeDef } from './types';
+import { VILLAGERS } from './villagers';
+import type { CropDef, ItemDef, MachineDef, RecipeDef, SeasonDef, SeasonId, TreeDef, VillagerDef } from './types';
 
 const MACHINE_ITEMS: ItemDef[] = MACHINES.map((m) => ({
   id: m.item,
@@ -38,6 +39,7 @@ export const getTree = index<TreeDef>(TREES, 'tree');
 export const getMachine = index<MachineDef>(MACHINES, 'machine');
 export const getRecipe = index<RecipeDef>(RECIPES, 'recipe');
 export const getSeason = index<SeasonDef>(SEASONS, 'season');
+export const getVillager = index<VillagerDef>(VILLAGERS, 'villager');
 
 export const hasItem = (id: string): boolean => ITEMS.some((i) => i.id === id);
 
@@ -55,4 +57,4 @@ export function cropIsInSeason(cropId: string, season: SeasonId): boolean {
   return getCrop(cropId).seasons.includes(season);
 }
 
-export { CROPS, TREES, MACHINES, RECIPES, SEASONS };
+export { CROPS, TREES, MACHINES, RECIPES, SEASONS, VILLAGERS };

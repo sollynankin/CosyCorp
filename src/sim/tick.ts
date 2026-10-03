@@ -1,11 +1,14 @@
 // The fixed tick (DESIGN.md §1). One call = 1/TICK_HZ s of game time.
-import { DAY_MINUTES, TICKS_PER_MINUTE } from '../data/balance';
+import { DAY_MINUTES, SCENE_CHECK_MINUTES, TICKS_PER_MINUTE } from '../data/balance';
 import { applyCommand, type Command, type CommandResult } from './commands';
 import { ensureContext, toast, type DayContext } from './context';
 import { endDay } from './day';
 import { factoryStep } from './factory';
 import { tickFishing } from './fishingTick';
 import type { GameState } from './state';
+import { festivalTick } from './festival';
+import { updateQuests } from './quests';
+import { checkSceneTriggers } from './scenes';
 
 export interface TickResult {
   results: CommandResult[];
@@ -17,6 +20,7 @@ export interface TickResult {
  */
 export function step(state: GameState, ctx: DayContext, commands: Command[] = []): TickResult {
   ensureContext(state, ctx);
+  const ctxRev = state.farm.layoutRev;
   state.player.moving = false;
   const results: CommandResult[] = [];
   for (const cmd of commands) {
@@ -24,6 +28,8 @@ export function step(state: GameState, ctx: DayContext, commands: Command[] = []
     results.push(r);
     if (!r.ok && cmd.type !== 'move') toast(ctx, r.reason);
     ensureContext(state, ctx);
+    // Machines placed or removed can complete 'own' and 'power' objectives.
+    if (r.ok && (cmd.type === 'place' || cmd.type === 'pickup' || (cmd.type === 'use' && state.farm.layoutRev !== ctxRev))) updateQuests(state, ctx);
   }
   const p = state.player;
   if (p.swing > 0) p.swing -= 1;
@@ -39,6 +45,8 @@ export function step(state: GameState, ctx: DayContext, commands: Command[] = []
     state.subTick = 0;
     factoryStep(state, ctx);
     state.minute += 1;
+    festivalTick(state, ctx);
+    if (state.minute % SCENE_CHECK_MINUTES === 0) checkSceneTriggers(state);
     if (state.minute >= DAY_MINUTES) endDay(state, ctx, true);
   }
   return { results };

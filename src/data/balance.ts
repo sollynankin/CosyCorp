@@ -208,3 +208,39 @@ export const SHOP_PRICES: Record<string, number> = {
   ribbon_charm: 500,
   promise_lantern: 2000,
 };
+
+// ---- Villagers (DESIGN.md §9) ----------------------------------------------------------------------
+/** tiles per in-game minute */
+export const NPC_SPEED = 1.2;
+/** how close (tiles) a villager must be to the clicked tile to talk */
+export const NPC_TALK_RADIUS = 0.95;
+export const POINTS_PER_HEART = 250;
+export const MAX_HEARTS = 10;
+export const MAX_POINTS = POINTS_PER_HEART * MAX_HEARTS;
+export const DATING_CAP_HEARTS = 8;
+export const TALK_POINTS = 20;
+export const GIFT_POINTS: Record<'loved' | 'liked' | 'neutral' | 'disliked', number> = { loved: 80, liked: 45, neutral: 20, disliked: -20 };
+export const BIRTHDAY_GIFT_MULT = 5;
+export const GIFTS_PER_WEEK = 2;
+/** days between giving the Promise Lantern and the ceremony */
+export const ENGAGEMENT_DAYS = 3;
+
+// ---- Festivals (DESIGN.md §11) ---------------------------------------------------------------------
+/** in-game minutes the timed festival activities last */
+export const FESTIVAL_ACTIVITY_MINUTES = 180;
+/** leaving a festival skips the clock to this minute (22:00) if it is earlier */
+export const FESTIVAL_LEAVE_MINUTE = 16 * 60;
+export const POD_COUNT = 12;
+export const POD_PRIZE = 40;
+export const DERBY_FISH_PRIZE = 60;
+/** Weigh-in: rival exhibit scores, and coin prizes for 1st/2nd/3rd */
+export const WEIGHIN_RIVALS = [420, 300, 180];
+export const WEIGHIN_PRIZES = [1200, 600, 250];
+/** Lantern Night: friendship bonus for a gift to your secret friend */
+export const SECRET_FRIEND_POINTS = 120;
+/** how often (in-game minutes) heart-event triggers are re-checked on the current map */
+export const SCENE_CHECK_MINUTES = 30;
+/** villagers set off for their festival spot this many minutes before it starts */
+export const FESTIVAL_GATHER_MINUTES = 60;
+/** dialogue: extra pick weight per condition a line lists (DESIGN.md §9) */
+export const DIALOGUE_SPECIFIC_WEIGHT = 3;

@@ -6,6 +6,8 @@ import { addItem } from './inventory';
 import type { GameState, MapState, Slot, WorldObject } from './state';
 import { emptyDayStats } from './stats';
 import { initVillagers } from './villagers';
+import { updateQuests } from './quests';
+import { buildContext } from './context';
 
 export const START_POS = { map: 'farm', x: 9.5, y: 7.5 };
 
@@ -92,5 +94,7 @@ export function newGame(seed: number): GameState {
     report: null,
     passedOut: false,
   };
+  // The opening quest activates at once and queues the arrival scene.
+  updateQuests(state, buildContext(state));
   return state;
 }

@@ -20,6 +20,11 @@ import { pickupMachine, placeMachine, rotateMachine } from './placement';
 import { chestMove } from './machineInteract';
 import { craftRecipe } from './crafting';
 import { entityAt } from './placement';
+import { finishScene } from './scenes';
+import { deliverAtWorks, deliverToVillager } from './quests';
+import { exhibit, secretFriendGift } from './festival';
+import { villagerAtTile } from './schedule';
+import { giveGift, talkTo } from './villagers';
 
 export type Command =
   | { type: 'move'; dx: number; dy: number }
@@ -36,7 +41,10 @@ export type Command =
   | { type: 'pickup'; x: number; y: number }
   | { type: 'rotate'; x: number; y: number; dir?: Dir }
   | { type: 'chest'; entity: number; fromBackpack: boolean; index: number }
-  | { type: 'craft'; recipe: string; n: number };
+  | { type: 'craft'; recipe: string; n: number }
+  | { type: 'sceneDone'; id: string; choice: number }
+  | { type: 'deliver'; quest: string }
+  | { type: 'exhibit'; slot: number };
 
 export type CommandResult = { ok: true } | { ok: false; reason: string };
 
@@ -98,6 +106,16 @@ function cmdUse(state: GameState, ctx: DayContext, x: number, y: number): Comman
   const slot = p.inventory[p.selected];
   if (!slot) return interactTile(state, ctx, x, y);
   const item = getItem(slot.id);
+  // Using an item on a villager hands it in for a quest, or gives it as a gift. Tools just say hello.
+  const villager = villagerAtTile(state, x, y);
+  if (villager) {
+    if (item.category === 'tool') return talkTo(state, ctx, villager);
+    const delivered = deliverToVillager(state, ctx, villager, slot.id);
+    if (delivered) return delivered;
+    const r = giveGift(state, ctx, villager, p.selected);
+    if (r.ok) secretFriendGift(state, ctx, villager);
+    return r;
+  }
   if (item.tool) {
     const cost = toolEnergy(state, item.tool);
     p.swing = TOOL_SWING_TICKS;
@@ -192,5 +210,11 @@ export function applyCommand(state: GameState, ctx: DayContext, cmd: Command): C
       return chestMove(state, ctx, cmd.entity, cmd.fromBackpack, cmd.index);
     case 'craft':
       return craftRecipe(state, ctx, cmd.recipe, cmd.n);
+    case 'sceneDone':
+      return finishScene(state, ctx, cmd.id, cmd.choice);
+    case 'deliver':
+      return deliverAtWorks(state, ctx, cmd.quest);
+    case 'exhibit':
+      return exhibit(state, ctx, cmd.slot);
   }
 }

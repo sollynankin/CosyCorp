@@ -179,13 +179,19 @@ export interface VillagerState {
   /** romanceable only */
   courting: boolean;
   engaged: boolean;
+  /** day the Promise Lantern was given, -1 if never */
+  engagedDay: number;
   married: boolean;
 }
 
 export interface QuestProgress {
   id: string;
-  /** objective index -> progress count */
+  /** objective index -> stored progress (deliveries) */
   progress: number[];
+  /** objective index -> shipped count at activation (ship objectives count from here) */
+  base: number[];
+  /** objective index -> item kinds already handed over (deliverKinds) */
+  kinds: string[][];
   /** day the quest became active */
   since: number;
 }

@@ -135,6 +135,7 @@ const specialItems: ItemDef[] = [
   { id: 'promise_lantern', name: 'Promise Lantern', category: 'special', spoils: false, color: '#f6c84a', icon: 'bottle', description: 'Give to your sweetheart at 10 hearts.' },
   { id: 'logbook', name: "Hollis's Logbook", category: 'special', spoils: false, color: '#5a3a2a', icon: 'box', description: 'Water-stained. The last entry is underlined twice.' },
   { id: 'seed_tin', name: 'Seed Tin', category: 'special', spoils: false, color: '#8a9aa8', icon: 'box', description: 'A dented tin with "Rook" scratched on the lid.' },
+  { id: 'seed_pod', name: 'Seed Pod', category: 'special', spoils: false, color: '#e8a0c0', icon: 'egg', description: 'A painted pod from the Blossom Fair hunt.' },
 ];
 
 const toolItems: ItemDef[] = [
