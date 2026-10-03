@@ -14,3 +14,8 @@ export { skillLevel, levelForXp } from './skills';
 export { isBlocked } from './collision';
 export { toolEnergy, areaTiles } from './tools';
 export { hash32, hashString } from './hash';
+export { factoryStep, dawnSprinklers } from './factory';
+export { placeMachine, pickupMachine, rotateMachine, entityAt, placementProblem } from './placement';
+export { canAccept, splitterOutputs, storedCount, availableRecipes } from './transfer';
+export { findRipeInReach, findPlantableInReach } from './machines';
+export { spoilOvernight } from './spoilage';

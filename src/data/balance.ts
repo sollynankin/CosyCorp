@@ -140,7 +140,7 @@ export const MACHINE_BALANCE: Record<string, MachineBalance> = {
   mill: { powerDraw: 3, bufferPerItem: 12, outputBuffer: 6 },
   cheese_press: { powerDraw: 3, bufferPerItem: 8, outputBuffer: 4 },
   silo: { powerDraw: 0, capacity: 240 },
-  market_chute: { powerDraw: 1 },
+  market_chute: { powerDraw: 0 },
   water_wheel: { powerDraw: 0, radius: 5, powerSupply: 12 },
   windmill: { powerDraw: 0, radius: 4, powerSupply: 8 },
   heater: { powerDraw: 4, radius: 2 },

@@ -1,5 +1,6 @@
 // Test fixtures. sandbox() gives a fresh game with a context; helpers place things directly.
-import { buildContext, newGame, step, type Command, type DayContext, type GameState } from '../src/sim';
+import type { Dir, Quality } from '../src/data/types';
+import { buildContext, ensureContext, factoryStep, newGame, placeMachine, step, type Command, type DayContext, type Entity, type GameState } from '../src/sim';
 import { addItem } from '../src/sim/inventory';
 import { farmIdx } from '../src/sim/farming';
 
@@ -52,4 +53,28 @@ export function act(sb: Sandbox, cmd: Command) {
   const r = step(sb.s, sb.ctx, [cmd]).results[0];
   for (let k = 0; k < 4; k++) step(sb.s, sb.ctx);
   return r;
+}
+
+/** Places a machine through the real placement rules (clearing the tile first) and returns it. */
+export function build(sb: Sandbox, item: string, x: number, y: number, dir: Dir = 1): Entity {
+  clearFarm(sb.s, x, y, x, y);
+  give(sb.s, item, 1);
+  const r = placeMachine(sb.s, sb.ctx, item, x, y, dir);
+  if (!r.ok) throw new Error(`place ${item} at ${x},${y}: ${r.reason}`);
+  ensureContext(sb.s, sb.ctx);
+  return sb.s.farm.entities[sb.s.farm.entities.length - 1];
+}
+
+/** Fills a silo or chest directly. */
+export function stock(e: Entity, id: string, n: number, q: Quality = 0): void {
+  e.stored.push({ id, q, n });
+}
+
+/** Runs n factory steps (minutes) without the player tick around them. */
+export function runFactory(sb: Sandbox, n: number, each?: (k: number) => void): void {
+  ensureContext(sb.s, sb.ctx);
+  for (let k = 0; k < n; k++) {
+    factoryStep(sb.s, sb.ctx);
+    each?.(k);
+  }
 }
