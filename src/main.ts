@@ -7,6 +7,7 @@ import { loadLocal, loadPrefs, saveLocal } from './game/save';
 import { Renderer } from './render/renderer';
 import { App } from './ui/app';
 import { AudioEngine } from './ui/audio';
+import { PadNav } from './ui/padNav';
 import { $ } from './ui/dom';
 import { showTitle } from './ui/menu';
 
@@ -23,6 +24,9 @@ const app = new App(uiRoot, game, renderer, audio);
 const input = new Input(canvas, game, renderer, {
   onKey: (key, e) => app.onKey(key, e),
   modalOpen: () => app.modals.open,
+  nav: new PadNav(uiRoot),
+  toast: (t) => app.toast(t),
+  onPadActivity: () => audio.unlock(),
 });
 
 input.buildMode = app.build;

@@ -55,6 +55,15 @@ export class BuildMode {
     this.dir = ((this.dir + 1) % 4) as Dir;
   }
 
+  /** Step the selected machine in the bar (gamepad: X and Y). */
+  cycle(step: number): void {
+    const items = this.machineItems();
+    if (items.length === 0) return;
+    const at = Math.max(0, items.findIndex((m) => m.id === this.item));
+    this.item = items[(at + step + items.length) % items.length].id;
+    this.renderBar();
+  }
+
   /** Machine items in the backpack, merged by id, in backpack order. */
   private machineItems(): { id: string; n: number }[] {
     const out: { id: string; n: number }[] = [];

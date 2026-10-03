@@ -1,4 +1,4 @@
-// Fishing overlay: "waiting for a bite", then the catch bar. Holding Space or the mouse raises the green
+// Fishing overlay: "waiting for a bite", then the catch bar. Holding Space, the pad's A or the mouse raises the green
 // zone (Input sends reel commands when the button changes); keep the fish inside it until the meter fills.
 import { FISH_ZONE_SIZE } from '../data/balance';
 import { getItem } from '../data';
@@ -34,7 +34,7 @@ export class FishingOverlay {
       this.meter.style.visibility = 'hidden';
       return;
     }
-    this.label.textContent = 'Hold Space or the mouse to raise the net. Keep the fish inside!';
+    this.label.textContent = 'Hold Space, A or the mouse to raise the net. Keep the fish inside!';
     this.bar.style.visibility = '';
     this.meter.style.visibility = '';
     const size = FISH_ZONE_SIZE[this.game.state.player.tools.rod];

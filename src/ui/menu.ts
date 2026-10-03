@@ -3,6 +3,7 @@ import type { Game } from '../game/game';
 import { exportSave, importSave, loadPrefs, saveLocal, savePrefs } from '../game/save';
 import { dateLabel, newGame } from '../sim';
 import type { Renderer, Quality } from '../render/renderer';
+import { PAD_CONTROLS } from '../game/input';
 import type { AudioEngine } from './audio';
 import { h } from './dom';
 import type { Modals } from './modal';
@@ -64,6 +65,8 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, audio: 
         volumeRow(audio),
         h('h3', 'Controls'),
         h('table.controls', CONTROLS.map(([k, v]) => h('tr', h('td.b', k), h('td', v)))),
+        h('h3', 'Gamepad'),
+        h('table.controls', PAD_CONTROLS.map(([k, v]) => h('tr', h('td.b', k), h('td', v)))),
         h('button', {
           onclick: () => {
             if (confirm('Start a new game? Your autosave will be replaced at the next morning.')) {

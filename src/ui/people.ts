@@ -99,7 +99,7 @@ export class People {
           h('img.portrait', { src: portrait(villager) }),
           h('div.grow',
             h('div.talk-text', text),
-            h('div.talk-foot', heartsEl(hearts), gained > 0 ? h('span.gain', `+${gained}`) : null, h('span.muted.small', 'Space / click to close')),
+            h('div.talk-foot', heartsEl(hearts), gained > 0 ? h('span.gain', `+${gained}`) : null, h('span.muted.small', 'Space / click / A to close')),
           ),
         ),
     });
@@ -152,7 +152,7 @@ export class People {
     queueMicrotask(() => (log.scrollTop = log.scrollHeight));
     const foot = last && sc.choices?.length
       ? h('div.choices', sc.choices.map((c, i) => h('button', { onclick: () => this.choose(i) }, c.text)))
-      : h('div.row', h('button.primary', { onclick: () => this.advance() }, last ? 'Continue' : 'Next'), h('span.muted.small', 'Space / E'));
+      : h('div.row', h('button.primary', { onclick: () => this.advance() }, last ? 'Continue' : 'Next'), h('span.muted.small', 'Space / E / A'));
     return h('div.scene', log, foot);
   }
 
