@@ -12,6 +12,8 @@ import { Panels } from './panels';
 import { NameTags, People } from './people';
 import { renderReport } from './report';
 import { FlowLegend, WorksPanels } from './works';
+import { FarmPanels } from './farmPanels';
+import { FishingOverlay } from './fishing';
 
 const ADVANCE_KEYS = new Set([' ', 'Enter', 'e', 'E']);
 
@@ -24,6 +26,8 @@ export class App {
   readonly legend: FlowLegend;
   readonly people: People;
   readonly tags: NameTags;
+  readonly farm: FarmPanels;
+  readonly fishing: FishingOverlay;
   /** building id of the last door opened (homes and counters need the door tile) */
   private lastBuilding: string | undefined;
 
@@ -40,6 +44,13 @@ export class App {
     this.build = new BuildMode(root, game, renderer, (t) => this.toast(t));
     this.legend = new FlowLegend(root, game, renderer);
     this.tags = new NameTags(root, game, renderer);
+    this.farm = new FarmPanels(game, this.modals);
+    this.fishing = new FishingOverlay(root, game);
+    this.panels.extra = (shopId) => (shopId === 'smithy' ? this.farm.upgrades() : null);
+    this.panels.kitchen = () => {
+      this.modals.close('home');
+      this.works.crafting('cook');
+    };
     game.on((e) => this.onEvent(e));
   }
 
@@ -49,6 +60,7 @@ export class App {
     this.legend.render();
     this.people.frame();
     this.tags.render(this.modals.open);
+    this.fishing.render();
   }
 
   toast(text: string): void {
@@ -144,6 +156,8 @@ export class App {
     else if (panel === 'works') this.people.works();
     else if (panel === 'board' || panel === 'townhall') this.people.board();
     else if (panel === 'festival') this.people.festival();
+    else if (panel === 'coop' || panel === 'barn') this.farm.animals(panel);
+    else if (panel === 'lift') this.farm.lift();
     else if (panel.startsWith('home:') && building) this.people.home(panel.slice(5), map, building.door);
     else this.toast('Nobody answers the door.');
   }

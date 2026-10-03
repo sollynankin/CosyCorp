@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { getItem, getTree } from '../data';
 import type { SeasonId } from '../data/types';
-import { cropStage } from '../sim';
+import { cropStage, festivalOn } from '../sim';
 import type { GameState } from '../sim/state';
 import { TREE_MATURE_DAYS } from '../data/balance';
 import { buildingAtTile, parseMap, type ParsedMap } from '../world';
@@ -23,6 +23,7 @@ const soilGeo = merge([box(0.94, 0.05, 0.94, '#ffffff', { y: -0.02 }), box(0.9, 
 const soilMat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 });
 const glassMat = new THREE.MeshStandardMaterial({ color: '#cfe8f0', transparent: true, opacity: 0.35, roughness: 0.1, depthWrite: false });
 
+const mineRock = new THREE.Color('#c8b8a8');
 const ORE_COLORS: Record<string, string> = { copper_ore: '#d8843a', iron_ore: '#c8c8d8', coal: '#2a2424', quartz: '#f0f8ff', amethyst: '#b06ae8', stone: '#9a9a94' };
 
 export class MapView {
@@ -41,6 +42,8 @@ export class MapView {
   private objSig = -1;
   private soilSig = -1;
   private builtFlags = '';
+  /** festival id and lantern-line state the town dressing was built for */
+  private dressKey = '';
   /** world positions of chimneys and lamps (for smoke and night light) */
   chimneys: THREE.Vector3[] = [];
 
@@ -62,6 +65,8 @@ export class MapView {
     this.decor.begin();
     this.decorGlow.begin();
     this.glass.begin();
+    // Lamps re-register below; drop the old ones so rebuilds don't stack duplicates.
+    this.chimneys = this.chimneys.filter((c) => c.y !== 1.9);
     const greenhouse = state.flags.includes('greenhouse');
     for (let y = 0; y < m.h; y++) {
       for (let x = 0; x < m.w; x++) {
@@ -108,9 +113,33 @@ export class MapView {
         }
       }
     }
+    if (this.mapId === 'town') this.dressTown(state);
     this.decor.end();
     this.decorGlow.end();
     this.glass.end();
+  }
+
+  private townDressKey(state: GameState): string {
+    return `${festivalOn(state.day)?.id ?? ''}|${state.flags.includes('lantern_line')}`;
+  }
+
+  /** Festival day dressing for the plaza, and the Lantern Line along Kettle Street once it is restored. */
+  private dressTown(state: GameState): void {
+    this.dressKey = this.townDressKey(state);
+    const f = festivalOn(state.day);
+    if (f && f.id !== 'lantern') {
+      for (const [x, y] of [[17, 10], [17, 21], [30, 10], [30, 21]] as const) this.decor.add(D.buntingPole(), tileMatrix(x + 0.5, y + 0.5, 0, 0));
+      for (const y of [10, 21]) this.decor.add(D.buntingRun(13), tileMatrix(17.5, y + 0.5, 0, 0));
+      const awnings = ['#e05a5a', '#5ab0e0', '#f0c040', '#7ad07a'];
+      [[19, 19], [22, 19], [26, 19], [28, 12]].forEach(([x, y], k) => this.decor.add(D.stall(awnings[k]), tileMatrix(x + 0.5, y + 0.5, 0, 0)));
+    }
+    if (state.flags.includes('lantern_line') || f?.id === 'lantern') {
+      for (let x = 2; x < 44; x += 4) {
+        if (x >= 16 && x <= 31) continue;
+        this.decor.add(D.lanternPost(), tileMatrix(x + 0.5, 14.5, 0, 0));
+        this.decorGlow.add(D.lanternBody(), tileMatrix(x + 0.5, 14.5, 0, 0));
+      }
+    }
   }
 
   private buildBuildings(state: GameState): void {
@@ -131,6 +160,7 @@ export class MapView {
   /** Called every frame. */
   update(state: GameState, season: SeasonId, time: number): void {
     if (season !== this.season) this.rebuildSeason(state, season);
+    if (this.mapId === 'town' && this.townDressKey(state) !== this.dressKey) this.buildDecor(state);
     if (state.flags.join(',') !== this.builtFlags) {
       this.buildBuildings(state);
       this.buildDecor(state);
@@ -207,7 +237,9 @@ export class MapView {
           this.objects.add(N.boulder(), tileMatrix(x, y, 0, r));
           break;
         case 'stone':
-          this.objects.add(N.smallStone(), tileMatrix(x, y, 0, r));
+          // Mine rocks are the main thing you break down there, so they read as proper rocks.
+          if (this.mapId.startsWith('mine')) this.objects.add(N.boulder(), tileMatrix(x, y, 0, r, 0.62), mineRock);
+          else this.objects.add(N.smallStone(), tileMatrix(x, y, 0, r));
           break;
         case 'weeds':
           this.objects.add(N.weeds(), tileMatrix(x, y, 0, r), bushCol.clone().offsetHSL(0, 0, 0.05));

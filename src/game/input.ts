@@ -38,15 +38,24 @@ export class Input implements InputSource {
     private readonly cb: InputCallbacks,
   ) {
     window.addEventListener('keydown', (e) => this.keyDown(e));
-    window.addEventListener('keyup', (e) => this.keys.delete(e.code));
-    window.addEventListener('blur', () => this.keys.clear());
+    window.addEventListener('keyup', (e) => {
+      this.keys.delete(e.code);
+      if (e.code === 'Space') this.setReel(false);
+    });
+    window.addEventListener('blur', () => {
+      this.keys.clear();
+      this.setReel(false);
+    });
     canvas.addEventListener('mousemove', (e) => {
       this.mouse = { x: e.clientX, y: e.clientY, inside: true };
     });
     canvas.addEventListener('mouseleave', () => (this.mouse.inside = false));
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     canvas.addEventListener('mousedown', (e) => this.click(e));
-    window.addEventListener('mouseup', () => this.buildMode?.onRelease());
+    window.addEventListener('mouseup', () => {
+      this.buildMode?.onRelease();
+      this.setReel(false);
+    });
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       if (e.shiftKey || e.ctrlKey) {
@@ -114,6 +123,13 @@ export class Input implements InputSource {
 
   private keyDown(e: KeyboardEvent): void {
     if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
+    // While fishing, Space holds the reel and Esc reels in; nothing else reaches the game.
+    if (this.game.state.player.fishing && !this.cb.modalOpen()) {
+      e.preventDefault();
+      if (e.code === 'Space' && !e.repeat) this.setReel(true);
+      if (e.key === 'Escape') this.game.send({ type: 'stopFishing' });
+      return;
+    }
     if (this.cb.onKey(e.key, e)) {
       e.preventDefault();
       return;
@@ -154,8 +170,21 @@ export class Input implements InputSource {
     return facingTile(this.game.state);
   }
 
+  private reeling = false;
+
+  /** Sends a reel command only when the button state changes (the sim keeps it until the next one). */
+  private setReel(hold: boolean): void {
+    if (hold === this.reeling) return;
+    this.reeling = hold;
+    if (this.game.state.player.fishing || !hold) this.game.send({ type: 'reel', hold });
+  }
+
   private click(e: MouseEvent): void {
     if (this.cb.modalOpen()) return;
+    if (this.game.state.player.fishing) {
+      if (e.button === 0) this.setReel(true);
+      return;
+    }
     const t = this.hoverTile();
     if (!t) return;
     if (this.buildMode?.active) {

@@ -34,6 +34,10 @@ export class Panels {
   private picked: number | null = null;
   /** shopkeeper greeting with a chat button (set by the App, which knows where villagers are) */
   counter: ((keeper: string, close: () => void) => HTMLElement | null) | null = null;
+  /** extra section under a shop's stock (the Smithy's upgrades) */
+  extra: ((shopId: string) => HTMLElement | null) | null = null;
+  /** opens the kitchen (cooking) from the farmhouse */
+  kitchen: (() => void) | null = null;
 
   constructor(private readonly game: Game, private readonly modals: Modals) {}
 
@@ -111,7 +115,7 @@ export class Panels {
       );
     }
     const greet = this.counter?.(shop.keeper, () => this.modals.close('shop')) ?? null;
-    return h('div', greet, h('div.shop-coins', 'Your coins: ', h('span.coin'), String(s.player.coins)), list);
+    return h('div', greet, h('div.shop-coins', 'Your coins: ', h('span.coin'), String(s.player.coins)), list, this.extra?.(shopId) ?? null);
   }
 
   shipping(): void {
@@ -155,7 +159,7 @@ export class Panels {
     return h(
       'div.home',
       h('p', 'A creaky bed, a kettle, and great-aunt Ros\'s handwriting on every jar.'),
-      h('div.row', h('button.primary', { onclick: () => { this.modals.close('home'); this.game.now({ type: 'sleep' }); } }, 'Sleep (end the day)')),
+      h('div.row', h('button.primary', { onclick: () => { this.modals.close('home'); this.game.now({ type: 'sleep' }); } }, 'Sleep (end the day)'), h('button', { onclick: () => this.kitchen?.() }, 'Cook in the kitchen')),
       s.overflow.length ? h('div.row', h('button', { onclick: () => this.game.now({ type: 'collectOverflow' }) }, `Collect the box (${s.overflow.reduce((a, b) => a + b.n, 0)} items)`)) : null,
     );
   }

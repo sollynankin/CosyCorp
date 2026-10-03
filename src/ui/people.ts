@@ -107,6 +107,12 @@ export class People {
   /** Called every frame: opens the scene player when the sim has queued a scene. */
   frame(): void {
     const q = this.s.sceneQueue[0];
+    // A scene finished elsewhere (or a loaded save) must not leave its player open.
+    if (this.modals.isOpen('scene') && (!q || q.id !== this.sceneId)) {
+      this.modals.close('scene');
+      this.sceneId = null;
+      this.pendingChoice = -1;
+    }
     if (!q) return;
     if (this.modals.isOpen('scene') && this.sceneId === q.id) return;
     if (this.modals.open && !this.modals.isOpen('scene')) return;

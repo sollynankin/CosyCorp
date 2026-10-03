@@ -20,6 +20,7 @@ import type { Dir } from '../data/types';
 import { FlowOverlay } from './flowOverlay';
 import { MachineView, yawFor } from './machineView';
 import { NpcView } from './npcView';
+import { AnimalView } from './animalView';
 import { ghostMat } from './materials';
 import { arrowGeo, machineMesh } from './meshes/machines';
 
@@ -56,9 +57,29 @@ export class Renderer {
   readonly machines = new MachineView();
   readonly flow = new FlowOverlay();
   readonly npcs = new NpcView();
+  readonly animals = new AnimalView();
   /** build ghost: a machine preview under the cursor */
   ghost: { type: string; x: number; y: number; dir: Dir; ok: boolean } | null = null;
   private readonly ghostBody = new THREE.Mesh(undefined, ghostMat);
+  private readonly bobber = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 8), new THREE.MeshStandardMaterial({ color: '#e84a3a', roughness: 0.5 }));
+  private readonly lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+  private readonly fishLine = new THREE.Line(this.lineGeo, new THREE.LineBasicMaterial({ color: '#f4f0e0' }));
+
+  /** Fishing: a bobber on the water (it dips when a fish bites) and a line from the rod. */
+  private drawLine(state: GameState): void {
+    const fs = state.player.fishing;
+    this.bobber.visible = this.fishLine.visible = !!fs;
+    if (!fs) return;
+    if (!this.bobber.parent) this.scene.add(this.bobber, this.fishLine);
+    const dip = fs.phase === 'reel' ? -0.08 + Math.sin(this.time * 18) * 0.04 : Math.sin(this.time * 3) * 0.02;
+    this.bobber.position.set(fs.tx + 0.5, -0.36 + dip, fs.ty + 0.5);
+    const tip = new THREE.Vector3(0, -1.5, 0);
+    this.heldTool.localToWorld(tip);
+    const pos = this.lineGeo.getAttribute('position') as THREE.BufferAttribute;
+    pos.setXYZ(0, tip.x, tip.y, tip.z);
+    pos.setXYZ(1, this.bobber.position.x, this.bobber.position.y + 0.05, this.bobber.position.z);
+    pos.needsUpdate = true;
+  }
   private readonly ghostArrow = new THREE.Mesh(arrowGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9, depthTest: false }));
   private powerKey = '';
   private powerInfo: PowerInfo | null = null;
@@ -83,7 +104,7 @@ export class Renderer {
     this.cursor.renderOrder = 5;
     this.scene.add(this.cursor);
     this.ghostArrow.renderOrder = 30;
-    this.scene.add(this.flow.group, this.ghostBody, this.ghostArrow, this.npcs.group);
+    this.scene.add(this.flow.group, this.ghostBody, this.ghostArrow, this.npcs.group, this.animals.group);
     this.effects = new Effects(this.scene);
     this.particles = new Particles(this.scene, quality);
     this.resize();
@@ -201,6 +222,7 @@ export class Renderer {
     this.lantern.position.set(px, 2.2, py + 0.4);
 
     this.npcs.update(state, interp.alpha, dt);
+    this.animals.update(state, this.time);
 
     // Machines, the Flow overlay and the build ghost (farm only).
     const onFarm = state.player.map === 'farm';
@@ -216,6 +238,7 @@ export class Renderer {
       this.flow.update(state, power);
     } else this.flow.group.visible = false;
     this.drawGhost(onFarm);
+    this.drawLine(state);
 
     // Cursor
     if (this.hover) {

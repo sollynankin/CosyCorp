@@ -72,3 +72,37 @@ export const rockWall = (variant: number) =>
   );
 
 export const shipLid = () => once('lid', () => merge([torus(0.1, 0.02, '#c8a050', { y: 0.7, rx: Math.PI / 2 })]));
+
+// ---- Festival dressing --------------------------------------------------------------------------------
+const FLAG_COLORS = ['#e05a5a', '#f0c040', '#5ab0e0', '#7ad07a', '#e88ad0'];
+
+/** A bunting pole with a string of pennants running along +x for `len` tiles. */
+export const buntingPole = () => once('bpole', () => merge([cyl(0.04, 0.05, 2.4, '#8a6440', {}, 5), ball(0.07, '#f0c040', { y: 2.42 }, 0)]));
+export const buntingRun = (len: number) =>
+  once(`brun${len}`, () => {
+    const parts = [box(len, 0.02, 0.02, '#f4ecd8', { x: len / 2, y: 2.25 })];
+    for (let k = 0; k < len * 3; k++) {
+      const x = (k + 0.5) / 3;
+      const sag = Math.sin((x / len) * Math.PI) * 0.25;
+      parts.push(cone(0.09, 0.22, FLAG_COLORS[k % FLAG_COLORS.length], { x, y: 2.25 - sag - 0.22, rx: Math.PI }, 3));
+    }
+    return merge(parts);
+  });
+
+export const stall = (color: string) =>
+  once(`stall${color}`, () =>
+    merge([
+      box(1.4, 0.75, 0.7, '#a87a50'),
+      box(1.5, 0.06, 0.8, '#7a5636', { y: 0.75 }),
+      cyl(0.04, 0.04, 1.3, '#7a5636', { x: -0.68, y: 0.75, z: -0.32 }, 5),
+      cyl(0.04, 0.04, 1.3, '#7a5636', { x: 0.68, y: 0.75, z: -0.32 }, 5),
+      box(1.6, 0.06, 1.0, color, { y: 2.05, rx: 0.25 }),
+      ball(0.12, '#e05a3a', { x: -0.4, y: 0.88 }, 0),
+      ball(0.1, '#f0c040', { x: -0.15, y: 0.86 }, 0),
+      ball(0.13, '#7ac04a', { x: 0.3, y: 0.88 }, 0),
+    ]),
+  );
+
+/** A paper lantern hung on a short post (body is the glowing part). */
+export const lanternPost = () => once('lpost', () => merge([cyl(0.03, 0.04, 1.9, '#4a3a2a', {}, 5), box(0.5, 0.03, 0.03, '#4a3a2a', { x: 0.2, y: 1.9 })]));
+export const lanternBody = () => once('lbody', () => merge([ball(0.17, '#ffb060', { x: 0.4, y: 1.62, sy: 1.25 }, 1), cyl(0.06, 0.06, 0.05, '#4a3a2a', { x: 0.4, y: 1.82 }, 6)]));

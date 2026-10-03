@@ -625,3 +625,19 @@ table.mtable td:first-child {
   background: rgba(58, 42, 30, 0.72); padding: 1px 7px; border-radius: 99px; white-space: nowrap;
 }
 #ui > .nametags, #ui > .flow-legend { pointer-events: none; }
+
+/* ---------- Fishing, upgrades ---------- */
+.fishing {
+  position: absolute; right: 90px; top: 50%; transform: translateY(-50%);
+  background: rgba(20, 40, 60, 0.85); color: #eef6ff; border-radius: var(--radius); padding: 12px;
+  display: flex; flex-direction: column; gap: 8px; align-items: center; width: 150px;
+}
+.fish-label { font-size: 12px; text-align: center; }
+.fish-row { display: flex; gap: 8px; }
+.fish-bar { position: relative; width: 44px; height: 260px; background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 10px; border: 2px solid #a8c8e8; overflow: hidden; }
+.fish-zone { position: absolute; left: 3px; right: 3px; background: rgba(120, 220, 120, 0.45); border: 2px solid #8ae08a; border-radius: 6px; }
+.fish-zone.hit { background: rgba(140, 255, 140, 0.7); }
+.fish-marker { position: absolute; left: 8px; width: 24px; height: 24px; }
+.fish-meter { width: 12px; height: 260px; background: #1a2a3a; border-radius: 6px; display: flex; flex-direction: column-reverse; overflow: hidden; }
+.fish-meter div { background: linear-gradient(#f0e040, #5ad06a); width: 100%; }
+.upgrades { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
