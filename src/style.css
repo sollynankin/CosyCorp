@@ -641,3 +641,5 @@ table.mtable td:first-child {
 .fish-meter { width: 12px; height: 260px; background: #1a2a3a; border-radius: 6px; display: flex; flex-direction: column-reverse; overflow: hidden; }
 .fish-meter div { background: linear-gradient(#f0e040, #5ad06a); width: 100%; }
 .upgrades { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.title-card { min-width: 320px; }
+.title-card .tagline { font-size: 16px; font-style: italic; color: var(--ink-soft); margin: 0 0 8px; }

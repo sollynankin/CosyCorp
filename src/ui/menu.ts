@@ -1,7 +1,7 @@
 // Pause menu: save, export/import, quality, controls help, new game.
 import type { Game } from '../game/game';
 import { exportSave, importSave, loadPrefs, saveLocal, savePrefs } from '../game/save';
-import { newGame } from '../sim';
+import { dateLabel, newGame } from '../sim';
 import type { Renderer, Quality } from '../render/renderer';
 import { h } from './dom';
 import type { Modals } from './modal';
@@ -72,5 +72,27 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, toast: 
         }, 'New game'),
       );
     },
+  });
+}
+
+/** Title card on load: continue the autosave or start fresh. Time is paused while it is open. */
+export function showTitle(game: Game, modals: Modals, hasSave: boolean): void {
+  modals.show({
+    id: 'title',
+    title: 'Hearthvale',
+    noClose: true,
+    render: () =>
+      h('div.menu.title-card',
+        h('p.tagline', 'A run-down workshop-farm, a sleepy valley town, and the Works waiting to be woken.'),
+        hasSave ? h('button.primary', { onclick: () => modals.close('title') }, `Continue (${dateLabel(game.state.day)})`) : null,
+        h(`button${hasSave ? '' : '.primary'}`, {
+          onclick: () => {
+            if (hasSave && !confirm('Start a new game? Your autosave will be replaced at the next morning.')) return;
+            if (hasSave) game.load(newGame((Date.now() % 1000000) + 1));
+            modals.close('title');
+          },
+        }, 'New game'),
+        h('p.muted.small', 'WASD to walk · click or Space to use a tool · E to talk and interact · I backpack · J journal · C craft · B build · F flow view · Esc menu'),
+      ),
   });
 }

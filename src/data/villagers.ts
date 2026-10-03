@@ -76,6 +76,7 @@ export const VILLAGERS: VillagerDef[] = [
       disliked: 'Ah, that is... I will find a place for it. Somewhere.',
     },
     schedule: [
+      { when: { married: true }, stops: [ALMANAC('06:00'), stop('06:10', 'farm', 12, 8), stop('09:30', 'town', 9, 12, true), stop('18:10', 'town', 21, 18), stop('19:30', 'town', 9, 12, true)] },
       { when: { weekday: [2] }, stops: [stop('06:00', 'town', 9, 12, true), stop('10:00', 'forest', 14, 12), stop('13:00', 'forest', 27, 14), stop('16:00', 'town', 9, 12, true)] },
       { when: { weather: ['rain', 'storm', 'snow'] }, stops: [ALMANAC('06:00'), stop('18:10', 'town', 36, 19, true), stop('21:00', 'town', 9, 12, true)] },
       { stops: [ALMANAC('06:00'), stop('08:00', 'town', 9, 13), ALMANAC('08:40'), stop('18:10', 'town', 21, 18), stop('19:30', 'town', 36, 19, true), stop('22:00', 'town', 9, 12, true)] },
@@ -98,6 +99,7 @@ export const VILLAGERS: VillagerDef[] = [
       disliked: 'Not really my thing. But thanks for thinking of me.',
     },
     schedule: [
+      { when: { married: true }, stops: [SMITHY('06:00'), stop('06:10', 'farm', 13, 8), stop('09:30', 'town', 8, 19, true), stop('18:30', 'town', 36, 19, true), stop('21:30', 'town', 8, 19, true)] },
       { when: { weekday: [5] }, stops: [SMITHY('06:00'), stop('09:00', 'lake', 20, 17), stop('13:00', 'lake', 26, 20), stop('16:00', 'town', 8, 19, true)] },
       { stops: [SMITHY('06:00'), stop('07:30', 'town', 7, 18), SMITHY('08:20'), stop('16:20', 'town', 43, 18), stop('18:30', 'town', 36, 19, true), stop('21:30', 'town', 8, 19, true)] },
     ],

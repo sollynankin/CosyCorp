@@ -121,9 +121,9 @@ export function lightAt(minute: number, weather: WeatherId, indoor: boolean): Li
   if (indoor) {
     st.sky = new THREE.Color('#1a1410');
     st.sunColor = new THREE.Color('#ffd8a0');
-    st.sunIntensity = 0.5;
+    st.sunIntensity = 0.8;
     st.hemiSky = new THREE.Color('#d8a878');
-    st.hemiIntensity = 0.9;
+    st.hemiIntensity = 1.35;
     st.night = 1;
   }
   return st;

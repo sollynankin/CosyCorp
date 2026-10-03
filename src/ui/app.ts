@@ -70,6 +70,7 @@ export class App {
   /** Returns true if the key was handled (and should not reach movement). */
   onKey(key: string, e: KeyboardEvent): boolean {
     const top = this.modals.top;
+    if (top === 'title') return key === 'Escape';
     if (top === 'scene' && ADVANCE_KEYS.has(key)) {
       this.people.advanceOrFinishReply();
       return true;

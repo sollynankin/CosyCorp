@@ -345,8 +345,11 @@ player.
 
 ## 11. Festivals
 
-One per season. On festival day the town is decorated and the festival runs 10:00–16:00. Entering the town
-in that window starts it. Leaving ends it, and the clock jumps to 22:00.
+One per season. On festival day the town is decorated and the festival runs 10:00–16:00 (Lantern Night runs
+17:00–23:00, because lanterns need the dark). Entering the town in that window starts it. Leaving ends it,
+and the clock jumps to 22:00 if it is earlier. Villagers walk to their festival spots an hour before the start.
+Timed activities (pod hunt, derby) last `FESTIVAL_ACTIVITY_MINUTES` from when you arrive; prizes are paid when
+you leave.
 
 | season | day | festival | activity |
 |---|---|---|---|

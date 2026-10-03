@@ -248,3 +248,12 @@ describe('heart events', () => {
     for (const sc of SCENES) for (const l of sc.lines) expect(ids.has(l.who), `${sc.id}: ${l.who}`).toBe(true);
   });
 });
+
+describe('marriage', () => {
+  it('a spouse visits the farm in the morning', () => {
+    const sb = sandbox();
+    sb.s.villagers.teo.married = true;
+    const p = villagerPos(sb.s, getVillager('teo'), minuteOfClock('08:30'));
+    expect([p.map, p.hidden]).toEqual(['farm', false]);
+  });
+});

@@ -7,12 +7,14 @@ import { loadLocal, loadPrefs, saveLocal } from './game/save';
 import { Renderer } from './render/renderer';
 import { App } from './ui/app';
 import { $ } from './ui/dom';
+import { showTitle } from './ui/menu';
 
 const canvas = $('#view') as HTMLCanvasElement;
 const uiRoot = $('#ui');
 
 const prefs = loadPrefs();
-const game = new Game(loadLocal() ?? newGame((Date.now() % 1000000) + 1));
+const saved = loadLocal();
+const game = new Game(saved ?? newGame((Date.now() % 1000000) + 1));
 const renderer = new Renderer(canvas, prefs.quality);
 const app = new App(uiRoot, game, renderer);
 const input = new Input(canvas, game, renderer, {
@@ -21,6 +23,7 @@ const input = new Input(canvas, game, renderer, {
 });
 
 input.buildMode = app.build;
+showTitle(game, app.modals, !!saved);
 window.addEventListener('resize', () => renderer.resize());
 
 let last = performance.now();
