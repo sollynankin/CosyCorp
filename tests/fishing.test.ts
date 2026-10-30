@@ -1,6 +1,6 @@
 // Fish sizes, size classes and prices, harder big fish, species variety, records and eating fish.
 import { describe, expect, it } from 'vitest';
-import { FISH_GOLD_AT, FISH_SIZE_TIRE_TIME, FISH_SILVER_AT, FISH_TIRE_TICKS, ITEM_ENERGY, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
+import { FISH_GOLD_AT, FISH_MIN_ENERGY, FISH_SIZE_TIRE_TIME, FISH_SILVER_AT, FISH_TIRE_TICKS, ITEM_ENERGY, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
 import { FISH } from '../src/data/fish';
 import { FISH_LOOKS } from '../src/data/fishLook';
 import { getItem } from '../src/data';
@@ -34,7 +34,7 @@ describe('fish table', () => {
     for (const f of FISH) {
       expect(getItem(f.item).category, f.item).toBe('fish');
       expect(ITEM_VALUE[f.item], `${f.item} value`).toBeGreaterThan(0);
-      expect(ITEM_ENERGY[f.item], `${f.item} energy`).toBeGreaterThan(0);
+      expect(ITEM_ENERGY[f.item], `${f.item} energy`).toBeGreaterThanOrEqual(FISH_MIN_ENERGY);
       expect(f.maxCm, f.item).toBeGreaterThan(f.minCm);
       expect(f.where.length, f.item).toBeGreaterThan(0);
     }

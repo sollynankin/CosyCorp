@@ -15,6 +15,7 @@ import { FlowLegend, WorksPanels } from './works';
 import { FarmPanels } from './farmPanels';
 import { FishingOverlay } from './fishing';
 import { Book, type BookTab } from './book';
+import { CatchFlash } from './catchFlash';
 import { fishLogBody } from './fishLog';
 import { MapPanel } from './mapPanel';
 import type { AudioEngine } from './audio';
@@ -34,6 +35,7 @@ export class App {
   readonly fishing: FishingOverlay;
   readonly map: MapPanel;
   readonly book: Book;
+  readonly catchFlash: CatchFlash;
   /** building id of the last door opened (homes and counters need the door tile) */
   private lastBuilding: string | undefined;
 
@@ -52,6 +54,7 @@ export class App {
     this.tags = new NameTags(root, game, renderer);
     this.farm = new FarmPanels(game, this.modals);
     this.fishing = new FishingOverlay(root, game);
+    this.catchFlash = new CatchFlash(root);
     this.map = new MapPanel(game, this.modals);
     // The top-right buttons do the same as the I, M and J keys, and close the panel if it is already open.
     this.book = new Book(this.modals, {
@@ -137,6 +140,9 @@ export class App {
     switch (e.type) {
       case 'toast':
         this.toast(e.text);
+        break;
+      case 'catch':
+        this.catchFlash.show(e.item, e.q, e.cm, e.record);
         break;
       case 'fx':
         this.renderer.effects.spawn(e.fx, e.map, e.x, e.y);

@@ -223,31 +223,31 @@ level nudges the roll up by 3% of the range. The length sets the size class, whi
 
 **Fish tire.** A hooked fish wears down: it swims slower, the catch meter fills faster and drains less, and if it never breaks loose it is landed once it is spent, after about 24 seconds for a small fish and up to 38 seconds for a record-length one. Letting the meter run empty is the only way to lose a fish.
 
-**Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Raw fish are a modest meal; bigger species restore more. Cooked Fish Stew is better still.
+**Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Every fish restores at least 20 energy, and bigger species restore more. Cooked Fish Stew is better still.
 
 | Fish | Where | Seasons | Time | Weather | Moves | Length | Silver / gold from | Base difficulty | Sells | Energy |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Minnow | River (farm stream, town river), Lake | Any season | Any | Any | calm | 4–9 cm | 7 / 8 cm | 10% | 8g | 4 |
-| Perch | River (farm stream, town river), Lake | Any season | Any | Any | calm | 15–40 cm | 30 / 36 cm | 20% | 40g | 12 |
-| Carp | Lake | Any season | Any | Any | sinker | 30–90 cm | 66 / 81 cm | 30% | 30g | 14 |
-| Sunfish | Lake | Spring, Summer, Autumn | Any | Any | floater | 8–25 cm | 18 / 22 cm | 20% | 25g | 8 |
-| Bream | Lake | Spring, Summer | Any | Any | floater | 20–45 cm | 35 / 41 cm | 35% | 45g | 12 |
-| Crayfish | River (farm stream, town river) | Spring, Summer | Any | Any | sinker | 6–15 cm | 11 / 14 cm | 30% | 35g | 8 |
-| Smelt | River (farm stream, town river) | Winter, Spring | Any | Any | dart | 8–20 cm | 15 / 18 cm | 25% | 20g | 6 |
-| Brook Trout | River (farm stream, town river) | Spring, Summer, Autumn | 06:00–19:00 | Any | dart | 20–50 cm | 38 / 46 cm | 45% | 65g | 16 |
-| Rainbow Trout | River (farm stream, town river) | Spring, Summer | 06:00–19:00 | Any | dart | 25–70 cm | 52 / 63 cm | 50% | 75g | 18 |
-| Largemouth Bass | Lake | Summer, Autumn | Any | Any | sinker | 25–60 cm | 46 / 55 cm | 50% | 90g | 20 |
-| Salmon | River (farm stream, town river) | Autumn | Any | Any | dart | 50–100 cm | 80 / 93 cm | 60% | 140g | 30 |
-| Koi | Lake | Spring, Summer | Any | Any | calm | 40–80 cm | 64 / 74 cm | 45% | 200g | 20 |
-| Pike | Lake | Summer, Autumn, Winter | Any | Any | dart | 50–130 cm | 98 / 118 cm | 60% | 100g | 28 |
-| Walleye | Lake | Autumn, Winter | 17:00–02:00 | Any | sinker | 35–80 cm | 62 / 73 cm | 55% | 110g | 24 |
-| Catfish | River (farm stream, town river) | Spring, Summer, Autumn | Any | rain, storm | sinker | 40–120 cm | 88 / 108 cm | 55% | 120g | 30 |
-| Emberscale | River (farm stream, town river) | Any season | Any | rain, storm | dart | 15–35 cm | 27 / 32 cm | 65% | 180g | 22 |
-| Frostfin | Lake | Winter | Any | snow | floater | 20–50 cm | 38 / 46 cm | 60% | 160g | 20 |
-| Eel | River (farm stream, town river), Lake | Autumn, Winter | 19:00–02:00 | Any | dart | 40–100 cm | 76 / 91 cm | 65% | 85g | 24 |
-| Moonfin | Lake | Any season | 20:00–02:00 | Any | floater | 20–45 cm | 35 / 41 cm | 70% | 220g | 28 |
-| Sturgeon | Lake | Summer | 10:00–19:00 | Any | sinker | 100–220 cm | 172 / 202 cm | 85% | 300g | 50 |
-| Glowfin | River (farm stream, town river) (+lake after the Heron story) | Summer | 18:00–02:00 | Any | floater | 25–60 cm | 46 / 55 cm | 80% | 400g | 40 |
+| Minnow | River (farm stream, town river), Lake | Any season | Any | Any | calm | 4–9 cm | 7 / 8 cm | 10% | 8g | 20 |
+| Perch | River (farm stream, town river), Lake | Any season | Any | Any | calm | 15–40 cm | 30 / 36 cm | 20% | 40g | 28 |
+| Carp | Lake | Any season | Any | Any | sinker | 30–90 cm | 66 / 81 cm | 30% | 30g | 30 |
+| Sunfish | Lake | Spring, Summer, Autumn | Any | Any | floater | 8–25 cm | 18 / 22 cm | 20% | 25g | 24 |
+| Bream | Lake | Spring, Summer | Any | Any | floater | 20–45 cm | 35 / 41 cm | 35% | 45g | 28 |
+| Crayfish | River (farm stream, town river) | Spring, Summer | Any | Any | sinker | 6–15 cm | 11 / 14 cm | 30% | 35g | 22 |
+| Smelt | River (farm stream, town river) | Winter, Spring | Any | Any | dart | 8–20 cm | 15 / 18 cm | 25% | 20g | 22 |
+| Brook Trout | River (farm stream, town river) | Spring, Summer, Autumn | 06:00–19:00 | Any | dart | 20–50 cm | 38 / 46 cm | 45% | 65g | 34 |
+| Rainbow Trout | River (farm stream, town river) | Spring, Summer | 06:00–19:00 | Any | dart | 25–70 cm | 52 / 63 cm | 50% | 75g | 36 |
+| Largemouth Bass | Lake | Summer, Autumn | Any | Any | sinker | 25–60 cm | 46 / 55 cm | 50% | 90g | 38 |
+| Salmon | River (farm stream, town river) | Autumn | Any | Any | dart | 50–100 cm | 80 / 93 cm | 60% | 140g | 55 |
+| Koi | Lake | Spring, Summer | Any | Any | calm | 40–80 cm | 64 / 74 cm | 45% | 200g | 38 |
+| Pike | Lake | Summer, Autumn, Winter | Any | Any | dart | 50–130 cm | 98 / 118 cm | 60% | 100g | 50 |
+| Walleye | Lake | Autumn, Winter | 17:00–02:00 | Any | sinker | 35–80 cm | 62 / 73 cm | 55% | 110g | 45 |
+| Catfish | River (farm stream, town river) | Spring, Summer, Autumn | Any | rain, storm | sinker | 40–120 cm | 88 / 108 cm | 55% | 120g | 55 |
+| Emberscale | River (farm stream, town river) | Any season | Any | rain, storm | dart | 15–35 cm | 27 / 32 cm | 65% | 180g | 42 |
+| Frostfin | Lake | Winter | Any | snow | floater | 20–50 cm | 38 / 46 cm | 60% | 160g | 40 |
+| Eel | River (farm stream, town river), Lake | Autumn, Winter | 19:00–02:00 | Any | dart | 40–100 cm | 76 / 91 cm | 65% | 85g | 45 |
+| Moonfin | Lake | Any season | 20:00–02:00 | Any | floater | 20–45 cm | 35 / 41 cm | 70% | 220g | 50 |
+| Sturgeon | Lake | Summer | 10:00–19:00 | Any | sinker | 100–220 cm | 172 / 202 cm | 85% | 300g | 90 |
+| Glowfin | River (farm stream, town river) (+lake after the Heron story) | Summer | 18:00–02:00 | Any | floater | 25–60 cm | 46 / 55 cm | 80% | 400g | 70 |
 
 The Glowfin Derby festival rewards catching many.
 
@@ -317,27 +317,27 @@ The shipping bin pays the full price; a Market Chute pays 90%.
 
 | Item | Sells | Energy | Spoils overnight | Notes |
 |---|---|---|---|---|
-| Perch | 40g | 12 | yes |  |
-| Brook Trout | 65g | 16 | yes |  |
-| Carp | 30g | 14 | yes |  |
-| Pike | 100g | 28 | yes |  |
-| Catfish | 120g | 30 | yes |  |
-| Bream | 45g | 12 | yes |  |
-| Eel | 85g | 24 | yes |  |
-| Glowfin | 400g | 40 | yes |  |
-| Minnow | 8g | 4 | yes |  |
-| Sunfish | 25g | 8 | yes |  |
-| Crayfish | 35g | 8 | yes |  |
-| Smelt | 20g | 6 | yes |  |
-| Rainbow Trout | 75g | 18 | yes |  |
-| Largemouth Bass | 90g | 20 | yes |  |
-| Salmon | 140g | 30 | yes |  |
-| Koi | 200g | 20 | yes |  |
-| Walleye | 110g | 24 | yes |  |
-| Emberscale | 180g | 22 | yes |  |
-| Frostfin | 160g | 20 | yes |  |
-| Moonfin | 220g | 28 | yes |  |
-| Sturgeon | 300g | 50 | yes |  |
+| Perch | 40g | 28 | yes |  |
+| Brook Trout | 65g | 34 | yes |  |
+| Carp | 30g | 30 | yes |  |
+| Pike | 100g | 50 | yes |  |
+| Catfish | 120g | 55 | yes |  |
+| Bream | 45g | 28 | yes |  |
+| Eel | 85g | 45 | yes |  |
+| Glowfin | 400g | 70 | yes |  |
+| Minnow | 8g | 20 | yes |  |
+| Sunfish | 25g | 24 | yes |  |
+| Crayfish | 35g | 22 | yes |  |
+| Smelt | 20g | 22 | yes |  |
+| Rainbow Trout | 75g | 36 | yes |  |
+| Largemouth Bass | 90g | 38 | yes |  |
+| Salmon | 140g | 55 | yes |  |
+| Koi | 200g | 38 | yes |  |
+| Walleye | 110g | 45 | yes |  |
+| Emberscale | 180g | 42 | yes |  |
+| Frostfin | 160g | 40 | yes |  |
+| Moonfin | 220g | 50 | yes |  |
+| Sturgeon | 300g | 90 | yes |  |
 
 ### Minerals
 

@@ -100,15 +100,17 @@ export const ITEM_VALUE: Record<string, number> = {
   // misc
   fertilizer: 5, lantern: 60, ribbon_charm: 0, promise_lantern: 0,
 };
+/** the least energy any fish restores */
+export const FISH_MIN_ENERGY = 20;
 /** energy restored when eaten (items not listed are inedible) */
 export const ITEM_ENERGY: Record<string, number> = {
   radish: 10, carrot: 12, strawberry: 15, pea: 6, tomato: 12, sweetcorn: 15, melon: 40, sunpepper: 6,
   pumpkin: 0, beetroot: 15, frostkale: 20, honeypear: 30,
   wild_leek: 10, morel: 15, blackberry: 8, hazelnut: 12, chanterelle: 15, snowberry: 10, winter_root: 15,
   egg: 15, milk: 25,
-  // fish (raw, so modest; a bigger fish is a bigger meal)
-  minnow: 4, sunfish: 8, crayfish: 8, smelt: 6, perch: 12, carp: 14, bream: 12, brook_trout: 16, rainbow_trout: 18, largemouth_bass: 20,
-  koi: 20, salmon: 30, pike: 28, walleye: 24, catfish: 30, emberscale: 22, frostfin: 20, eel: 24, moonfin: 28, sturgeon: 50, glowfin: 40,
+  // fish are a proper meal: at least FISH_MIN_ENERGY, and a bigger species is a bigger meal
+  minnow: 20, smelt: 22, crayfish: 22, sunfish: 24, perch: 28, bream: 28, carp: 30, brook_trout: 34, rainbow_trout: 36, largemouth_bass: 38,
+  koi: 38, frostfin: 40, emberscale: 42, walleye: 45, eel: 45, pike: 50, moonfin: 50, salmon: 55, catfish: 55, glowfin: 70, sturgeon: 90,
   radish_salad: 40, tomato_soup: 50, corn_chowder: 70, pumpkin_pie: 90, fish_stew: 70, pancakes: 60,
   berry_tart: 70, mushroom_toast: 60,
 };
