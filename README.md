@@ -4,6 +4,8 @@ A cozy 3D farming-life sim with a deterministic automation layer ("the Works"). 
 villagers of Hearthvale, wake the old Guild machines and keep the valley lit. TypeScript, Vite and Three.js,
 with procedural art and audio (no asset files).
 
+**Play it:** https://sollynankin.github.io/CosyCorp/ (built and published automatically from `main` by GitHub Actions).
+
 ```bash
 npm install
 npm run dev        # http://localhost:5173
