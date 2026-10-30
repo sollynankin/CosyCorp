@@ -12,7 +12,7 @@ export type SimEvent =
   | { type: 'warp'; to: string }
   | { type: 'scene'; id: string }
   | { type: 'dayEnd' }
-  | { type: 'catch'; item: ItemId; q: Quality }
+  | { type: 'catch'; item: ItemId; q: Quality; cm: number; record: boolean }
   | { type: 'escape' }
   | { type: 'sound'; name: string }
   | { type: 'dialogue'; villager: string; text: string; hearts: number; gained: number };

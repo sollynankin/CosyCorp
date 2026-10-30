@@ -75,6 +75,7 @@ export function newGame(seed: number): GameState {
       shipping: [],
     },
     maps,
+    fishLog: {},
     mineDeepest: 0,
     mineBroken: 0,
     feeders: { coop: 0, barn: 0 },

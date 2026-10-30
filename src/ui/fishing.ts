@@ -1,6 +1,6 @@
 // Fishing overlay: "waiting for a bite", then the catch bar. Holding Space, the pad's A or the mouse raises the green
 // zone (Input sends reel commands when the button changes); keep the fish inside it until the meter fills.
-import { FISH_ZONE_SIZE } from '../data/balance';
+import { FISH_GOLD_AT, FISH_SILVER_AT, FISH_ZONE_SIZE } from '../data/balance';
 import { getItem } from '../data';
 import type { Game } from '../game/game';
 import { h } from './dom';
@@ -34,13 +34,15 @@ export class FishingOverlay {
       this.meter.style.visibility = 'hidden';
       return;
     }
-    this.label.textContent = 'Hold Space, A or the mouse to raise the net. Keep the fish inside!';
+    // The bigger the fish, the louder the reel: a hint before you land it.
+    const big = fs.size >= FISH_GOLD_AT ? 'Whoa, this one is HUGE! ' : fs.size >= FISH_SILVER_AT ? 'A big one! ' : '';
+    this.label.textContent = `${big}Hold Space, A or the mouse to raise the net. Keep the fish inside!`;
     this.bar.style.visibility = '';
     this.meter.style.visibility = '';
     const size = FISH_ZONE_SIZE[this.game.state.player.tools.rod];
     this.zone.style.bottom = `${fs.zonePos * 100}%`;
     this.zone.style.height = `${size * 100}%`;
-    this.fish.style.bottom = `calc(${fs.fishPos * 100}% - 12px)`;
+    this.fish.style.bottom = `calc(${fs.fishPos * 100}% - 36px)`;
     (this.fish as HTMLImageElement).src = itemIcon(fs.fish);
     this.fish.title = getItem(fs.fish).name;
     const inside = fs.fishPos >= fs.zonePos && fs.fishPos <= fs.zonePos + size;

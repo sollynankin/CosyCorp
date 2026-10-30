@@ -14,6 +14,8 @@ import { renderReport } from './report';
 import { FlowLegend, WorksPanels } from './works';
 import { FarmPanels } from './farmPanels';
 import { FishingOverlay } from './fishing';
+import { Book, type BookTab } from './book';
+import { fishLogBody } from './fishLog';
 import { MapPanel } from './mapPanel';
 import type { AudioEngine } from './audio';
 
@@ -31,6 +33,7 @@ export class App {
   readonly farm: FarmPanels;
   readonly fishing: FishingOverlay;
   readonly map: MapPanel;
+  readonly book: Book;
   /** building id of the last door opened (homes and counters need the door tile) */
   private lastBuilding: string | undefined;
 
@@ -51,9 +54,17 @@ export class App {
     this.fishing = new FishingOverlay(root, game);
     this.map = new MapPanel(game, this.modals);
     // The top-right buttons do the same as the I, M and J keys, and close the panel if it is already open.
-    this.hud.onOpenBackpack = () => this.toggleBackpack();
-    this.hud.onOpenMap = () => this.openMap();
-    this.hud.onOpenJournal = () => this.toggleJournal();
+    this.book = new Book(this.modals, {
+      body: { pack: () => this.panels.inventoryBody(), journal: () => this.people.journalBody(), map: () => this.map.body(), fishing: () => fishLogBody(game) },
+      onShow: (tab) => {
+        if (tab === 'pack') this.panels.resetPick();
+        if (tab === 'map') this.map.focusHere();
+      },
+    });
+    this.hud.onOpenBackpack = () => this.book.toggle('pack');
+    this.hud.onOpenMap = () => this.book.toggle('map');
+    this.hud.onOpenJournal = () => this.book.toggle('journal');
+    this.hud.onOpenFishing = () => this.book.toggle('fishing');
     this.panels.extra = (shopId) => (shopId === 'smithy' ? this.farm.upgrades() : null);
     this.panels.kitchen = () => {
       this.modals.close('home');
@@ -96,16 +107,9 @@ export class App {
       return true;
     }
     const k = key.toLowerCase();
-    if (k === 'i' || key === 'Tab') {
-      this.toggleBackpack();
-      return true;
-    }
-    if (k === 'j') {
-      this.toggleJournal();
-      return true;
-    }
-    if (k === 'm') {
-      this.openMap();
+    const tab: BookTab | null = k === 'i' || key === 'Tab' ? 'pack' : k === 'j' ? 'journal' : k === 'm' ? 'map' : k === 'k' ? 'fishing' : null;
+    if (tab) {
+      this.book.toggle(tab);
       return true;
     }
     if (this.modals.open || e.repeat) return false;
@@ -127,20 +131,6 @@ export class App {
       return true;
     }
     return false;
-  }
-
-  private toggleBackpack(): void {
-    if (this.modals.top === 'inventory') this.modals.close('inventory');
-    else if (!this.modals.open) this.panels.inventory();
-  }
-
-  private toggleJournal(): void {
-    if (this.modals.top === 'journal') this.modals.close('journal');
-    else if (!this.modals.open) this.people.journal();
-  }
-
-  private openMap(): void {
-    if (this.modals.top === 'map' || !this.modals.open) this.map.toggle();
   }
 
   onEvent(e: SimEvent): void {

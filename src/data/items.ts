@@ -1,3 +1,4 @@
+import { FISH_LOOKS } from './fishLook';
 import { CROPS, TREES } from './crops';
 import type { ItemDef } from './types';
 
@@ -59,7 +60,8 @@ const forageItems: ItemDef[] = [
 ];
 
 const fish = (id: string, name: string, color: string): ItemDef => ({
-  id, name, category: 'fish', spoils: true, color, icon: 'fish', tags: ['fish'],
+  // the colour tints the belt item, so use the fish's own body colour when it has a look (data/fishLook.ts)
+  id, name, category: 'fish', spoils: true, color: FISH_LOOKS[id]?.body ?? color, icon: 'fish', tags: ['fish'],
 });
 
 const fishItems: ItemDef[] = [
@@ -71,6 +73,19 @@ const fishItems: ItemDef[] = [
   fish('bream', 'Bream', '#c8c08a'),
   fish('eel', 'Eel', '#4f5a4a'),
   fish('glowfin', 'Glowfin', '#7ff0e0'),
+  fish('minnow', 'Minnow', '#c0d4e0'),
+  fish('sunfish', 'Sunfish', '#f0b040'),
+  fish('crayfish', 'Crayfish', '#d8603a'),
+  fish('smelt', 'Smelt', '#a8c8e8'),
+  fish('rainbow_trout', 'Rainbow Trout', '#e88aa8'),
+  fish('largemouth_bass', 'Largemouth Bass', '#5a9a5a'),
+  fish('salmon', 'Salmon', '#f08a6a'),
+  fish('koi', 'Koi', '#f07a2a'),
+  fish('walleye', 'Walleye', '#c0a050'),
+  fish('emberscale', 'Emberscale', '#ff5a3a'),
+  fish('frostfin', 'Frostfin', '#8ad8ff'),
+  fish('moonfin', 'Moonfin', '#b8a0ff'),
+  fish('sturgeon', 'Sturgeon', '#7a8a9a'),
 ];
 
 const product = (id: string, name: string, color: string, icon: ItemDef['icon'] = 'jar'): ItemDef => ({

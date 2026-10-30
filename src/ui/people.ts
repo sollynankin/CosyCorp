@@ -23,6 +23,7 @@ import {
 } from '../sim';
 import { h } from './dom';
 import { guidance } from './hints';
+import { getUiScale } from './scale';
 import { itemIcon } from './icons';
 import type { Modals } from './modal';
 import { slotEl } from './panels';
@@ -183,11 +184,8 @@ export class People {
   }
 
   // ---- Journal -----------------------------------------------------------------------------------
-  journal(): void {
-    this.modals.show({ id: 'journal', title: 'Journal', wide: true, render: () => this.renderJournal() });
-  }
-
-  private renderJournal(): HTMLElement {
+  /** The journal tab of the book (it has its own sub-tabs: what next, quests, friends, goals). */
+  journalBody(): HTMLElement {
     const tab = (id: 'next' | 'quests' | 'friends' | 'goals', label: string) =>
       h(`button.tab${this.journalTab === id ? '.on' : ''}`, { onclick: () => { this.journalTab = id; this.modals.refresh(); } }, label);
     const body =
@@ -403,7 +401,9 @@ export class NameTags {
           this.tags.set(n.id, tag);
           this.el.appendChild(tag);
         }
-        tag.style.transform = `translate(${Math.round(sp.x)}px, ${Math.round(sp.y)}px) translate(-50%, -100%)`;
+        // #ui is zoomed, so screen pixels have to be divided back down
+        const z = getUiScale();
+        tag.style.transform = `translate(${Math.round(sp.x / z)}px, ${Math.round(sp.y / z)}px) translate(-50%, -100%)`;
         tag.style.display = '';
         seen.add(n.id);
       }

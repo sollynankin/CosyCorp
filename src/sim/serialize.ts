@@ -30,6 +30,9 @@ export function migrate(s: GameState): GameState {
   for (const k of Object.keys(fresh.player) as (keyof GameState['player'])[]) {
     if (s.player[k] === undefined) (s.player as unknown as Record<string, unknown>)[k] = fresh.player[k];
   }
+  // A cast saved mid-reel from before sizes existed has no length; drop it rather than reel a NaN fish.
+  const f = s.player.fishing;
+  if (f && (f.lenCm === undefined || f.difficulty === undefined)) s.player.fishing = null;
   s.version = SAVE_VERSION;
   return s;
 }

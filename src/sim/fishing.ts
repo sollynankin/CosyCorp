@@ -5,16 +5,22 @@ import {
   BITE_MIN_TICKS,
   FISH_CATCH_RATE,
   FISH_DRAIN_RATE,
-  FISH_GOLD_BASE,
-  FISH_GOLD_PER_LEVEL,
+  FISH_GOLD_AT,
+  FISH_LENGTH_SKEW,
+  FISH_LENGTH_SKILL_BONUS,
+  FISH_SILVER_AT,
+  FISH_SIZE_DIFFICULTY,
+  FISH_SIZE_REEL_TIME,
   FISH_START_PROGRESS,
   FISH_ZONE_DAMP,
   FISH_ZONE_GRAVITY,
   FISH_ZONE_LIFT,
   FISH_ZONE_SIZE,
+  QUALITY_PRICE_MULT,
   XP_FISH,
 } from '../data/balance';
-import { FISH, type FishDef } from '../data/fish';
+import { FISH, fishDefOf, type FishDef } from '../data/fish';
+import { getItem } from '../data';
 import type { Quality } from '../data/types';
 import { getMapDef, isWaterTerrain, parseMap } from '../world';
 import { giveItem } from './actions';
@@ -53,6 +59,8 @@ export function startFishing(state: GameState, ctx: DayContext, x: number, y: nu
   }
   // Harder fish are rarer.
   const fish = rngWeighted(state, pool.map((f) => [f.item, 1.4 - f.difficulty] as [string, number]));
+  const def = fishDef(fish);
+  const { size, lenCm } = rollLength(state, def);
   p.fishing = {
     phase: 'wait',
     biteIn: rngInt(state, BITE_MIN_TICKS, BITE_MAX_TICKS),
@@ -68,13 +76,38 @@ export function startFishing(state: GameState, ctx: DayContext, x: number, y: nu
     holding: false,
     retarget: 0,
     fishTarget: 0.5,
+    lenCm,
+    size,
+    difficulty: fishDifficulty(def, size),
   };
   emit(ctx, { type: 'fx', fx: 'splash', map: p.map, x, y });
   return true;
 }
 
 function fishDef(item: string): FishDef {
-  return FISH.find((f) => f.item === item)!;
+  return fishDefOf(item)!;
+}
+
+/** A big fish fights harder than an average one of its kind, a small one softer. */
+export function fishDifficulty(def: FishDef, size: number): number {
+  return Math.min(0.98, Math.max(0.05, def.difficulty + (size - 0.5) * FISH_SIZE_DIFFICULTY));
+}
+
+/** Size class of a catch from its place in the species' length range: 0 normal, 1 silver, 2 gold. */
+export function sizeClass(size: number): Quality {
+  return size >= FISH_GOLD_AT ? 2 : size >= FISH_SILVER_AT ? 1 : 0;
+}
+
+/** Roll a length: small fish are common, fishing skill nudges the roll up. */
+export function rollLength(state: GameState, def: FishDef): { size: number; lenCm: number } {
+  const size = Math.min(1, Math.max(0, rngNext(state) ** FISH_LENGTH_SKEW + skillLevel(state, 'fishing') * FISH_LENGTH_SKILL_BONUS));
+  return { size, lenCm: Math.round(def.minCm + size * (def.maxCm - def.minCm)) };
+}
+
+/** Length in cm at which a species' catch becomes silver and gold (for the Fishing tab and the wiki). */
+export function sizeThresholds(def: FishDef): { silverCm: number; goldCm: number } {
+  const at = (frac: number) => Math.round(def.minCm + frac * (def.maxCm - def.minCm));
+  return { silverCm: at(FISH_SILVER_AT), goldCm: at(FISH_GOLD_AT) };
 }
 
 /** Next target for the fish marker, by behaviour. */
@@ -90,12 +123,6 @@ function nextTarget(state: GameState, f: FishDef, cur: number): number {
     case 'floater':
       return 0.45 + r * 0.55;
   }
-}
-
-function catchQuality(state: GameState): Quality {
-  const gold = FISH_GOLD_BASE + skillLevel(state, 'fishing') * FISH_GOLD_PER_LEVEL;
-  const r = rngNext(state);
-  return r < gold ? 2 : r < gold * 3 ? 1 : 0;
 }
 
 export function tickFishing(state: GameState, ctx: DayContext): void {
@@ -114,9 +141,9 @@ export function tickFishing(state: GameState, ctx: DayContext): void {
   // Fish: moves toward a target, picking a new one every so often (faster for harder fish).
   if (--fs.retarget <= 0) {
     fs.fishTarget = nextTarget(state, f, fs.fishPos);
-    fs.retarget = Math.round(14 - f.difficulty * 9);
+    fs.retarget = Math.round(14 - fs.difficulty * 9);
   }
-  const speed = 0.006 + f.difficulty * 0.02;
+  const speed = 0.006 + fs.difficulty * 0.02;
   fs.fishVel = fs.fishVel * 0.8 + Math.sign(fs.fishTarget - fs.fishPos) * speed * 0.2 * 5;
   fs.fishPos = Math.min(1, Math.max(0, fs.fishPos + Math.max(-speed, Math.min(speed, fs.fishVel))));
   // Zone: lift while held, gravity otherwise, bounce gently off the ends.
@@ -132,19 +159,41 @@ export function tickFishing(state: GameState, ctx: DayContext): void {
     fs.zoneVel = 0;
   }
   const inside = fs.fishPos >= fs.zonePos && fs.fishPos <= fs.zonePos + size;
-  fs.progress += inside ? FISH_CATCH_RATE : -FISH_DRAIN_RATE;
+  fs.progress += inside ? FISH_CATCH_RATE / (1 + fs.size * FISH_SIZE_REEL_TIME) : -FISH_DRAIN_RATE;
   if (fs.progress >= 1) {
-    const q = catchQuality(state);
+    const q = sizeClass(fs.size);
     p.fishing = null;
     giveItem(state, ctx, fs.fish, 1, q);
-    gainXp(state, ctx, 'fishing', XP_FISH * (1 + f.difficulty));
-    emit(ctx, { type: 'catch', item: fs.fish, q });
+    gainXp(state, ctx, 'fishing', XP_FISH * (1 + fs.difficulty));
+    const record = logCatch(state, fs.fish, fs.lenCm, q);
+    const bonus = Math.round((QUALITY_PRICE_MULT[q] - 1) * 100);
+    toast(ctx, `${getItem(fs.fish).name}: ${fs.lenCm} cm${q ? `, ${q === 2 ? 'gold' : 'silver'} size (+${bonus}% price)` : ''}${record ? '. A new record!' : ''}`);
+    emit(ctx, { type: 'catch', item: fs.fish, q, cm: fs.lenCm, record });
     if (p.map === 'town') derbyCatch(state, ctx);
   } else if (fs.progress <= 0) {
     p.fishing = null;
     emit(ctx, { type: 'escape' });
     toast(ctx, 'It got away.');
   }
+}
+
+/** Update the species record. Returns true when this is the longest one so far (a first catch counts). */
+function logCatch(state: GameState, item: string, cm: number, q: Quality): boolean {
+  const rec = state.fishLog[item];
+  if (!rec) {
+    const bySize: [number, number, number] = [0, 0, 0];
+    bySize[q] = 1;
+    state.fishLog[item] = { caught: 1, bestCm: cm, bestQ: q, bySize, firstDay: state.day };
+    return true;
+  }
+  rec.caught += 1;
+  rec.bySize[q] += 1;
+  if (cm > rec.bestCm) {
+    rec.bestCm = cm;
+    rec.bestQ = q;
+    return true;
+  }
+  return false;
 }
 
 export function reel(state: GameState, hold: boolean): void {

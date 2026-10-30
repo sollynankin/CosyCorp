@@ -142,7 +142,7 @@ fishing rod. Tier raises the hoe/can area (1 tile, a row of 3, a row of 5), the 
 pickaxe hit damage, and the rod's catch bar size. The scythe costs no energy.
 
 **Skills:** farming, mining and fishing each have levels 0–5 from XP (`SKILL_XP_THRESHOLDS`). Farming raises
-crop quality, mining gives extra ore chances, and fishing widens the catch bar. Nothing else.
+crop quality, mining gives extra ore chances, and fishing makes longer fish more likely (`FISH_LENGTH_SKILL_BONUS`). Nothing else.
 
 ## 4. Automation (the Works)
 
@@ -370,6 +370,13 @@ you leave.
   along a vertical bar (behaviour per fish), and you hold a button to raise your catch zone. The catch meter
   fills while the zone overlaps the fish and drains otherwise. Full means caught, empty means it got away (no
   penalty beyond the cast energy). It runs in the sim tick with a `hold` input, so it is deterministic.
+  **Sizes:** each cast rolls the fish's length (cm) inside its species range, skewed to small fish
+  (`FISH_LENGTH_SKEW`) and nudged up by fishing level. The length's place in the range sets the size class,
+  which is the fish's quality: silver from `FISH_SILVER_AT`, gold from `FISH_GOLD_AT`, selling at
+  `QUALITY_PRICE_MULT` (+25% and +50%). **Bigger fish are harder:** the fish's difficulty moves by
+  `(size - 0.5) × FISH_SIZE_DIFFICULTY`, and they take longer to reel in (the catch rate is divided by
+  `1 + size × FISH_SIZE_REEL_TIME`). There are 21 species (data/fish.ts). Fish can be eaten for energy
+  (`ITEM_ENERGY`). `GameState.fishLog` keeps per-species catches and the longest length (the book's Fishing tab).
 - **Animals:** a Coop (chickens) and a Barn (cows) are built from the Joinery on fixed farm plots. Each animal
   needs feeding (hay in the building's feeder, refilled from your inventory; on sunny days outside winter they
   graze instead) and likes being petted. A fed animal produces overnight (eggs daily, milk daily). Friendship

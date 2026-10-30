@@ -24,6 +24,7 @@ export class Hud {
   onOpenBackpack: () => void = () => {};
   onOpenMap: () => void = () => {};
   onOpenJournal: () => void = () => {};
+  onOpenFishing: () => void = () => {};
 
   constructor(root: HTMLElement, private readonly game: Game) {
     root.append(this.top, this.nameTag, this.bar, this.energy, this.toasts);
@@ -66,6 +67,7 @@ export class Hud {
         h('button.journal-btn', { title: 'Journal: quests and what to do next (J)', onclick: () => this.onOpenJournal() }, '📖 Journal'),
         h('button', { title: 'Backpack (I)', onclick: () => this.onOpenBackpack() }, '🎒'),
         h('button', { title: 'Map (M)', onclick: () => this.onOpenMap() }, '🗺'),
+        h('button', { title: 'Fishing log (K)', onclick: () => this.onOpenFishing() }, '🎣'),
       ),
     );
     this.showName(s);

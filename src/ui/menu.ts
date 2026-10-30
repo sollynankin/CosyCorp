@@ -7,6 +7,7 @@ import { PAD_CONTROLS } from '../game/input';
 import type { AudioEngine } from './audio';
 import { h } from './dom';
 import type { Modals } from './modal';
+import { applyUiScale, UI_SCALES } from './scale';
 
 export const CONTROLS: [string, string][] = [
   ['WASD / arrows', 'walk (relative to the camera)'],
@@ -16,8 +17,9 @@ export const CONTROLS: [string, string][] = [
   ['1–0, wheel', 'pick a hotbar slot (the item name shows above the bar)'],
   ['Ctrl+wheel', 'zoom'],
   ['[ and ]', 'rotate the camera'],
-  ['I or Tab', 'backpack'],
+  ['I or Tab', 'backpack (the backpack, journal, map and fishing log are tabs of one book)'],
   ['M', 'map'],
+  ['K', 'fishing log (every fish you have caught and its longest length)'],
   ['C', 'crafting'],
   ['B', 'build mode: click to place, drag to paint belts, R rotate, right click pick up'],
   ['F', 'Flow overlay'],
@@ -63,6 +65,14 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, audio: 
             }, label),
           ),
         ),
+        h('div.row', 'UI size: ', UI_SCALES.map((o) =>
+          h(`button${prefs.uiScale === o.value ? '.primary' : ''}`, {
+            onclick: () => {
+              savePrefs({ ...loadPrefs(), uiScale: o.value });
+              applyUiScale(document.getElementById('ui')!, o.value);
+              modals.refresh();
+            },
+          }, o.label))),
         volumeRow(audio),
         h('h3', 'Controls'),
         h('table.controls', CONTROLS.map(([k, v]) => h('tr', h('td.b', k), h('td', v)))),

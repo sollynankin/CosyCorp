@@ -16,7 +16,7 @@ describe('sound effects', () => {
     expect(sfxFor({ type: 'sound', name: 'bite' })).toBe('bite');
     expect(sfxFor({ type: 'sound', name: 'quest' })).toBe('quest');
     expect(sfxFor({ type: 'sound', name: 'ship' })).toBe('ship');
-    expect(sfxFor({ type: 'catch', item: 'perch', q: 0 })).toBe('catch');
+    expect(sfxFor({ type: 'catch', item: 'perch', q: 0, cm: 20, record: false })).toBe('catch');
     expect(sfxFor({ type: 'escape' })).toBe('escape');
   });
 

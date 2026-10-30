@@ -88,6 +88,8 @@ export const ITEM_VALUE: Record<string, number> = {
   wood: 2, stone: 2, fiber: 1, hay: 10, coal: 15, copper_ore: 10, iron_ore: 20, quartz: 30, amethyst: 120,
   // fish
   perch: 40, brook_trout: 65, carp: 30, pike: 100, catfish: 120, bream: 45, eel: 85, glowfin: 400,
+  minnow: 8, sunfish: 25, crayfish: 35, smelt: 20, rainbow_trout: 75, largemouth_bass: 90, salmon: 140, koi: 200, walleye: 110,
+  emberscale: 180, frostfin: 160, moonfin: 220, sturgeon: 300,
   // products
   strawberry_jam: 230, bramble_jam: 110, pear_butter: 330, pumpkin_butter: 680, melon_jam: 520,
   pickled_carrots: 160, pickled_beets: 270, pepper_relish: 150, tomato_passata: 180, kale_kraut: 320,
@@ -104,6 +106,9 @@ export const ITEM_ENERGY: Record<string, number> = {
   pumpkin: 0, beetroot: 15, frostkale: 20, honeypear: 30,
   wild_leek: 10, morel: 15, blackberry: 8, hazelnut: 12, chanterelle: 15, snowberry: 10, winter_root: 15,
   egg: 15, milk: 25,
+  // fish (raw, so modest; a bigger fish is a bigger meal)
+  minnow: 4, sunfish: 8, crayfish: 8, smelt: 6, perch: 12, carp: 14, bream: 12, brook_trout: 16, rainbow_trout: 18, largemouth_bass: 20,
+  koi: 20, salmon: 30, pike: 28, walleye: 24, catfish: 30, emberscale: 22, frostfin: 20, eel: 24, moonfin: 28, sturgeon: 50, glowfin: 40,
   radish_salad: 40, tomato_soup: 50, corn_chowder: 70, pumpkin_pie: 90, fish_stew: 70, pancakes: 60,
   berry_tart: 70, mushroom_toast: 60,
 };
@@ -288,12 +293,22 @@ export const FISH_ZONE_SIZE = [0.24, 0.3, 0.36];
 export const FISH_ZONE_LIFT = 0.012;
 export const FISH_ZONE_GRAVITY = 0.008;
 export const FISH_ZONE_DAMP = 0.86;
-export const FISH_CATCH_RATE = 0.022;
-export const FISH_DRAIN_RATE = 0.014;
+export const FISH_CATCH_RATE = 0.014;
+/** a bigger fish takes longer to reel in: catch rate is divided by 1 + size × this */
+export const FISH_SIZE_REEL_TIME = 0.8;
+export const FISH_DRAIN_RATE = 0.011;
 export const FISH_START_PROGRESS = 0.3;
-/** quality chances from fishing skill: gold = base + level × per; silver = 2 × gold */
-export const FISH_GOLD_BASE = 0.03;
-export const FISH_GOLD_PER_LEVEL = 0.04;
+/**
+ * Fish sizes. A catch rolls a length fraction f in 0..1 of its species' range: roll^FISH_LENGTH_SKEW (so small
+ * fish are common) plus FISH_LENGTH_SKILL_BONUS per fishing level. f decides the size class, which is the quality
+ * (silver and gold sell at QUALITY_PRICE_MULT), and bigger fish are harder: difficulty shifts by
+ * (f - 0.5) × FISH_SIZE_DIFFICULTY.
+ */
+export const FISH_LENGTH_SKEW = 1.8;
+export const FISH_LENGTH_SKILL_BONUS = 0.03;
+export const FISH_SILVER_AT = 0.6;
+export const FISH_GOLD_AT = 0.85;
+export const FISH_SIZE_DIFFICULTY = 0.45;
 
 // ---- Animals (DESIGN.md §12) -----------------------------------------------------------------------
 export const COOP_CAPACITY = 4;

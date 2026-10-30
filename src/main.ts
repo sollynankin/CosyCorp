@@ -10,11 +10,13 @@ import { AudioEngine } from './ui/audio';
 import { PadNav } from './ui/padNav';
 import { $ } from './ui/dom';
 import { showTitle } from './ui/menu';
+import { applyUiScale } from './ui/scale';
 
 const canvas = $('#view') as HTMLCanvasElement;
 const uiRoot = $('#ui');
 
 const prefs = loadPrefs();
+applyUiScale(uiRoot, prefs.uiScale);
 const saved = loadLocal();
 const game = new Game(saved ?? newGame((Date.now() % 1000000) + 1));
 const renderer = new Renderer(canvas, prefs.quality);

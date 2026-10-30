@@ -5,7 +5,7 @@ import {
   ANIMAL_GOLD_AT, ANIMAL_MATURE_DAYS, ANIMAL_SILVER_AT, AUTO_SELL_MULT, BARN_CAPACITY, BIRTHDAY_GIFT_MULT, BOARD_MIN_REWARD, BOARD_POINTS,
   BOARD_REWARD_MULT, BOARD_SIZE, BUILD_BARN_COST, BUILD_COOP_COST, BUNNIES_PER_FLOOR, BUNNY_ENERGY, BUNNY_SIGHT, CAN_CAPACITY, CHICKEN_PRICE,
   COOP_CAPACITY, COW_PRICE, CROP_BALANCE, DATING_CAP_HEARTS, DAY_MINUTES, DAYS_PER_SEASON, ENGAGEMENT_DAYS, FERTILIZER_GOLD_BONUS,
-  FISH_GOLD_BASE, FISH_GOLD_PER_LEVEL, FISH_ZONE_SIZE, FORAGE_PER_DAY, GIFT_POINTS, GIFTS_PER_WEEK, HARDY_WINTER_GROWTH, HOTBAR_SLOTS,
+  FISH_GOLD_AT, FISH_LENGTH_SKILL_BONUS, FISH_SIZE_REEL_TIME, FISH_SILVER_AT, FISH_SIZE_DIFFICULTY, FISH_ZONE_SIZE, FORAGE_PER_DAY, GIFT_POINTS, GIFTS_PER_WEEK, HARDY_WINTER_GROWTH, HOTBAR_SLOTS,
   INVENTORY_SLOTS, ITEM_ENERGY, ITEM_VALUE, LIFT_FLOORS, MACHINE_BALANCE, MAX_ENERGY, MAX_HEARTS, MAX_SKILL_LEVEL, MINE_ORE_CHANCE,
   MINE_ORE_HP, MINE_ORE_TABLE, MINE_ROCK_HP, MINE_ROCKS_BASE, MINE_ROCKS_PER_FLOOR, MINING_BONUS_PER_LEVEL, PASS_OUT_ENERGY_FRAC, POD_COUNT,
   POD_PRIZE, POINTS_PER_HEART, QUALITY_GOLD_BASE, QUALITY_GOLD_PER_LEVEL, QUALITY_PRICE_MULT, REACH, SAPLING_PRICE, SECRET_FRIEND_POINTS,
@@ -25,6 +25,7 @@ import { SHOPS } from '../data/shops';
 import { WEEKDAYS } from '../data/seasons';
 import type { Conditions, Objective, QuestRewards, RecipeInput, SeasonId } from '../data/types';
 import { STATIC_MAPS } from '../world';
+import { sizeThresholds } from '../sim/fishing';
 
 // ---- small helpers -----------------------------------------------------------------------------------
 
@@ -261,7 +262,7 @@ Maximum level ${MAX_SKILL_LEVEL}. XP needed in total: ${skills}.
 
 - Farming raises the chance of silver and gold crops (gold chance ${Math.round(QUALITY_GOLD_BASE * 100)}% + ${Math.round(QUALITY_GOLD_PER_LEVEL * 100)}% per level, +${Math.round(FERTILIZER_GOLD_BONUS * 100)}% with fertiliser; silver is up to three times as likely).
 - Mining gives extra drops (+${Math.round(MINING_BONUS_PER_LEVEL * 100)}% per level).
-- Fishing raises the chance of gold fish (${Math.round(FISH_GOLD_BASE * 100)}% + ${Math.round(FISH_GOLD_PER_LEVEL * 100)}% per level).
+- Fishing makes longer fish more likely (+${Math.round(FISH_LENGTH_SKILL_BONUS * 100)}% of the length range per level), which means more silver and gold fish.
 
 ### Quality
 
@@ -358,25 +359,43 @@ Quartz first appears on floor 3, iron on floor 5 and amethyst on floor 8. If you
 }
 
 function fishing(): string {
-  const rows = FISH.map((f) => [
-    itemName(f.item),
-    f.where.map((w) => (w === 'river' ? 'River (farm stream)' : 'Lake')).join(', ') + (f.lakeFlag ? ' (+lake after the Heron story)' : ''),
-    seasonList(f.seasons),
-    f.from && f.to ? `${f.from}–${f.to}` : 'Any',
-    f.weather ? f.weather.join(', ') : 'Any',
-    f.behaviour,
-    `${Math.round(f.difficulty * 100)}%`,
-    `${sell(f.item)}g`,
-  ]);
+  const rows = FISH.map((f) => {
+    const t = sizeThresholds(f);
+    return [
+      itemName(f.item),
+      f.where.map((w) => (w === 'river' ? 'River (farm stream, town river)' : 'Lake')).join(', ') + (f.lakeFlag ? ' (+lake after the Heron story)' : ''),
+      seasonList(f.seasons),
+      f.from && f.to ? `${f.from}–${f.to}` : 'Any',
+      f.weather ? f.weather.join(', ') : 'Any',
+      f.behaviour,
+      `${f.minCm}–${f.maxCm} cm`,
+      `${t.silverCm} / ${t.goldCm} cm`,
+      `${Math.round(f.difficulty * 100)}%`,
+      `${sell(f.item)}g`,
+      ITEM_ENERGY[f.item] ?? '',
+    ];
+  });
   return `## Fishing
 
-Yes, there is fishing. Select the **Fishing Rod** (hotbar 6), face water and use it. Wait for the bobber to dip, then play the catch bar:
-hold the mouse button (or Space, or A on a pad) to lift the bar and keep the fish inside it. The stream on the farm is "river" water; the
-lake north of the town is "lake" water.
+Select the **Fishing Rod** (hotbar 6), face water and use it. Wait for the bobber to dip, then play the catch bar:
+hold the mouse button (or Space, or A on a pad) to lift the bar and keep the fish inside it. The stream on the farm and the
+river through town are "river" water; the lake north of the town is "lake" water. What bites depends on the season, the time of day and the weather.
 
-${table(['Fish', 'Where', 'Seasons', 'Time', 'Weather', 'Moves', 'Difficulty', 'Sells'], rows)}
+**Sizes.** Every catch has a length. Small fish are common; the length is rolled inside the species' range (shown below), and each fishing
+level nudges the roll up by ${Math.round(FISH_LENGTH_SKILL_BONUS * 100)}% of the range. The length sets the size class, which is the fish's quality:
 
-Fish are also the key ingredient in Fish Stew, and the Glowfin Derby festival rewards catching many.`;
+- **Normal:** under ${Math.round(FISH_SILVER_AT * 100)}% of the range. Sells at the normal price.
+- **Silver ★:** ${Math.round(FISH_SILVER_AT * 100)}% of the range or more. **+${Math.round((QUALITY_PRICE_MULT[1] - 1) * 100)}%** on the selling price.
+- **Gold ★★:** ${Math.round(FISH_GOLD_AT * 100)}% of the range or more. **+${Math.round((QUALITY_PRICE_MULT[2] - 1) * 100)}%** on the selling price.
+
+**Bigger fish take longer to reel in** (the catch meter fills ${Math.round((1 - 1 / (1 + FISH_SIZE_REEL_TIME)) * 100)}% slower for a record-length fish than for a tiny one) and **fight harder.** The fish's difficulty moves by ±${Math.round((FISH_SIZE_DIFFICULTY / 2) * 100)}% between the smallest and the biggest of its kind: a record-sized fish moves faster and changes direction more often. The
+**Fishing tab** of the book (backpack, journal, map and fishing log in one pull-up) records how many of each fish you have caught and your longest.
+
+**Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Raw fish are a modest meal; bigger species restore more. Cooked Fish Stew is better still.
+
+${table(['Fish', 'Where', 'Seasons', 'Time', 'Weather', 'Moves', 'Length', 'Silver / gold from', 'Base difficulty', 'Sells', 'Energy'], rows)}
+
+The Glowfin Derby festival rewards catching many.`;
 }
 
 function animals(): string {

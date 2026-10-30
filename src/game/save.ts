@@ -49,10 +49,12 @@ export interface Prefs {
   seenIntro: boolean;
   /** master volume, 0..1 */
   volume: number;
+  /** UI zoom (ui/scale.ts) */
+  uiScale: number;
 }
 
 export function loadPrefs(): Prefs {
-  const def: Prefs = { quality: 1, seenIntro: false, volume: 0.6 };
+  const def: Prefs = { quality: 1, seenIntro: false, volume: 0.6, uiScale: 1.25 };
   try {
     return { ...def, ...(JSON.parse(localStorage.getItem(PREFS) ?? '{}') as Partial<Prefs>) };
   } catch {

@@ -33,6 +33,22 @@ export interface FishingState {
   /** ticks until the fish picks a new target */
   retarget: number;
   fishTarget: number;
+  /** rolled at the cast: length in cm, its place in the species' range (0..1) and the resulting difficulty */
+  lenCm: number;
+  size: number;
+  difficulty: number;
+}
+
+/** What you have caught of one species (the Fishing tab). */
+export interface FishRecord {
+  caught: number;
+  bestCm: number;
+  /** size class of the best catch */
+  bestQ: Quality;
+  /** catches by size class: normal, silver, gold */
+  bySize: [number, number, number];
+  /** day of the first catch */
+  firstDay: number;
 }
 
 export interface PlayerState {
@@ -254,6 +270,8 @@ export interface GameState {
   player: PlayerState;
   farm: FarmState;
   maps: Record<MapId, MapState>;
+  /** per species records of what you have caught: counts and the longest fish */
+  fishLog: Record<ItemId, FishRecord>;
   /** deepest mine floor reached (lift unlocks at 5 and 10) */
   mineDeepest: number;
   /** rocks broken on the current mine floor since entering (ladder reveal) */

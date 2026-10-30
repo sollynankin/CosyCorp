@@ -115,7 +115,7 @@ Maximum level 5. XP needed in total: Level 1: 100 XP · Level 2: 300 XP · Level
 
 - Farming raises the chance of silver and gold crops (gold chance 2% + 3% per level, +10% with fertiliser; silver is up to three times as likely).
 - Mining gives extra drops (+8% per level).
-- Fishing raises the chance of gold fish (3% + 4% per level).
+- Fishing makes longer fish more likely (+3% of the length range per level), which means more silver and gold fish.
 
 ### Quality
 
@@ -207,22 +207,47 @@ Quartz first appears on floor 3, iron on floor 5 and amethyst on floor 8. If you
 
 ## Fishing
 
-Yes, there is fishing. Select the **Fishing Rod** (hotbar 6), face water and use it. Wait for the bobber to dip, then play the catch bar:
-hold the mouse button (or Space, or A on a pad) to lift the bar and keep the fish inside it. The stream on the farm is "river" water; the
-lake north of the town is "lake" water.
+Select the **Fishing Rod** (hotbar 6), face water and use it. Wait for the bobber to dip, then play the catch bar:
+hold the mouse button (or Space, or A on a pad) to lift the bar and keep the fish inside it. The stream on the farm and the
+river through town are "river" water; the lake north of the town is "lake" water. What bites depends on the season, the time of day and the weather.
 
-| Fish | Where | Seasons | Time | Weather | Moves | Difficulty | Sells |
-|---|---|---|---|---|---|---|---|
-| Perch | River (farm stream), Lake | Any season | Any | Any | calm | 20% | 40g |
-| Brook Trout | River (farm stream) | Spring, Summer, Autumn | 06:00–19:00 | Any | dart | 45% | 65g |
-| Carp | Lake | Any season | Any | Any | sinker | 30% | 30g |
-| Pike | Lake | Summer, Autumn, Winter | Any | Any | dart | 60% | 100g |
-| Catfish | River (farm stream) | Spring, Summer, Autumn | Any | rain, storm | sinker | 55% | 120g |
-| Bream | Lake | Spring, Summer | Any | Any | floater | 35% | 45g |
-| Eel | River (farm stream), Lake | Autumn, Winter | 19:00–02:00 | Any | dart | 65% | 85g |
-| Glowfin | River (farm stream) (+lake after the Heron story) | Summer | 18:00–02:00 | Any | floater | 80% | 400g |
+**Sizes.** Every catch has a length. Small fish are common; the length is rolled inside the species' range (shown below), and each fishing
+level nudges the roll up by 3% of the range. The length sets the size class, which is the fish's quality:
 
-Fish are also the key ingredient in Fish Stew, and the Glowfin Derby festival rewards catching many.
+- **Normal:** under 60% of the range. Sells at the normal price.
+- **Silver ★:** 60% of the range or more. **+25%** on the selling price.
+- **Gold ★★:** 85% of the range or more. **+50%** on the selling price.
+
+**Bigger fish take longer to reel in** (the catch meter fills 44% slower for a record-length fish than for a tiny one) and **fight harder.** The fish's difficulty moves by ±23% between the smallest and the biggest of its kind: a record-sized fish moves faster and changes direction more often. The
+**Fishing tab** of the book (backpack, journal, map and fishing log in one pull-up) records how many of each fish you have caught and your longest.
+
+**Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Raw fish are a modest meal; bigger species restore more. Cooked Fish Stew is better still.
+
+| Fish | Where | Seasons | Time | Weather | Moves | Length | Silver / gold from | Base difficulty | Sells | Energy |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Minnow | River (farm stream, town river), Lake | Any season | Any | Any | calm | 4–9 cm | 7 / 8 cm | 10% | 8g | 4 |
+| Perch | River (farm stream, town river), Lake | Any season | Any | Any | calm | 15–40 cm | 30 / 36 cm | 20% | 40g | 12 |
+| Carp | Lake | Any season | Any | Any | sinker | 30–90 cm | 66 / 81 cm | 30% | 30g | 14 |
+| Sunfish | Lake | Spring, Summer, Autumn | Any | Any | floater | 8–25 cm | 18 / 22 cm | 20% | 25g | 8 |
+| Bream | Lake | Spring, Summer | Any | Any | floater | 20–45 cm | 35 / 41 cm | 35% | 45g | 12 |
+| Crayfish | River (farm stream, town river) | Spring, Summer | Any | Any | sinker | 6–15 cm | 11 / 14 cm | 30% | 35g | 8 |
+| Smelt | River (farm stream, town river) | Winter, Spring | Any | Any | dart | 8–20 cm | 15 / 18 cm | 25% | 20g | 6 |
+| Brook Trout | River (farm stream, town river) | Spring, Summer, Autumn | 06:00–19:00 | Any | dart | 20–50 cm | 38 / 46 cm | 45% | 65g | 16 |
+| Rainbow Trout | River (farm stream, town river) | Spring, Summer | 06:00–19:00 | Any | dart | 25–70 cm | 52 / 63 cm | 50% | 75g | 18 |
+| Largemouth Bass | Lake | Summer, Autumn | Any | Any | sinker | 25–60 cm | 46 / 55 cm | 50% | 90g | 20 |
+| Salmon | River (farm stream, town river) | Autumn | Any | Any | dart | 50–100 cm | 80 / 93 cm | 60% | 140g | 30 |
+| Koi | Lake | Spring, Summer | Any | Any | calm | 40–80 cm | 64 / 74 cm | 45% | 200g | 20 |
+| Pike | Lake | Summer, Autumn, Winter | Any | Any | dart | 50–130 cm | 98 / 118 cm | 60% | 100g | 28 |
+| Walleye | Lake | Autumn, Winter | 17:00–02:00 | Any | sinker | 35–80 cm | 62 / 73 cm | 55% | 110g | 24 |
+| Catfish | River (farm stream, town river) | Spring, Summer, Autumn | Any | rain, storm | sinker | 40–120 cm | 88 / 108 cm | 55% | 120g | 30 |
+| Emberscale | River (farm stream, town river) | Any season | Any | rain, storm | dart | 15–35 cm | 27 / 32 cm | 65% | 180g | 22 |
+| Frostfin | Lake | Winter | Any | snow | floater | 20–50 cm | 38 / 46 cm | 60% | 160g | 20 |
+| Eel | River (farm stream, town river), Lake | Autumn, Winter | 19:00–02:00 | Any | dart | 40–100 cm | 76 / 91 cm | 65% | 85g | 24 |
+| Moonfin | Lake | Any season | 20:00–02:00 | Any | floater | 20–45 cm | 35 / 41 cm | 70% | 220g | 28 |
+| Sturgeon | Lake | Summer | 10:00–19:00 | Any | sinker | 100–220 cm | 172 / 202 cm | 85% | 300g | 50 |
+| Glowfin | River (farm stream, town river) (+lake after the Heron story) | Summer | 18:00–02:00 | Any | floater | 25–60 cm | 46 / 55 cm | 80% | 400g | 40 |
+
+The Glowfin Derby festival rewards catching many.
 
 ## Animals
 
@@ -290,14 +315,27 @@ The shipping bin pays the full price; a Market Chute pays 90%.
 
 | Item | Sells | Energy | Spoils overnight | Notes |
 |---|---|---|---|---|
-| Perch | 40g |  | yes |  |
-| Brook Trout | 65g |  | yes |  |
-| Carp | 30g |  | yes |  |
-| Pike | 100g |  | yes |  |
-| Catfish | 120g |  | yes |  |
-| Bream | 45g |  | yes |  |
-| Eel | 85g |  | yes |  |
-| Glowfin | 400g |  | yes |  |
+| Perch | 40g | 12 | yes |  |
+| Brook Trout | 65g | 16 | yes |  |
+| Carp | 30g | 14 | yes |  |
+| Pike | 100g | 28 | yes |  |
+| Catfish | 120g | 30 | yes |  |
+| Bream | 45g | 12 | yes |  |
+| Eel | 85g | 24 | yes |  |
+| Glowfin | 400g | 40 | yes |  |
+| Minnow | 8g | 4 | yes |  |
+| Sunfish | 25g | 8 | yes |  |
+| Crayfish | 35g | 8 | yes |  |
+| Smelt | 20g | 6 | yes |  |
+| Rainbow Trout | 75g | 18 | yes |  |
+| Largemouth Bass | 90g | 20 | yes |  |
+| Salmon | 140g | 30 | yes |  |
+| Koi | 200g | 20 | yes |  |
+| Walleye | 110g | 24 | yes |  |
+| Emberscale | 180g | 22 | yes |  |
+| Frostfin | 160g | 20 | yes |  |
+| Moonfin | 220g | 28 | yes |  |
+| Sturgeon | 300g | 50 | yes |  |
 
 ### Minerals
 

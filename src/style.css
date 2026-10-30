@@ -285,20 +285,20 @@ button.primary {
   left: 50%;
   bottom: 84px;
   transform: translateX(-50%);
-  width: min(760px, 94vw);
+  width: min(760px, calc(94vw / var(--ui-scale, 1)));
 }
 .modal {
   background: var(--paper);
   border: 3px solid var(--wood);
   border-radius: 26px;
   box-shadow: var(--shadow), inset 0 0 0 2px #fff8e8;
-  width: min(460px, 94vw);
-  max-height: 86vh;
+  width: min(460px, calc(94vw / var(--ui-scale, 1)));
+  max-height: calc(86vh / var(--ui-scale, 1));
   display: flex;
   flex-direction: column;
 }
 .modal.wide {
-  width: min(820px, 96vw);
+  width: min(820px, calc(96vw / var(--ui-scale, 1)));
 }
 .modal.docked {
   width: 100%;
@@ -376,7 +376,7 @@ button.close {
   margin-bottom: 8px;
 }
 .shop-list {
-  max-height: 56vh;
+  max-height: calc(56vh / var(--ui-scale, 1));
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -519,7 +519,7 @@ table.mtable td:first-child {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 8px 12px;
-  max-width: min(92vw, 900px);
+  max-width: min(calc(92vw / var(--ui-scale, 1)), 900px);
   pointer-events: auto;
 }
 .build-title { font-weight: 700; letter-spacing: 0.04em; color: var(--wood-dark); }
@@ -541,7 +541,7 @@ table.mtable td:first-child {
 .build-name { font-size: 13px; }
 .build-help, .build-empty { font-size: 12px; color: var(--ink-soft); }
 
-.craft-list { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.craft-list { max-height: calc(60vh / var(--ui-scale, 1)); overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
 .craft-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #fff8e8; border-radius: 26px; }
 .craft-row.dim { opacity: 0.6; }
 .craft-out { width: 40px; height: 40px; }
@@ -597,7 +597,7 @@ table.mtable td:first-child {
 .hearts .on { color: #e0486a; }
 .gain { color: var(--good); font-weight: 700; font-size: 13px; }
 .scene { display: flex; flex-direction: column; gap: 12px; }
-.scene-log { max-height: 52vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.scene-log { max-height: calc(52vh / var(--ui-scale, 1)); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 .scene-line { display: flex; gap: 10px; align-items: flex-start; opacity: 0.55; font-size: 16px; line-height: 1.45; }
 .scene-line.cur { opacity: 1; }
 .scene-line.narr { font-style: italic; color: var(--ink-soft); padding: 2px 6px; }
@@ -606,7 +606,7 @@ table.mtable td:first-child {
 .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
 .tab { background: var(--paper-2); }
 .tab.on { background: var(--accent); color: #fff; }
-.journal, .friends { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.journal, .friends { max-height: calc(60vh / var(--ui-scale, 1)); overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 .quest, .friend { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; background: #fff8e8; border-radius: 26px; }
 .quest.main { border-left: 4px solid var(--accent); }
 .quest.side { border-left: 4px solid #5a9ad0; }
@@ -628,17 +628,18 @@ table.mtable td:first-child {
 
 /* ---------- Fishing, upgrades ---------- */
 .fishing {
-  position: absolute; right: 90px; top: 50%; transform: translateY(-50%);
-  background: rgba(20, 40, 60, 0.85); color: #eef6ff; border-radius: var(--radius); padding: 12px;
-  display: flex; flex-direction: column; gap: 8px; align-items: center; width: 150px;
+  position: absolute; right: 70px; top: 50%; transform: translateY(-50%);
+  background: rgba(20, 40, 60, 0.88); color: #eef6ff; border-radius: var(--radius); padding: 16px;
+  display: flex; flex-direction: column; gap: 10px; align-items: center; width: 240px;
+  border: 3px solid #a8c8e8; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
-.fish-label { font-size: 12px; text-align: center; }
-.fish-row { display: flex; gap: 8px; }
-.fish-bar { position: relative; width: 44px; height: 260px; background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 26px; border: 2px solid #a8c8e8; overflow: hidden; }
-.fish-zone { position: absolute; left: 3px; right: 3px; background: rgba(120, 220, 120, 0.45); border: 2px solid #8ae08a; border-radius: 9px; }
+.fish-label { font-size: 15px; font-weight: 700; text-align: center; line-height: 1.25; }
+.fish-row { display: flex; gap: 14px; }
+.fish-bar { position: relative; width: 96px; height: min(460px, calc(60vh / var(--ui-scale, 1))); background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 48px; border: 3px solid #a8c8e8; overflow: hidden; }
+.fish-zone { position: absolute; left: 4px; right: 4px; background: rgba(120, 220, 120, 0.45); border: 3px solid #8ae08a; border-radius: 24px; }
 .fish-zone.hit { background: rgba(140, 255, 140, 0.7); }
-.fish-marker { position: absolute; left: 8px; width: 24px; height: 24px; }
-.fish-meter { width: 12px; height: 260px; background: #1a2a3a; border-radius: 9px; display: flex; flex-direction: column-reverse; overflow: hidden; }
+.fish-marker { position: absolute; left: 12px; width: 72px; height: 72px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4)); }
+.fish-meter { width: 24px; height: min(460px, calc(60vh / var(--ui-scale, 1))); background: #1a2a3a; border-radius: 14px; border: 2px solid #a8c8e8; display: flex; flex-direction: column-reverse; overflow: hidden; }
 .fish-meter div { background: linear-gradient(#f0e040, #5ad06a); width: 100%; }
 .upgrades { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
 .title-card { min-width: 320px; }
@@ -714,6 +715,24 @@ button:active:not(:disabled) {
 .world-node.on { background: linear-gradient(#ffd08a, #e8954a); }
 .world-node .here { color: #c8402a; font-weight: 800; }
 .map-panel { max-width: 100%; }
-.map-wrap { overflow: auto; max-height: 68vh; border-radius: 14px; border: 2px solid var(--wood); }
+.map-wrap { overflow: auto; max-height: calc(68vh / var(--ui-scale, 1)); border-radius: 14px; border: 2px solid var(--wood); }
 .map-canvas { display: block; max-width: 100%; height: auto; }
 .map-title { font-family: 'Fredoka', sans-serif; font-size: 18px; margin-bottom: 6px; }
+
+/* ---------- The book: tabs, fishing log ---------- */
+.book-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.book-tabs .tab { font-size: 16px; padding: 6px 16px; }
+.book-tabs .keyhint { margin-left: 8px; font-size: 11px; opacity: 0.6; border: 1px solid currentColor; border-radius: 6px; padding: 0 4px; }
+.book .tabs { margin-bottom: 8px; }
+.book .tabs .tab { font-size: 13px; padding: 3px 12px; }
+.fish-summary { display: flex; flex-wrap: wrap; gap: 6px 22px; padding: 8px 12px; background: #fff8e8; border-radius: 16px; margin-bottom: 6px; }
+.fish-list { display: flex; flex-direction: column; gap: 6px; max-height: calc(52vh / var(--ui-scale, 1)); overflow: auto; }
+.fish-entry { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; background: #fff8e8; border-radius: 18px; }
+.fish-entry.unknown { opacity: 0.6; }
+.fish-icon { width: 72px; height: 72px; flex: none; }
+.fish-entry.unknown .fish-icon { filter: brightness(0) opacity(0.35); }
+.len-bar { position: relative; height: 10px; margin: 5px 0; background: #e8dcc0; border-radius: 6px; overflow: hidden; }
+.len-fill { height: 100%; border-radius: 6px; background: #8ab868; }
+.len-fill.silver { background: #a8b8d0; }
+.len-fill.gold { background: #f0b83a; }
+.len-mark { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(90, 58, 34, 0.55); }

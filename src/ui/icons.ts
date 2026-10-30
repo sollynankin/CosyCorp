@@ -2,15 +2,19 @@
 // colour from ItemDef.color; tools and machines get their own little drawings.
 import { getItem } from '../data';
 import { machineIconUrl } from '../render/iconRender';
+import { drawFish } from './fishArt';
 
 const cache = new Map<string, string>();
 const S = 48;
 
 function ctx2d(): [HTMLCanvasElement, CanvasRenderingContext2D] {
   const c = document.createElement('canvas');
-  c.width = S;
-  c.height = S;
-  return [c, c.getContext('2d')!];
+  // Drawn on a 48-unit grid but rendered at twice the pixels, so the art stays crisp in a bigger UI.
+  c.width = S * 2;
+  c.height = S * 2;
+  const g = c.getContext('2d')!;
+  g.scale(2, 2);
+  return [c, g];
 }
 
 function shadeHex(hex: string, amt: number): string {
@@ -119,6 +123,7 @@ export function itemIcon(id: string): string {
       fillShape();
       break;
     case 'fish':
+      if (drawFish(g, id)) break;
       g.beginPath();
       g.ellipse(22, 25, 14, 8, 0, 0, Math.PI * 2);
       fillShape();

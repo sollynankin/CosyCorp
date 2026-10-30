@@ -34,16 +34,13 @@ export class MapPanel {
 
   constructor(private readonly game: Game, private readonly modals: Modals) {}
 
-  toggle(): void {
-    if (this.modals.isOpen('map')) {
-      this.modals.close('map');
-      return;
-    }
+  /** Start on the area you are standing in (the book calls this when it opens on the map). */
+  focusHere(): void {
     this.view = areaOf(this.game.state.player.map);
-    this.modals.show({ id: 'map', title: 'Map', wide: true, render: () => this.render() });
   }
 
-  private render(): HTMLElement {
+  /** The map tab of the book. */
+  body(): HTMLElement {
     const s = this.game.state;
     const here = areaOf(s.player.map);
     const chart = h('div.world-chart');

@@ -41,12 +41,13 @@ export class Panels {
 
   constructor(private readonly game: Game, private readonly modals: Modals) {}
 
-  inventory(): void {
+  /** Forget the slot picked for swapping (the book calls this when it opens on the backpack). */
+  resetPick(): void {
     this.picked = null;
-    this.modals.show({ id: 'inventory', title: 'Backpack', wide: true, render: () => this.renderInventory() });
   }
 
-  private renderInventory(): HTMLElement {
+  /** The backpack tab of the book. */
+  inventoryBody(): HTMLElement {
     const s = this.game.state;
     const inv = s.player.inventory;
     const grid = h('div.inv-grid');
