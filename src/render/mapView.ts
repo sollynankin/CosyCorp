@@ -8,22 +8,23 @@ import type { GameState } from '../sim/state';
 import { TREE_MATURE_DAYS } from '../data/balance';
 import { buildingAtTile, parseMap, type ParsedMap } from '../world';
 import { Batcher, tileMatrix } from './batcher';
-import { glowMat } from './materials';
+import { glowMat, saturate, vertexMat } from './materials';
 import { buildBuilding, type BuildingMesh } from './meshes/buildings';
 import { cropGeometry } from './meshes/crops';
 import * as D from './meshes/decor';
-import { box, jitter, merge } from './meshes/kit';
+import { box, jitter, merge, noise2 } from './meshes/kit';
+import * as F from './meshes/flora';
 import * as N from './meshes/nature';
 import { SEASON_PALETTE } from './palette';
+import { buildBackdrop } from './backdrop';
 import { buildTerrain, type TerrainView } from './terrain';
 import { itemShape } from './meshes/items';
 
 // Tilled soil: a low bed with three furrow ridges (one instanced geometry, tinted dry/wet).
 const soilGeo = merge([box(0.94, 0.05, 0.94, '#ffffff', { y: -0.02 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02, z: -0.3 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02 }), box(0.9, 0.04, 0.16, '#e4e4e4', { y: 0.02, z: 0.3 })]);
-const soilMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
+const soilMat = saturate(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
 const glassMat = new THREE.MeshStandardMaterial({ color: '#cfe8f0', transparent: true, opacity: 0.35, roughness: 0.1, depthWrite: false });
 
-const mineRock = new THREE.Color('#c8b8a8');
 const ORE_COLORS: Record<string, string> = { copper_ore: '#d8843a', iron_ore: '#c8c8d8', coal: '#2a2424', quartz: '#f0f8ff', amethyst: '#b06ae8', stone: '#9a9a94' };
 
 export class MapView {
@@ -37,6 +38,10 @@ export class MapView {
   private readonly glass = new Batcher(glassMat, { cast: false, receive: false });
   private readonly objects = new Batcher();
   private readonly crops = new Batcher();
+  /** meadow flowers, mushrooms, lilies and reeds: no shadows, rebuilt when objects, soil or machines change */
+  private readonly flora = new Batcher(vertexMat, { cast: false, receive: true });
+  private floraSig = '';
+  private backdrop: THREE.Mesh | null = null;
   private soil: THREE.InstancedMesh | null = null;
   readonly buildings: { def: string; mesh: BuildingMesh }[] = [];
   private objSig = -1;
@@ -52,9 +57,21 @@ export class MapView {
     this.parsed = parseMap(this.mapId);
     this.season = season;
     this.terrain = buildTerrain(this.parsed, season, quality);
-    this.group.add(this.terrain.group, this.decor.group, this.decorGlow.group, this.glass.group, this.objects.group, this.crops.group);
+    this.group.add(this.terrain.group, this.decor.group, this.decorGlow.group, this.glass.group, this.objects.group, this.crops.group, this.flora.group);
     this.buildDecor(state);
     this.buildBuildings(state);
+    this.buildBackdrop();
+  }
+
+  private buildBackdrop(): void {
+    if (this.backdrop) {
+      this.group.remove(this.backdrop);
+      this.backdrop.geometry.dispose();
+      this.backdrop = null;
+    }
+    if (this.parsed.def.indoor || this.mapId.startsWith('mine')) return;
+    this.backdrop = buildBackdrop(this.parsed, this.season);
+    this.group.add(this.backdrop);
   }
 
   private buildDecor(state: GameState): void {
@@ -80,11 +97,12 @@ export class MapView {
         switch (d) {
           case 'pine':
             this.decor.add(N.pineTrunk(), tileMatrix(cx, cy, 0, r, s));
-            this.decor.add(N.pineBody(), tileMatrix(cx, cy, 0.35 * s, r, s * 1.15), pineCol);
+            this.decor.add(N.pineBody(), tileMatrix(cx, cy, 0.35 * s, r, s * 1.15), pineCol.clone().offsetHSL((jitter(i * 2.7) - 0.5) * 0.09, 0, (jitter(i * 4.1) - 0.5) * 0.12));
             if (pal.snow) this.decor.add(N.pineSnow(), tileMatrix(cx, cy, 0.35 * s, r, s * 1.15));
             break;
           case 'bush':
-            this.decor.add(N.bush(), tileMatrix(cx, cy, 0, r, s), bushCol);
+            this.decor.add(N.bush(), tileMatrix(cx, cy, 0, r, s), bushCol.clone().offsetHSL((jitter(i * 1.9) - 0.5) * 0.06, 0, 0));
+            if (jitter(i * 6.6) < 0.6) this.decor.add(N.bushDots(pal.accent[i % pal.accent.length]), tileMatrix(cx, cy, 0, r, s));
             break;
           case 'lamp':
             this.decor.add(D.lampPost(), tileMatrix(cx, cy, 0, 0));
@@ -198,6 +216,75 @@ export class MapView {
         this.rebuildSoil(state);
       }
     }
+    const fs = `${this.season}|${this.objSig}|${this.soilSig}|${state.farm.layoutRev}`;
+    if (fs !== this.floraSig) {
+      this.floraSig = fs;
+      this.rebuildFlora(state);
+    }
+  }
+
+  /**
+   * The meadow. Flower patches come from smooth noise, so a patch is one kind in two or three colours; between
+   * patches the odd mushroom, crystal or curly fern pops up. Nothing grows on soil, machines, objects, decor
+   * or buildings. Water gets lily pads, the shoreline gets reeds.
+   */
+  private rebuildFlora(state: GameState): void {
+    const m = this.parsed;
+    const pal = SEASON_PALETTE[this.season];
+    const objs = state.maps[this.mapId].objects;
+    const onFarm = this.mapId === 'farm';
+    const dm = [0.5, 1, 1.25][this.quality] ?? 1;
+    const wet = (x: number, y: number) => {
+      if (x < 0 || y < 0 || x >= m.w || y >= m.h) return false;
+      const t = m.terrain[y * m.w + x];
+      return t === 'water' || t === 'lake';
+    };
+    this.flora.begin();
+    for (let y = 0; y < m.h; y++) {
+      for (let x = 0; x < m.w; x++) {
+        const i = y * m.w + x;
+        if (m.decor[i] || objs[i]) continue;
+        const t = m.terrain[i];
+        if (t === 'water' || t === 'lake') {
+          if (jitter(i * 9.1) < 0.09 * dm && !(onFarm && state.farm.entityAt[i] >= 0)) {
+            const bloomColor = pal.snow || jitter(i * 3.9) < 0.4 ? null : pal.blooms[i % pal.blooms.length];
+            this.flora.add(F.lily(bloomColor), tileMatrix(x + 0.5 + (jitter(i * 1.1) - 0.5) * 0.3, y + 0.5, -0.09, jitter(i) * 6.28, 0.9 + jitter(i * 2.2) * 0.4));
+          }
+          continue;
+        }
+        if (t !== 'grass' || m.buildingAt[i] >= 0) continue;
+        if (onFarm && (state.farm.soil[i] || state.farm.entityAt[i] >= 0)) continue;
+        const rot = jitter(i * 1.9) * Math.PI * 2;
+        if (wet(x - 1, y) || wet(x + 1, y) || wet(x, y - 1) || wet(x, y + 1)) {
+          if (jitter(i * 4.7) < 0.3 * dm) this.flora.add(F.reeds(), tileMatrix(x + 0.5, y + 0.5, 0, rot, 1 + jitter(i) * 0.3));
+          continue;
+        }
+        const r = jitter(i * 1.37);
+        const inPatch = !pal.snow && noise2(x * 0.22 + 7, y * 0.22 + 3) > 0.58;
+        let kind: F.BloomKind;
+        let color: string;
+        let count = 1;
+        if (inPatch) {
+          if (r > 0.5 * dm) continue;
+          kind = F.PATCH_KINDS[Math.floor(noise2(x * 0.1 + 90, y * 0.1 + 11) * F.PATCH_KINDS.length * 0.999)];
+          const ci = Math.floor(noise2(x * 0.13 + 40, y * 0.13 + 70) * pal.blooms.length * 0.999) + (jitter(i * 2.1) < 0.4 ? 1 : 0);
+          color = pal.blooms[ci % pal.blooms.length];
+          count = jitter(i * 8.1) < 0.5 ? 2 : 1;
+        } else {
+          if (r > (pal.snow ? 0.02 : 0.055) * dm) continue;
+          const pool: F.BloomKind[] = pal.snow ? ['crystal', 'curl'] : F.ODD_KINDS;
+          kind = pool[Math.floor(jitter(i * 5.3) * pool.length * 0.999)];
+          const colors = kind === 'mushroom' ? F.MUSHROOM_COLORS : kind === 'crystal' ? F.CRYSTAL_COLORS : kind === 'curl' ? F.CURL_COLORS : pal.blooms;
+          color = colors[Math.floor(jitter(i * 7.9) * colors.length * 0.999)];
+        }
+        for (let k = 0; k < count; k++) {
+          const ox = (jitter(i * 3.3 + k * 17) - 0.5) * 0.7;
+          const oz = (jitter(i * 4.3 + k * 11) - 0.5) * 0.7;
+          this.flora.add(F.bloom(kind, color), tileMatrix(x + 0.5 + ox, y + 0.5 + oz, 0, rot + k * 2, 1.1 + jitter(i * 2.6 + k) * 0.35));
+        }
+      }
+    }
+    this.flora.end();
   }
 
   private rebuildSeason(state: GameState, season: SeasonId): void {
@@ -206,6 +293,7 @@ export class MapView {
     this.terrain.dispose();
     this.terrain = buildTerrain(this.parsed, season, this.quality);
     this.group.add(this.terrain.group);
+    this.buildBackdrop();
     this.buildDecor(state);
     for (const b of this.buildings) for (const s of b.mesh.snow) s.visible = season === 'winter';
     this.objSig = -1;
@@ -233,7 +321,7 @@ export class MapView {
     const pal = SEASON_PALETTE[this.season];
     const canopy = pal.canopy.map((c) => new THREE.Color(c));
     const bushCol = new THREE.Color(pal.bush);
-    const grey = new THREE.Color('#b8b8b0');
+    const grey = new THREE.Color('#dce8f4');
     this.objects.begin();
     for (let i = 0; i < objs.length; i++) {
       const o = objs[i];
@@ -248,17 +336,29 @@ export class MapView {
             break;
           }
           const s = 0.9 + jitter(i * 1.7) * 0.3;
-          this.objects.add(N.treeTrunk(o.variant), tileMatrix(x, y, 0, r, s));
-          this.objects.add(N.treeCanopy(o.variant), tileMatrix(x, y, 0, r, s), canopy[(i + o.variant) % canopy.length]);
+          const tint = canopy[(i + o.variant) % canopy.length];
+          // Render-only silhouettes: most are round and puffy, some are umbrella or soft-serve spires.
+          const style = (i * 7 + o.variant) % 10;
+          if (style >= 8) {
+            this.objects.add(N.spireTrunk(), tileMatrix(x, y, 0, r, s));
+            this.objects.add(N.spireCanopy(), tileMatrix(x, y, 0, r, s), tint);
+          } else if (style >= 6) {
+            this.objects.add(N.umbrellaTrunk(), tileMatrix(x, y, 0, r, s));
+            this.objects.add(N.umbrellaCanopy(), tileMatrix(x, y, 0, r, s), tint);
+          } else {
+            this.objects.add(N.treeTrunk(o.variant), tileMatrix(x, y, 0, r, s));
+            this.objects.add(N.treeCanopy(o.variant), tileMatrix(x, y, 0, r, s), tint);
+            if (jitter(i * 2.9) < 0.65) this.objects.add(N.treeDots(o.variant, pal.accent[(i * 3) % pal.accent.length]), tileMatrix(x, y, 0, r, s));
+          }
           break;
         }
         case 'boulder':
-          this.objects.add(N.boulder(), tileMatrix(x, y, 0, r));
+          this.objects.add(N.boulder(i), tileMatrix(x, y, 0, r));
           break;
         case 'stone':
           // Mine rocks are the main thing you break down there, so they read as proper rocks.
-          if (this.mapId.startsWith('mine')) this.objects.add(N.boulder(), tileMatrix(x, y, 0, r, 0.62), mineRock);
-          else this.objects.add(N.smallStone(), tileMatrix(x, y, 0, r));
+          if (this.mapId.startsWith('mine')) this.objects.add(N.boulder(i + 1), tileMatrix(x, y, 0, r, 0.62));
+          else this.objects.add(N.smallStone(i), tileMatrix(x, y, 0, r));
           break;
         case 'weeds':
           this.objects.add(N.weeds(), tileMatrix(x, y, 0, r), bushCol.clone().offsetHSL(0, 0, 0.05));
@@ -268,6 +368,7 @@ export class MapView {
           break;
         case 'forage':
           this.objects.add(N.bush(), tileMatrix(x, y, 0, r, 0.55), bushCol);
+          this.objects.add(N.bushDots(pal.accent[i % pal.accent.length]), tileMatrix(x, y, 0, r, 0.55));
           this.objects.add(itemShape(getItem(o.item).icon), tileMatrix(x, y, 0.32, r, 1.1), new THREE.Color(getItem(o.item).color));
           break;
         case 'ore':
@@ -320,9 +421,9 @@ export class MapView {
     this.soil.receiveShadow = true;
     this.soil.count = tiles.length;
     const mtx = new THREE.Matrix4();
-    const dry = new THREE.Color('#9a6a44');
-    const wet = new THREE.Color('#4e3420');
-    const fert = new THREE.Color('#6a5040');
+    const dry = new THREE.Color('#c8844e');
+    const wet = new THREE.Color('#7a4a38');
+    const fert = new THREE.Color('#a8683e');
     const c = new THREE.Color();
     tiles.forEach((i, k) => {
       const s = soil[i]!;
@@ -358,6 +459,8 @@ export class MapView {
     this.glass.dispose();
     this.objects.dispose();
     this.crops.dispose();
+    this.flora.dispose();
+    if (this.backdrop) this.backdrop.geometry.dispose();
     this.soil?.dispose();
   }
 }

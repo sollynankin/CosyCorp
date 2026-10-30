@@ -1,6 +1,6 @@
-# Hearthvale: Design
+# Cosycorp: Design
 
-Hearthvale is a cozy 3D farming-life sim. Its automation layer is part of the story. This file holds the
+Cosycorp is a cozy 3D farming-life sim. Its automation layer is part of the story. This file holds the
 authoritative rules and the reasoning behind each major system. If the code and this file disagree, one of
 them is a bug: fix whichever is wrong and keep them in sync. Numbers live in `src/data/balance.ts`. This
 file names the constant instead of repeating its value unless the value matters for understanding.
@@ -83,7 +83,7 @@ harvester takes 4 minutes per crop".
   steps up to 02:00 run instantly (no player input), so going to bed early never loses production.
   Passing out (02:00, or 0 energy) wakes you at home with `PASS_OUT_ENERGY_FRAC` of your max energy. That is
   the only penalty.
-- Overnight (`endDay`), in this order: shipping bin sale, spoilage, report, crop growth (§3), animals,
+- Overnight (`endDay`), in this order: sale of anything left in the bin (old saves), spoilage, report, crop growth (§3), animals,
   calendar advance (season change, withering), story triggers, weather for tomorrow, new day setup.
 - **Calendar:** 4 seasons × `DAYS_PER_SEASON` (14) days. `day` is a 0-based absolute counter. Year =
   `floor(day / 56) + 1`. Weekday = `day % 7` (Mon..Sun).
@@ -257,7 +257,7 @@ it takes at most one item per step.
 
 ## 8. Economy
 
-- **Shipping bin** (farm): items put in it sell overnight at `price(item, quality)`. The **Market Chute**
+- **Shipping bin** (farm): items put in it sell **instantly** at `price(item, quality)` and the coins go straight to the player (anything left in the bin by an older save still sells overnight). The **Market Chute**
   sells instantly at `AUTO_SELL_MULT` of that price.
 - **Shops** (town; each open at set hours on set weekdays): Almanac & Sundries (Wren: seasonal seeds, hay,
   fertiliser, saplings), Smithy (Teo: tool upgrades, buys and sells ore), Joinery (Bram: coop, barn,

@@ -45,10 +45,10 @@ export const FARM: MapDef = {
     'PPPPPPPPPPPPPPPPPPPPP::PPPPPPPPPPPPPPPPPPPPP',
   ],
   buildings: [
-    { id: 'farmhouse', name: 'Farmhouse', style: 'farmhouse', x: 7, y: 2, w: 6, h: 5, door: { x: 9, y: 6 }, doorDir: 2, panel: 'home', wall: '#e8d6b0', roof: '#a8483a' },
-    { id: 'shipbin', name: 'Shipping Bin', style: 'shipbin', x: 14, y: 6, w: 2, h: 1, door: { x: 14, y: 6 }, doorDir: 2, panel: 'ship', wall: '#8a5a32', roof: '#6a4426' },
-    { id: 'coop', name: 'Coop', style: 'coop', x: 28, y: 3, w: 5, h: 4, door: { x: 30, y: 6 }, doorDir: 2, panel: 'coop', requiresFlag: 'built_coop', wall: '#d8b47a', roof: '#7a4a8a' },
-    { id: 'barn', name: 'Barn', style: 'barn', x: 35, y: 2, w: 7, h: 5, door: { x: 38, y: 6 }, doorDir: 2, panel: 'barn', requiresFlag: 'built_barn', wall: '#b8463a', roof: '#5a4a42' },
+    { id: 'farmhouse', name: 'Farmhouse', style: 'farmhouse', x: 7, y: 2, w: 6, h: 5, door: { x: 9, y: 6 }, doorDir: 2, panel: 'home', wall: '#ffe6b8', roof: '#ee5a4a' },
+    { id: 'shipbin', name: 'Shipping Bin', style: 'shipbin', x: 14, y: 6, w: 2, h: 1, door: { x: 14, y: 6 }, doorDir: 2, panel: 'ship', wall: '#e09a54', roof: '#c06a34' },
+    { id: 'coop', name: 'Coop', style: 'coop', x: 28, y: 3, w: 5, h: 4, door: { x: 30, y: 6 }, doorDir: 2, panel: 'coop', requiresFlag: 'built_coop', wall: '#ffd890', roof: '#a85ae0' },
+    { id: 'barn', name: 'Barn', style: 'barn', x: 35, y: 2, w: 7, h: 5, door: { x: 38, y: 6 }, doorDir: 2, panel: 'barn', requiresFlag: 'built_barn', wall: '#ee5a4a', roof: '#7a5ab0' },
   ],
   warps: [
     { x: 43, y: 15, to: 'town', tx: 1, ty: 15, dir: 1 },

@@ -79,33 +79,37 @@ export function buildBuilding(b: BuildingDef): BuildingMesh {
     if (spec.stilts) for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(cyl(0.07, 0.07, base, '#6a4a2e', { x: (sx * W) / 2.4, z: (sz * D) / 2.4 }, 5));
     if (spec.stilts) parts.push(box(W + 0.3, 0.08, D + 0.6, '#9a6c42', { y: base - 0.08, z: 0.2 }));
     // stone plinth and walls
-    parts.push(box(W + 0.1, 0.18, D + 0.1, '#8a8278', { y: base }));
+    parts.push(box(W + 0.1, 0.18, D + 0.1, '#e0c8b0', { y: base }));
     parts.push(box(W, spec.wallH, D, wall, { y: base + 0.18 }));
     // corner beams
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(box(0.12, spec.wallH, 0.12, shade(wall, -0.25), { x: (sx * W) / 2, y: base + 0.18, z: (sz * D) / 2 }));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) parts.push(box(0.12, spec.wallH, 0.12, '#c8844a', { x: (sx * W) / 2, y: base + 0.18, z: (sz * D) / 2 }));
     const top = base + 0.18 + spec.wallH;
     // roof (ridge along the wider side)
     if (spec.roofH > 0) {
       parts.push(gable(W + 0.4, D + 0.4, spec.roofH, roof, { y: top }));
-      parts.push(box(W + 0.5, 0.06, 0.12, shade(roof, -0.15), { y: top + spec.roofH - 0.03 }));
+      parts.push(box(W + 0.5, 0.08, 0.14, shade(roof, 0.14), { y: top + spec.roofH - 0.03 }));
       snowParts.push(gable(W + 0.44, D + 0.44, spec.roofH * 0.35, '#f4f8fb', { y: top + spec.roofH * 0.66 }));
     }
     // door
-    parts.push(box(0.62, 1.05, 0.08, '#5a3a24', { x: doorOff, y: base + 0.18, z: D / 2 + 0.01 }));
-    parts.push(box(0.74, 0.08, 0.1, shade(wall, -0.3), { x: doorOff, y: base + 1.23, z: D / 2 + 0.02 }));
+    parts.push(box(0.62, 1.05, 0.08, shade(roof, 0.04), { x: doorOff, y: base + 0.18, z: D / 2 + 0.01 }));
+    parts.push(box(0.74, 0.08, 0.1, '#fff8ec', { x: doorOff, y: base + 1.23, z: D / 2 + 0.02 }));
     parts.push(ball(0.04, '#e8c84a', { x: doorOff + 0.2, y: base + 0.75, z: D / 2 + 0.06 }, 0));
     // windows on the front (skip the door position)
     const nWin = Math.max(1, Math.floor(W / 1.6));
     for (let k = 0; k < nWin; k++) {
       const wx = -W / 2 + ((k + 0.5) * W) / nWin;
       if (Math.abs(wx - doorOff) < 0.7) continue;
-      parts.push(box(0.6, 0.6, 0.06, shade(wall, -0.3), { x: wx, y: base + 0.75, z: D / 2 + 0.01 }));
-      glow.push(box(0.48, 0.48, 0.06, '#ffe6a8', { x: wx, y: base + 0.81, z: D / 2 + 0.03 }));
+      parts.push(box(0.6, 0.6, 0.06, '#fff8ec', { x: wx, y: base + 0.75, z: D / 2 + 0.01 }));
+      // shutters in the roof colour and a flower box under the sill
+      parts.push(box(0.14, 0.6, 0.05, shade(roof, 0.05), { x: wx - 0.4, y: base + 0.75, z: D / 2 + 0.02 }), box(0.14, 0.6, 0.05, shade(roof, 0.05), { x: wx + 0.4, y: base + 0.75, z: D / 2 + 0.02 }));
+      parts.push(box(0.62, 0.1, 0.16, '#c8844a', { x: wx, y: base + 0.6, z: D / 2 + 0.1 }));
+      for (let f = 0; f < 4; f++) parts.push(ball(0.06, ['#ff6a9e', '#ffd23a', '#ffffff', '#8a7cff'][(f + k) % 4], { x: wx - 0.22 + f * 0.147, y: base + 0.72, z: D / 2 + 0.1 }, 0));
+      glow.push(box(0.48, 0.48, 0.06, '#bfeaff', { x: wx, y: base + 0.81, z: D / 2 + 0.03 }));
     }
     // side windows
-    for (const sx of [-1, 1]) glow.push(box(0.06, 0.45, 0.45, '#ffe6a8', { x: (sx * W) / 2 + sx * 0.02, y: base + 0.85 }));
+    for (const sx of [-1, 1]) glow.push(box(0.06, 0.45, 0.45, '#bfeaff', { x: (sx * W) / 2 + sx * 0.02, y: base + 0.85 }));
     if (spec.chimney) {
-      parts.push(box(0.35, spec.roofH + 0.5, 0.35, '#8a6a5a', { x: W / 3, y: top, z: -D / 6 }));
+      parts.push(box(0.35, spec.roofH + 0.5, 0.35, '#e8806a', { x: W / 3, y: top, z: -D / 6 }));
       chimney = new THREE.Vector3(W / 3, top + spec.roofH + 0.5, -D / 6);
     }
     if (spec.sign) {

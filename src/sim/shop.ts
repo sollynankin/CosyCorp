@@ -4,8 +4,8 @@ import { getShop, type ShopDef, type ShopEntry } from '../data/shops';
 import { minuteOfClock, seasonOf, weekdayOf } from './calendar';
 import type { CommandResult } from './commands';
 import { toast, type DayContext } from './context';
-import { isSellable } from './economy';
-import { addItem, canFit, countItem, pushStack, removeItem, takeFromSlot } from './inventory';
+import { isSellable, sellNow } from './economy';
+import { addItem, canFit, countItem, removeItem, takeFromSlot } from './inventory';
 import { addAnimal } from './animals';
 import { TOOL_UPGRADE_COST } from '../data/balance';
 import type { ToolId } from '../data/types';
@@ -55,7 +55,7 @@ export function buy(state: GameState, ctx: DayContext, shopId: string, item: str
   return OK;
 }
 
-/** Put items from a backpack slot into the shipping bin (sold overnight). */
+/** Put items from a backpack slot into the shipping bin: they sell at once and the coins are yours. */
 export function ship(state: GameState, ctx: DayContext, slot: number, n: number): CommandResult {
   if (state.player.map !== 'farm') return fail('The shipping bin is on the farm.');
   const st = state.player.inventory[slot];
@@ -63,7 +63,8 @@ export function ship(state: GameState, ctx: DayContext, slot: number, n: number)
   if (!isSellable(st.id)) return fail(`${getItem(st.id).name} can't be shipped.`);
   const taken = takeFromSlot(state.player.inventory, slot, n);
   if (!taken) return fail('Nothing there.');
-  pushStack(state.farm.shipping, taken);
+  const coins = sellNow(state, taken);
+  toast(ctx, `Sold ${taken.n} ${getItem(taken.id).name} for ${coins}g.`);
   ctx.events.push({ type: 'sound', name: 'ship' });
   return OK;
 }

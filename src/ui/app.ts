@@ -14,6 +14,7 @@ import { renderReport } from './report';
 import { FlowLegend, WorksPanels } from './works';
 import { FarmPanels } from './farmPanels';
 import { FishingOverlay } from './fishing';
+import { MapPanel } from './mapPanel';
 import type { AudioEngine } from './audio';
 
 const ADVANCE_KEYS = new Set([' ', 'Enter', 'e', 'E']);
@@ -29,6 +30,7 @@ export class App {
   readonly tags: NameTags;
   readonly farm: FarmPanels;
   readonly fishing: FishingOverlay;
+  readonly map: MapPanel;
   /** building id of the last door opened (homes and counters need the door tile) */
   private lastBuilding: string | undefined;
 
@@ -47,6 +49,11 @@ export class App {
     this.tags = new NameTags(root, game, renderer);
     this.farm = new FarmPanels(game, this.modals);
     this.fishing = new FishingOverlay(root, game);
+    this.map = new MapPanel(game, this.modals);
+    // The top-right buttons do the same as the I, M and J keys, and close the panel if it is already open.
+    this.hud.onOpenBackpack = () => this.toggleBackpack();
+    this.hud.onOpenMap = () => this.openMap();
+    this.hud.onOpenJournal = () => this.toggleJournal();
     this.panels.extra = (shopId) => (shopId === 'smithy' ? this.farm.upgrades() : null);
     this.panels.kitchen = () => {
       this.modals.close('home');
@@ -90,13 +97,15 @@ export class App {
     }
     const k = key.toLowerCase();
     if (k === 'i' || key === 'Tab') {
-      if (top === 'inventory') this.modals.close('inventory');
-      else if (!this.modals.open) this.panels.inventory();
+      this.toggleBackpack();
       return true;
     }
     if (k === 'j') {
-      if (top === 'journal') this.modals.close('journal');
-      else if (!this.modals.open) this.people.journal();
+      this.toggleJournal();
+      return true;
+    }
+    if (k === 'm') {
+      this.openMap();
       return true;
     }
     if (this.modals.open || e.repeat) return false;
@@ -118,6 +127,20 @@ export class App {
       return true;
     }
     return false;
+  }
+
+  private toggleBackpack(): void {
+    if (this.modals.top === 'inventory') this.modals.close('inventory');
+    else if (!this.modals.open) this.panels.inventory();
+  }
+
+  private toggleJournal(): void {
+    if (this.modals.top === 'journal') this.modals.close('journal');
+    else if (!this.modals.open) this.people.journal();
+  }
+
+  private openMap(): void {
+    if (this.modals.top === 'map' || !this.modals.open) this.map.toggle();
   }
 
   onEvent(e: SimEvent): void {

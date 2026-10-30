@@ -36,7 +36,7 @@ export const LAKE: MapDef = {
     'PPPPPPPPPPPPPPPPPPPPPPPP::PPPPPPPPPPPPPP',
   ],
   buildings: [
-    { id: 'ilo_hut', name: "Ilo's Hut", style: 'hut', x: 30, y: 18, w: 5, h: 4, door: { x: 32, y: 21 }, doorDir: 2, panel: 'home:ilo', wall: '#a8b8c0', roof: '#c8a03a' },
+    { id: 'ilo_hut', name: "Ilo's Hut", style: 'hut', x: 30, y: 18, w: 5, h: 4, door: { x: 32, y: 21 }, doorDir: 2, panel: 'home:ilo', wall: '#a8ecf8', roof: '#ffb830' },
   ],
   warps: [
     { x: 24, y: 27, to: 'town', tx: 30, ty: 1, dir: 2 },

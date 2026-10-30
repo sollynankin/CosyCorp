@@ -17,9 +17,16 @@ export class Hud {
   private readonly energy = h('div.energy');
   private readonly toasts = h('div.toasts');
   private lastSig = '';
+  /** the item name that pops up above the hotbar when the selection changes */
+  private readonly nameTag = h('div.tool-name');
+  private lastSelected = -1;
+  private nameTimer = 0;
+  onOpenBackpack: () => void = () => {};
+  onOpenMap: () => void = () => {};
+  onOpenJournal: () => void = () => {};
 
   constructor(root: HTMLElement, private readonly game: Game) {
-    root.append(this.top, this.bar, this.energy, this.toasts);
+    root.append(this.top, this.nameTag, this.bar, this.energy, this.toasts);
   }
 
   toast(text: string): void {
@@ -28,6 +35,22 @@ export class Hud {
     while (this.toasts.children.length > 4) this.toasts.firstChild!.remove();
     setTimeout(() => t.classList.add('fade'), 2600);
     setTimeout(() => t.remove(), 3200);
+  }
+
+  /** Flash the selected item's name above the hotbar whenever the selection changes. */
+  private showName(s: GameState): void {
+    const sel = s.player.selected;
+    if (this.lastSelected !== sel) {
+      const first = this.lastSelected === -1;
+      this.lastSelected = sel;
+      const st = s.player.inventory[sel];
+      if (!first && st) {
+        this.nameTag.textContent = getItem(st.id).name;
+        this.nameTag.classList.add('show');
+        window.clearTimeout(this.nameTimer);
+        this.nameTimer = window.setTimeout(() => this.nameTag.classList.remove('show'), 1500);
+      } else if (!first) this.nameTag.classList.remove('show');
+    }
   }
 
   render(): void {
@@ -39,7 +62,13 @@ export class Hud {
       h('div.hud-date', dateLabel(s.day)),
       h('div.hud-clock', h('span.weather', WEATHER_ICON[s.weather] ?? ''), clockLabel(s.minute)),
       h('div.hud-coins', h('span.coin'), String(s.player.coins)),
+      h('div.hud-buttons',
+        h('button.journal-btn', { title: 'Journal: quests and what to do next (J)', onclick: () => this.onOpenJournal() }, '📖 Journal'),
+        h('button', { title: 'Backpack (I)', onclick: () => this.onOpenBackpack() }, '🎒'),
+        h('button', { title: 'Map (M)', onclick: () => this.onOpenMap() }, '🗺'),
+      ),
     );
+    this.showName(s);
     const p = s.player;
     const frac = p.energy / p.maxEnergy;
     clear(this.energy).append(

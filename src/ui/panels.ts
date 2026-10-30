@@ -135,18 +135,19 @@ export class Panels {
       if (st && !can) el.classList.add('dim');
       grid.appendChild(el);
     });
-    let total = 0;
+    // Anything still in the bin came from an older save; it sells overnight as before.
+    let legacy = 0;
     const bin = h('div.bin');
     for (const st of s.farm.shipping) {
-      total += sellPrice(st.id, st.q) * st.n;
+      legacy += sellPrice(st.id, st.q) * st.n;
       bin.appendChild(slotEl(st));
     }
     return h(
       'div',
-      h('p.muted', 'Click to ship one, Shift-click or right-click to ship the stack. Everything in the bin sells overnight.'),
+      h('p.muted', 'Click to sell one, Shift-click or right-click to sell the stack. You are paid on the spot.'),
       grid,
-      h('h3', `In the bin: ${total}g`),
-      bin,
+      h('h3', `Sold today: ${s.today.coinsShipped}g`),
+      legacy > 0 ? h('div', h('p.muted.small', `Left in the bin from before (${legacy}g, sells overnight):`), bin) : null,
     );
   }
 

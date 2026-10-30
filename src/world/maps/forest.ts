@@ -43,8 +43,8 @@ export const FOREST: MapDef = {
     'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP',
   ],
   buildings: [
-    { id: 'saffi_cottage', name: "Saffi's Cottage", style: 'cottage', x: 6, y: 6, w: 6, h: 5, door: { x: 8, y: 10 }, doorDir: 2, panel: 'home:saffi', wall: '#b8c8a0', roof: '#5a7a3a' },
-    { id: 'sluice_house', name: 'Sluice House', style: 'sluice', x: 32, y: 5, w: 6, h: 5, door: { x: 34, y: 9 }, doorDir: 2, panel: 'home:odile', wall: '#9aa0a8', roof: '#5a4a3a' },
+    { id: 'saffi_cottage', name: "Saffi's Cottage", style: 'cottage', x: 6, y: 6, w: 6, h: 5, door: { x: 8, y: 10 }, doorDir: 2, panel: 'home:saffi', wall: '#c8f4b0', roof: '#20b878' },
+    { id: 'sluice_house', name: 'Sluice House', style: 'sluice', x: 32, y: 5, w: 6, h: 5, door: { x: 34, y: 9 }, doorDir: 2, panel: 'home:odile', wall: '#b8c8ff', roof: '#7a5ac8' },
   ],
   warps: [
     { x: 21, y: 0, to: 'farm', tx: 21, ty: 32, dir: 0 },

@@ -6,19 +6,33 @@ import { deserialize, serialize } from '../src/sim/serialize';
 import { act, give, sandbox, stand } from './helpers';
 
 describe('shipping and shops', () => {
-  it('ships items overnight at quality-adjusted prices', () => {
+  it('pays the moment items are shipped, at quality-adjusted prices', () => {
     const sb = sandbox();
     const { s } = sb;
     s.player.inventory[20] = { id: 'radish', q: 2, n: 3 };
     s.player.inventory[21] = { id: 'carrot', q: 0, n: 2 };
-    expect(act(sb, { type: 'ship', slot: 20, n: 3 }).ok).toBe(true);
-    expect(act(sb, { type: 'ship', slot: 21, n: 1 }).ok).toBe(true);
     const coins = s.player.coins;
-    endDay(s, sb.ctx, false);
-    const expected = 3 * Math.round(ITEM_VALUE.radish * QUALITY_PRICE_MULT[2]) + ITEM_VALUE.carrot;
+    expect(act(sb, { type: 'ship', slot: 20, n: 3 }).ok).toBe(true);
+    const expectedRadish = 3 * Math.round(ITEM_VALUE.radish * QUALITY_PRICE_MULT[2]);
+    expect(s.player.coins - coins).toBe(expectedRadish); // paid already, no waiting for the night
+    expect(act(sb, { type: 'ship', slot: 21, n: 1 }).ok).toBe(true);
+    const expected = expectedRadish + ITEM_VALUE.carrot;
     expect(s.player.coins - coins).toBe(expected);
+    expect(s.farm.shipping).toEqual([]);
+    endDay(s, sb.ctx, false);
+    expect(s.player.coins - coins).toBe(expected); // the night adds nothing more
     expect(s.report!.stats.coinsShipped).toBe(expected);
     expect(countItem(s.player.inventory, 'carrot')).toBe(1);
+  });
+
+  it('still sells overnight whatever an older save left in the bin', () => {
+    const sb = sandbox();
+    const { s } = sb;
+    s.farm.shipping = [{ id: 'radish', q: 0, n: 2 }];
+    const coins = s.player.coins;
+    endDay(s, sb.ctx, false);
+    expect(s.player.coins - coins).toBe(2 * ITEM_VALUE.radish);
+    expect(s.farm.shipping).toEqual([]);
   });
 
   it('refuses to ship tools and things worth nothing', () => {

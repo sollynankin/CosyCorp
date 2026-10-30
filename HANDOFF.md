@@ -1,4 +1,4 @@
-# HANDOFF: Hearthvale
+# HANDOFF: Cosycorp
 
 Status: **M1 to M7 are built and committed.** 80 tests pass, `npm run typecheck` is clean, and `npm run build`
 produces a working bundle. The game can be played from the title card to the Lantern Night finale; the
@@ -26,10 +26,24 @@ system) before changing anything.
 | Rendering | Three.js with instanced procedural meshes, day/night light curves, weather and season particles, a quality setting, villagers with name tags, portraits and machine icons rendered from the real meshes | `src/render/` |
 | Tests | Determinism (including a whole-system tour with a save/load in the middle), crop growth by season, sprinkler radius, harvester reach, belt caps and backpressure, merges, splitters, golden layout (exact 14,931 coins, derivation in the file), relationship maths, dialogue selection, heart events, story walk (attentive and festival-skipping players), save/load round trip, mine, fishing, animals, goals | `tests/` |
 
+## The look (candy-bright pass)
+
+The world is deliberately colourful and cartoony. Where to turn the knobs, all render-only:
+
+- `src/render/palette.ts`: season colours (grass, second grass hue, canopy, accents, flower colours, hill colours),
+  sky and light keys, warm bounce light.
+- `src/render/materials.ts`: `SATURATION` pushes every world material's colours away from grey.
+- `src/render/terrain.ts`: grass is two hues blended by smooth noise (`noise2` in `meshes/kit.ts`), not a checkerboard.
+- `src/render/meshes/flora.ts` + `MapView.rebuildFlora`: meadow patches (daisies, tulips, bells, pompoms,
+  sunflowers), odd mushrooms, crystals and fiddlehead ferns, lily pads, reeds. Skips soil, machines, objects, buildings.
+- `meshes/nature.ts`: three tree silhouettes (round, umbrella, soft-serve spire), blossom/fruit dots, pastel mossy rocks.
+- `meshes/crops.ts`: per-crop leaf colours, blossoms, ribbed pumpkin, striped melon, tasselled corn, poppy in wheat.
+- `meshes/items.ts` (held tools) and `ui/icons.ts` (hotbar): chunky, shaded, no faces; the axe has a sharp wedge blade.
+- `src/render/backdrop.ts`: pastel hills ringing outdoor maps.
+- Building colours live in `src/world/maps/*.ts` (`wall`/`roof`).
+
 ## What is thin or stubbed
 
-- **No audio.** The sim emits `sound` events (`bite`, `quest`, `ship`) that nothing plays yet.
-- **No gamepad.** `InputSource` in `src/game/input.ts` is the extension point.
 - **Animals are not drawn indoors.** On rainy days and in winter they stay "inside" and simply are not shown.
 - **Mine fishing** (`MapDef.fishing = 'mine'`) has no fish and no water tiles.
 - **Tool upgrades are instant** at the Smithy (Teo has no two-day wait).
@@ -84,7 +98,7 @@ Always: `CLAUDE.md`, `DESIGN.md`, `HANDOFF.md`. Then, by task:
 ## First prompt for the next session (paste as is)
 
 ```
-You're continuing Hearthvale (C:\Users\solly\hearthvale). Read CLAUDE.md, DESIGN.md and HANDOFF.md first.
+You're continuing Cosycorp (C:\Users\solly\hearthvale). Read CLAUDE.md, DESIGN.md and HANDOFF.md first.
 Keep npm test and npm run typecheck green, and commit after each task.
 
 1. Balance pass. Add tests/balance.test.ts: a scripted "reasonable player" (plants in season, builds the

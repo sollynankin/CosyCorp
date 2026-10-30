@@ -666,3 +666,54 @@ button:active:not(:disabled) {
   outline-offset: 2px;
   box-shadow: 0 0 0 6px rgba(255, 179, 71, 0.35) !important;
 }
+
+/* ---------- HUD buttons, tool name, journal help, map ---------- */
+.hud-top .hud-buttons {
+  display: flex;
+  gap: 6px;
+  padding: 4px 6px;
+  pointer-events: auto;
+}
+.hud-buttons button {
+  font-size: 15px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.hud-buttons .journal-btn {
+  background: linear-gradient(#ffd08a, #e8954a);
+  font-weight: 800;
+}
+.tool-name {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(90, 58, 34, 0.94);
+  color: #fff4dc;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 18px;
+  padding: 4px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--wood-dark);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tool-name.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.hint-steps { margin: 4px 0 6px; padding-left: 20px; font-size: 14px; }
+.hint-steps li { margin: 3px 0; }
+.hint-src { font-size: 13px; color: var(--ink-soft); margin: 2px 0 4px; font-style: italic; list-style: none; }
+.world-chart { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.world-node { padding: 4px 14px; cursor: pointer; }
+.world-node.on { background: linear-gradient(#ffd08a, #e8954a); }
+.world-node .here { color: #c8402a; font-weight: 800; }
+.map-panel { max-width: 100%; }
+.map-wrap { overflow: auto; max-height: 68vh; border-radius: 14px; border: 2px solid var(--wood); }
+.map-canvas { display: block; max-width: 100%; height: auto; }
+.map-title { font-family: 'Fredoka', sans-serif; font-size: 18px; margin-bottom: 6px; }

@@ -198,6 +198,9 @@ const MOVE_RAMP_DOWN = 0.07;
 
 type PendingAction = { cmd: Command; tx: number; ty: number } | null;
 
+/** Wheel delta that counts as one step (a standard mouse notch is 100). */
+const WHEEL_STEP = 80;
+
 export class Input implements InputSource {
   private keys = new Set<string>();
   private mouse = { x: 0, y: 0, inside: false };
@@ -208,6 +211,8 @@ export class Input implements InputSource {
   /** the eased move vector (screen space); a partial length walks proportionally slower */
   private eased: [number, number] = [0, 0];
   private lastUpdate = performance.now();
+  private wheelAcc = 0;
+  private wheelAt = 0;
   /** the gamepad; its vector is merged with the keyboard's every frame */
   readonly pad = new GamepadSource();
   /** which device moved last: the hover cursor follows the mouse, or the tile in front of the player */
@@ -251,13 +256,31 @@ export class Input implements InputSource {
       this.buildMode?.onRelease();
       this.setReel(false);
     });
+    // The wheel steps through the hotbar; Ctrl+wheel zooms. A notched mouse sends ~100 per click and a
+    // trackpad a stream of small deltas, so accumulate and step once per WHEEL_STEP.
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      if (e.shiftKey || e.ctrlKey) {
-        const dir = Math.sign(e.deltaY);
-        const s = this.game.state.player.selected;
-        this.game.send({ type: 'select', slot: (s + dir + HOTBAR_SLOTS) % HOTBAR_SLOTS });
-      } else this.renderer.rig.zoom(Math.sign(e.deltaY) * 0.08);
+      if (e.ctrlKey) {
+        this.renderer.rig.zoom(Math.sign(e.deltaY) * 0.08);
+        return;
+      }
+      if (this.cb.modalOpen()) return;
+      const now = performance.now();
+      if (now - this.wheelAt > 250) this.wheelAcc = 0;
+      this.wheelAt = now;
+      // deltaMode 1 (Firefox with a notched wheel) reports lines, not pixels
+      this.wheelAcc += e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+      // Steps from one event build on each other (the sim applies the commands on the next tick).
+      let slot = this.game.state.player.selected;
+      while (Math.abs(this.wheelAcc) >= WHEEL_STEP) {
+        const dir = Math.sign(this.wheelAcc);
+        this.wheelAcc -= dir * WHEEL_STEP;
+        if (this.buildMode?.active) this.buildMode.cycle(dir);
+        else {
+          slot = (slot + dir + HOTBAR_SLOTS) % HOTBAR_SLOTS;
+          this.game.send({ type: 'select', slot });
+        }
+      }
     }, { passive: false });
     game.tickHook = () => this.followPath();
     window.addEventListener('gamepadconnected', () => this.cb.toast?.('Controller connected.'));

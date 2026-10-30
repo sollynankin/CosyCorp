@@ -1,8 +1,8 @@
 // Small item meshes: belt items, held tools, dropped icons. Belt items share one geometry per icon shape
 // (tinted by instance colour) so all items on all belts draw in a handful of instanced calls.
-import type * as THREE from 'three';
+import * as THREE from 'three';
 import type { ItemDef, ToolId } from '../../data/types';
-import { ball, box, cone, cyl, merge, type Part } from './kit';
+import { ball, box, cone, cyl, merge, torus, type Part } from './kit';
 
 const memo = new Map<string, THREE.BufferGeometry>();
 
@@ -50,33 +50,83 @@ export function itemShape(icon: ItemDef['icon']): THREE.BufferGeometry {
   return g;
 }
 
-/** Held tool geometry, oriented to hang from the hand (pointing down −y). */
+/**
+ * Axe head: a flat wedge in the (z, y) plane with a straight, sharp cutting edge, extruded thin along x.
+ * The poll (back) sits on the handle; the blade flares out to the edge.
+ */
+function axeBlade(color: string): Part {
+  const sh = new THREE.Shape();
+  sh.moveTo(-0.05, -0.56);
+  sh.lineTo(0.07, -0.57);
+  sh.lineTo(0.3, -0.47);
+  sh.lineTo(0.31, -0.92);
+  sh.lineTo(0.07, -0.83);
+  sh.lineTo(-0.05, -0.84);
+  sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.07, bevelEnabled: false });
+  g.rotateY(-Math.PI / 2);
+  g.translate(0.035, 0, 0);
+  return { geo: g, color };
+}
+
+/** Held tool geometry, oriented to hang from the hand (pointing down −y). Chunky and bright, shaded by colour. */
 export function toolGeometry(tool: ToolId, tier: number): THREE.BufferGeometry {
   const key = `tool:${tool}:${tier}`;
   let g = memo.get(key);
   if (g) return g;
-  const metal = ['#8a8a8a', '#c8743a', '#c8ccd4'][tier] ?? '#8a8a8a';
-  const handle = cyl(0.025, 0.025, 0.6, '#8a6440', { y: -0.55 }, 5);
+  // Pastel head colours by tier: sky, copper-orange, silver-lilac; `rim` is the deeper shade for undersides.
+  const head = ['#8ad0ff', '#ffa060', '#e4dcff'][tier] ?? '#8ad0ff';
+  const rim = ['#4a8ede', '#e86a2a', '#9a88e0'][tier] ?? '#4a8ede';
+  const edge = ['#e8f8ff', '#fff0d8', '#ffffff'][tier] ?? '#e8f8ff';
+  const handle = cyl(0.045, 0.05, 0.62, '#e0a060', { y: -0.55 }, 8);
+  const grip = cyl(0.05, 0.05, 0.16, '#c0743a', { y: -0.2 }, 8);
+  const knob = ball(0.065, '#c0743a', { y: 0.07 }, 0);
   let parts: Part[];
   switch (tool) {
     case 'hoe':
-      parts = [handle, box(0.2, 0.04, 0.12, metal, { y: -0.6, z: 0.06 })];
+      parts = [handle, grip, knob, box(0.3, 0.15, 0.2, head, { y: -0.7, z: 0.1 }), box(0.3, 0.05, 0.2, rim, { y: -0.7, z: 0.1 }), box(0.3, 0.03, 0.2, edge, { y: -0.58, z: 0.1 })];
       break;
     case 'axe':
-      parts = [handle, box(0.04, 0.16, 0.18, metal, { y: -0.62, z: 0.08 })];
+      parts = [
+        handle,
+        grip,
+        knob,
+        axeBlade(head),
+        box(0.12, 0.3, 0.1, rim, { y: -0.86, z: -0.02 }), // darker poll behind the blade
+        box(0.075, 0.44, 0.02, edge, { y: -0.92, z: 0.295 }), // bright cutting edge
+      ];
       break;
     case 'pickaxe':
-      parts = [handle, box(0.36, 0.05, 0.05, metal, { y: -0.6 })];
+      parts = [
+        handle,
+        grip,
+        knob,
+        box(0.16, 0.16, 0.16, head, { y: -0.68 }),
+        box(0.22, 0.11, 0.11, head, { x: 0.18, y: -0.62, rz: 0.4 }),
+        box(0.22, 0.11, 0.11, head, { x: -0.18, y: -0.62, rz: -0.4 }),
+        box(0.16, 0.04, 0.16, rim, { y: -0.68 }),
+        cone(0.05, 0.14, edge, { x: 0.32, y: -0.58, rz: -1.9 }, 6),
+        cone(0.05, 0.14, edge, { x: -0.32, y: -0.58, rz: 1.9 }, 6),
+      ];
       break;
     case 'scythe':
-      parts = [handle, box(0.04, 0.04, 0.38, metal, { y: -0.58, z: 0.18, rx: 0.3 })];
+      parts = [handle, grip, knob, box(0.1, 0.12, 0.44, head, { y: -0.7, z: 0.2, rx: 0.3 }), box(0.1, 0.04, 0.44, rim, { y: -0.7, z: 0.2, rx: 0.3 }), cone(0.05, 0.16, edge, { y: -0.56, z: 0.46, rx: 1.6 }, 6)];
       break;
     case 'rod':
-      parts = [cyl(0.015, 0.025, 1.1, '#6a8a4a', { y: -1.0 }, 5)];
+      parts = [cyl(0.028, 0.048, 1.1, '#9ae070', { y: -1.0 }, 8), cyl(0.05, 0.05, 0.2, '#c0743a', { y: -0.3 }, 8), ball(0.065, '#ffd84a', { y: 0.07 }, 0), ball(0.07, '#ffd84a', { z: 0.08, y: -0.4 }, 0), ball(0.055, '#ff5a6a', { y: -1.5 }, 0)];
       break;
-    case 'can':
-      parts = [cyl(0.1, 0.12, 0.2, metal === '#8a8a8a' ? '#5a8ab8' : metal, { y: -0.2 }, 8), cyl(0.02, 0.03, 0.22, '#5a8ab8', { y: -0.15, z: 0.12, rx: 0.9 }, 5)];
+    case 'can': {
+      const body = tier === 0 ? '#7ac0f0' : head;
+      parts = [
+        cyl(0.14, 0.16, 0.26, body, { y: -0.2 }, 10),
+        cyl(0.145, 0.145, 0.04, rim, { y: -0.2 }, 10),
+        cyl(0.15, 0.15, 0.03, edge, { y: 0.03 }, 10),
+        cyl(0.035, 0.055, 0.3, body, { y: -0.1, z: 0.16, rx: 0.9 }, 8),
+        ball(0.06, rim, { y: 0.08, z: 0.3 }, 0),
+        torus(0.08, 0.022, rim, { z: -0.16, y: -0.09, ry: Math.PI / 2 }, 5, 10),
+      ];
       break;
+    }
   }
   g = merge(parts);
   memo.set(key, g);

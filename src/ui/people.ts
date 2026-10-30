@@ -22,6 +22,7 @@ import {
   type GameState,
 } from '../sim';
 import { h } from './dom';
+import { guidance } from './hints';
 import { itemIcon } from './icons';
 import type { Modals } from './modal';
 import { slotEl } from './panels';
@@ -77,7 +78,7 @@ export function describeObjective(o: Objective): string {
 export class People {
   private sceneLine = 0;
   private sceneId: string | null = null;
-  private journalTab: 'quests' | 'friends' | 'goals' = 'quests';
+  private journalTab: 'next' | 'quests' | 'friends' | 'goals' = 'next';
 
   constructor(private readonly game: Game, private readonly modals: Modals, private readonly renderer: Renderer) {}
 
@@ -187,10 +188,41 @@ export class People {
   }
 
   private renderJournal(): HTMLElement {
-    const tab = (id: 'quests' | 'friends' | 'goals', label: string) =>
+    const tab = (id: 'next' | 'quests' | 'friends' | 'goals', label: string) =>
       h(`button.tab${this.journalTab === id ? '.on' : ''}`, { onclick: () => { this.journalTab = id; this.modals.refresh(); } }, label);
-    const body = this.journalTab === 'quests' ? this.renderQuests() : this.journalTab === 'friends' ? this.renderFriends() : this.renderGoals();
-    return h('div', h('div.tabs', tab('quests', 'Quests'), tab('friends', 'Friends'), tab('goals', 'Stretch goals')), body);
+    const body =
+      this.journalTab === 'next' ? this.renderNext() : this.journalTab === 'quests' ? this.renderQuests() : this.journalTab === 'friends' ? this.renderFriends() : this.renderGoals();
+    return h('div', h('div.tabs', tab('next', 'What next?'), tab('quests', 'Quests'), tab('friends', 'Friends'), tab('goals', 'Stretch goals')), body);
+  }
+
+  /** The stuck-helper: for every active quest, what is left and exactly how to do it. */
+  private renderNext(): HTMLElement {
+    const g = guidance(this.s, this.supply, describeObjective);
+    const sources = new Set<string>();
+    const active = g.active.map(({ quest, objectives, steps }) =>
+      h(`div.quest.${quest.arc}`,
+        quest.villager ? h('img.portrait.small', { src: portrait(quest.villager) }) : null,
+        h('div.grow',
+          h('div.b', quest.title, h('span.arc', quest.arc === 'main' ? 'Story' : 'Side')),
+          h('div.muted.small', quest.summary),
+          h('ul.objs', objectives.map((o) =>
+            h(`li${o.done ? '.done' : ''}`, o.label, o.target > 1 ? h('span.prog', ` ${o.cur}/${o.target}`) : null,
+              o.source && !sources.has(o.source) ? (sources.add(o.source), h('div.hint-src', o.source)) : null))),
+          steps.length ? h('div', h('div.b.small', 'How to do it'), h('ol.hint-steps', steps.map((t) => h('li', t)))) : null,
+        )));
+    const waiting = g.waiting.map(({ quest, why, steps }) =>
+      h('div.quest.dim',
+        h('div.grow',
+          h('div.b', quest.title, h('span.arc', quest.arc === 'main' ? 'Story' : 'Side')),
+          h('div.small', why),
+          steps.length ? h('ol.hint-steps.small', steps.map((t) => h('li', t))) : null)));
+    return h('div.scroll.journal',
+      h('p.muted.small', 'Stuck? Do the first story quest below. Everything it needs is listed with where to find it.'),
+      active.length ? active : h('p.muted', 'Nothing is asked of you right now.'),
+      waiting.length ? h('div', h('h3', 'Coming up'), waiting) : null,
+      h('h3', 'Always worth doing'),
+      h('ul.objs', g.tips.map((t) => h('li', t))),
+    );
   }
 
   private renderQuests(): HTMLElement {

@@ -20,7 +20,19 @@ function recordSale(state: GameState, id: ItemId, n: number): void {
   state.shippedTotal[id] = (state.shippedTotal[id] ?? 0) + n;
 }
 
-/** Overnight sale of the shipping bin. Returns coins earned. */
+/** Shipping bin: instant sale at full price, the moment the items go in. Returns coins earned. */
+export function sellNow(state: GameState, st: ItemStack): number {
+  const coins = sellPrice(st.id, st.q) * st.n;
+  recordSale(state, st.id, st.n);
+  state.player.coins += coins;
+  state.today.coinsShipped += coins;
+  return coins;
+}
+
+/**
+ * Overnight sale of whatever is still in the bin. Shipping now pays instantly, so this only matters for
+ * saves made before that change. Returns coins earned.
+ */
 export function sellShipping(state: GameState): number {
   let coins = 0;
   for (const st of state.farm.shipping) {

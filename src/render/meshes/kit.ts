@@ -100,7 +100,7 @@ export function flat(w: number, d: number, color: THREE.ColorRepresentation, t: 
 /** A leaf: a flattened, tilted octahedron. */
 export function leaf(len: number, color: THREE.ColorRepresentation, t: Xform = {}): Part {
   const g = new THREE.OctahedronGeometry(0.5, 0);
-  g.scale(len * 0.35, len * 0.08, len);
+  g.scale(len * 0.52, len * 0.14, len);
   g.translate(0, 0, len * 0.5);
   return { geo: xf(g, t), color };
 }
@@ -160,4 +160,18 @@ export function shade(color: THREE.ColorRepresentation, dl: number): THREE.Color
 export function jitter(seed: number): number {
   const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);
+}
+
+/** Smooth value noise in 0..1 (render-only): broad patches for ground colour and flower meadows. */
+export function noise2(x: number, y: number): number {
+  const ix = Math.floor(x);
+  const iy = Math.floor(y);
+  const fx = x - ix;
+  const fy = y - iy;
+  const sx = fx * fx * (3 - 2 * fx);
+  const sy = fy * fy * (3 - 2 * fy);
+  const h = (a: number, b: number) => jitter(a * 73.1 + b * 157.3);
+  const top = h(ix, iy) * (1 - sx) + h(ix + 1, iy) * sx;
+  const bot = h(ix, iy + 1) * (1 - sx) + h(ix + 1, iy + 1) * sx;
+  return top * (1 - sy) + bot * sy;
 }

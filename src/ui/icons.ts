@@ -184,66 +184,151 @@ export function itemIcon(id: string): string {
   return url;
 }
 
-function drawTool(g: CanvasRenderingContext2D, tool: string, col: string): void {
+const INK = 'rgba(70,38,28,0.95)';
+
+/** Fat rounded stroke with an ink outline, a shaded underside and a shine along the top: a chunky shaded handle. */
+function fatLine(g: CanvasRenderingContext2D, pts: [number, number][], w: number, fill: string, ctrl?: [number, number], shadow = 'rgba(90,40,20,0.38)'): void {
+  const path = (dx = 0, dy = 0) => {
+    g.beginPath();
+    g.moveTo(pts[0][0] + dx, pts[0][1] + dy);
+    if (ctrl) g.quadraticCurveTo(ctrl[0] + dx, ctrl[1] + dy, pts[1][0] + dx, pts[1][1] + dy);
+    else for (const p of pts.slice(1)) g.lineTo(p[0] + dx, p[1] + dy);
+  };
   g.lineCap = 'round';
-  g.strokeStyle = '#8a6440';
-  g.lineWidth = 4;
-  g.beginPath();
-  g.moveTo(12, 40);
-  g.lineTo(32, 14);
+  path();
+  g.lineWidth = w + 5;
+  g.strokeStyle = INK;
   g.stroke();
-  g.fillStyle = tool === 'can' ? '#5a8ab8' : '#a8a8b0';
-  g.strokeStyle = 'rgba(40,28,20,0.75)';
-  g.lineWidth = 2;
-  g.beginPath();
-  switch (tool) {
-    case 'hoe':
-      g.rect(28, 8, 14, 7);
-      break;
-    case 'axe':
-      g.moveTo(28, 8);
-      g.lineTo(42, 12);
-      g.lineTo(38, 24);
-      g.closePath();
-      break;
-    case 'pickaxe':
-      g.moveTo(18, 12);
-      g.quadraticCurveTo(32, 4, 44, 18);
-      g.lineTo(32, 14);
-      g.closePath();
-      break;
-    case 'scythe':
-      g.moveTo(30, 12);
-      g.quadraticCurveTo(44, 10, 42, 26);
-      g.quadraticCurveTo(38, 16, 30, 16);
-      g.closePath();
-      break;
-    case 'rod':
-      g.strokeStyle = '#6a8a4a';
-      g.lineWidth = 3;
-      g.moveTo(10, 42);
-      g.lineTo(40, 6);
-      g.stroke();
-      g.strokeStyle = '#e8e8e8';
-      g.lineWidth = 1;
-      g.beginPath();
-      g.moveTo(40, 6);
-      g.lineTo(42, 30);
-      g.stroke();
-      return;
-    case 'can':
-      g.roundRect(14, 18, 20, 18, 3);
-      g.fill();
-      g.stroke();
-      g.beginPath();
-      g.moveTo(34, 24);
-      g.lineTo(44, 14);
-      g.lineWidth = 3;
-      g.strokeStyle = '#5a8ab8';
-      g.stroke();
-      return;
-  }
+  path();
+  g.lineWidth = w;
+  g.strokeStyle = fill;
+  g.stroke();
+  // shaded underside (bottom-right), then a thin shine (top-left)
+  path(w * 0.2, w * 0.2);
+  g.lineWidth = w * 0.4;
+  g.strokeStyle = shadow;
+  g.stroke();
+  path(-w * 0.2, -w * 0.2);
+  g.lineWidth = Math.max(1.5, w * 0.24);
+  g.strokeStyle = 'rgba(255,255,255,0.55)';
+  g.stroke();
+}
+
+/**
+ * Fill the path already traced on g with a glossy, shaded look: vertical gradient, a darker bottom-right
+ * shadow, a soft white shine at the top-left, then the ink outline. `sharp` keeps hard mitred corners.
+ */
+function blobFill(g: CanvasRenderingContext2D, top: string, bottom: string, x0: number, y0: number, x1: number, y1: number, sharp = false): void {
+  const grad = g.createLinearGradient(0, y0, 0, y1);
+  grad.addColorStop(0, top);
+  grad.addColorStop(1, bottom);
+  g.fillStyle = grad;
   g.fill();
+  g.save();
+  g.clip();
+  const shade = g.createLinearGradient(x0, y0, x1, y1);
+  shade.addColorStop(0.35, 'rgba(60,20,90,0)');
+  shade.addColorStop(1, 'rgba(60,20,90,0.42)');
+  g.fillStyle = shade;
+  g.fillRect(x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4);
+  const shine = g.createRadialGradient(x0 + (x1 - x0) * 0.3, y0 + (y1 - y0) * 0.25, 0, x0 + (x1 - x0) * 0.3, y0 + (y1 - y0) * 0.25, Math.max(x1 - x0, y1 - y0) * 0.6);
+  shine.addColorStop(0, 'rgba(255,255,255,0.7)');
+  shine.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = shine;
+  g.fillRect(x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4);
+  g.restore();
+  g.lineWidth = 3;
+  g.lineJoin = sharp ? 'miter' : 'round';
+  g.miterLimit = 6;
+  g.strokeStyle = INK;
   g.stroke();
+}
+
+function drawTool(g: CanvasRenderingContext2D, tool: string, col: string): void {
+  const handle = '#e0a060';
+  g.lineJoin = 'round';
+  switch (tool) {
+    case 'hoe': {
+      fatLine(g, [[9, 41], [30, 17]], 7, handle);
+      g.save();
+      g.translate(34, 13);
+      g.rotate(0.35);
+      g.beginPath();
+      g.roundRect(-13, -9, 26, 18, 7);
+      blobFill(g, '#d6f0ff', '#6aaee8', -13, -9, 13, 9);
+      g.restore();
+      break;
+    }
+    case 'axe': {
+      // A sharp wedge: straight edges, a flared cutting edge on the right and a squared-off poll at the handle.
+      fatLine(g, [[9, 42], [27, 15]], 7, handle);
+      g.beginPath();
+      g.moveTo(21, 9);
+      g.lineTo(31, 6);
+      g.lineTo(46, 3);
+      g.lineTo(48, 26);
+      g.lineTo(31, 24);
+      g.lineTo(24, 22);
+      g.closePath();
+      blobFill(g, '#f4f8ff', '#8ea4c8', 21, 3, 48, 26, true);
+      // bright cutting edge
+      g.beginPath();
+      g.moveTo(46, 4);
+      g.lineTo(47.5, 25);
+      g.lineWidth = 2;
+      g.strokeStyle = '#ffffff';
+      g.stroke();
+      break;
+    }
+    case 'pickaxe': {
+      fatLine(g, [[9, 42], [29, 14]], 7, handle);
+      fatLine(g, [[10, 20], [44, 20]], 10, '#dcd2f4', [27, -2], 'rgba(70,40,120,0.4)');
+      break;
+    }
+    case 'scythe': {
+      fatLine(g, [[9, 42], [27, 12]], 7, handle);
+      fatLine(g, [[26, 9], [45, 28]], 9, '#fff0b8', [48, 6], 'rgba(120,80,20,0.4)');
+      break;
+    }
+    case 'rod': {
+      fatLine(g, [[8, 43], [39, 7]], 6, '#9ae070', undefined, 'rgba(20,90,40,0.4)');
+      g.beginPath();
+      g.moveTo(39, 7);
+      g.quadraticCurveTo(46, 20, 40, 30);
+      g.lineWidth = 1.5;
+      g.strokeStyle = '#ffffff';
+      g.stroke();
+      g.beginPath();
+      g.arc(40, 37, 8, 0, Math.PI * 2);
+      blobFill(g, '#ff9a8a', '#e8445a', 32, 29, 48, 45);
+      g.save();
+      g.beginPath();
+      g.arc(40, 37, 6.5, Math.PI * 1.1, Math.PI * 1.9);
+      g.lineTo(40, 37);
+      g.closePath();
+      g.fillStyle = 'rgba(255,255,255,0.9)';
+      g.fill();
+      g.restore();
+      break;
+    }
+    case 'can': {
+      fatLine(g, [[30, 25], [44, 13]], 7, '#7ac0f0', undefined, 'rgba(20,60,140,0.4)');
+      g.beginPath();
+      g.arc(12, 26, 7, Math.PI * 0.5, Math.PI * 1.5);
+      g.lineWidth = 4;
+      g.strokeStyle = INK;
+      g.stroke();
+      g.beginPath();
+      g.roundRect(9, 17, 26, 23, 9);
+      blobFill(g, '#b8e4ff', '#4a8ed8', 9, 17, 35, 40);
+      g.fillStyle = '#8ad4ff';
+      for (const [x, y] of [[44, 21], [41, 27], [45, 30]]) {
+        g.beginPath();
+        g.arc(x, y, 2, 0, Math.PI * 2);
+        g.fill();
+      }
+      break;
+    }
+  }
   void col;
 }

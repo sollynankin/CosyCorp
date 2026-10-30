@@ -10,7 +10,7 @@ export function serialize(state: GameState): string {
 
 export function deserialize(json: string): GameState {
   const raw = JSON.parse(json) as Partial<GameState> & { version?: number };
-  if (!raw || typeof raw !== 'object' || typeof raw.version !== 'number') throw new Error('Not a Hearthvale save.');
+  if (!raw || typeof raw !== 'object' || typeof raw.version !== 'number') throw new Error('Not a Cosycorp save.');
   if (raw.version > SAVE_VERSION) throw new Error('This save is from a newer version of the game.');
   return migrate(raw as GameState);
 }

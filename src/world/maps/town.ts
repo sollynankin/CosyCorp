@@ -42,12 +42,12 @@ export const TOWN: MapDef = {
     'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP',
   ],
   buildings: [
-    { id: 'townhall', name: 'Town Hall', style: 'townhall', x: 20, y: 3, w: 8, h: 6, door: { x: 23, y: 8 }, doorDir: 2, panel: 'townhall', wall: '#d8cbb0', roof: '#4a6a8a' },
-    { id: 'almanac', name: 'Almanac & Sundries', style: 'store', x: 6, y: 8, w: 7, h: 5, door: { x: 9, y: 12 }, doorDir: 2, panel: 'shop:almanac', wall: '#f0e0b8', roof: '#3f7a5a' },
-    { id: 'smithy', name: 'The Smithy', style: 'smithy', x: 6, y: 19, w: 6, h: 5, door: { x: 8, y: 19 }, doorDir: 0, panel: 'shop:smithy', wall: '#8a8078', roof: '#3a3a42' },
-    { id: 'joinery', name: 'Toller Joinery', style: 'joinery', x: 34, y: 8, w: 7, h: 5, door: { x: 37, y: 12 }, doorDir: 2, panel: 'shop:joinery', wall: '#c89a62', roof: '#7a3a2a' },
-    { id: 'inn', name: 'The Kettle Inn', style: 'inn', x: 33, y: 19, w: 9, h: 6, door: { x: 36, y: 19 }, doorDir: 0, panel: 'shop:inn', wall: '#e8c8a0', roof: '#8a2a2a' },
-    { id: 'works', name: 'Works Hall', style: 'works', x: 20, y: 24, w: 8, h: 6, door: { x: 23, y: 24 }, doorDir: 0, panel: 'works', wall: '#a87a5a', roof: '#4a5a4a' },
+    { id: 'townhall', name: 'Town Hall', style: 'townhall', x: 20, y: 3, w: 8, h: 6, door: { x: 23, y: 8 }, doorDir: 2, panel: 'townhall', wall: '#fff0d0', roof: '#3a8aee' },
+    { id: 'almanac', name: 'Almanac & Sundries', style: 'store', x: 6, y: 8, w: 7, h: 5, door: { x: 9, y: 12 }, doorDir: 2, panel: 'shop:almanac', wall: '#fff4c8', roof: '#20c07a' },
+    { id: 'smithy', name: 'The Smithy', style: 'smithy', x: 6, y: 19, w: 6, h: 5, door: { x: 8, y: 19 }, doorDir: 0, panel: 'shop:smithy', wall: '#c8b8f0', roof: '#6a4ab8' },
+    { id: 'joinery', name: 'Toller Joinery', style: 'joinery', x: 34, y: 8, w: 7, h: 5, door: { x: 37, y: 12 }, doorDir: 2, panel: 'shop:joinery', wall: '#f0b878', roof: '#e8504a' },
+    { id: 'inn', name: 'The Kettle Inn', style: 'inn', x: 33, y: 19, w: 9, h: 6, door: { x: 36, y: 19 }, doorDir: 0, panel: 'shop:inn', wall: '#ffd4b8', roof: '#e8386a' },
+    { id: 'works', name: 'Works Hall', style: 'works', x: 20, y: 24, w: 8, h: 6, door: { x: 23, y: 24 }, doorDir: 0, panel: 'works', wall: '#e8a070', roof: '#20b0a0' },
   ],
   warps: [
     { x: 0, y: 15, to: 'farm', tx: 42, ty: 15, dir: 3 },

@@ -1,4 +1,6 @@
-# CLAUDE.md: Hearthvale
+# CLAUDE.md: Cosycorp
+
+(The game was renamed from Hearthvale to Cosycorp. The valley town in the story is still called Hearthvale; the `hearthvale.*` browser storage keys are kept so old saves keep loading.)
 
 A cozy 3D farming-life sim with a deterministic automation layer ("the Works"). Read `DESIGN.md` for the rules
 (it is authoritative) and `HANDOFF.md` for current status and next tasks.

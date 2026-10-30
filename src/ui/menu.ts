@@ -13,10 +13,11 @@ export const CONTROLS: [string, string][] = [
   ['Left click', 'use the selected item on a tile (walks there if far)'],
   ['Right click / E', 'interact: talk, open doors, harvest, pick up'],
   ['Space', 'use the selected item on the tile in front'],
-  ['1–0, Shift+wheel', 'pick a hotbar slot'],
-  ['Wheel', 'zoom'],
+  ['1–0, wheel', 'pick a hotbar slot (the item name shows above the bar)'],
+  ['Ctrl+wheel', 'zoom'],
   ['[ and ]', 'rotate the camera'],
   ['I or Tab', 'backpack'],
+  ['M', 'map'],
   ['C', 'crafting'],
   ['B', 'build mode: click to place, drag to paint belts, R rotate, right click pick up'],
   ['F', 'Flow overlay'],
@@ -39,7 +40,7 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, audio: 
   });
   modals.show({
     id: 'menu',
-    title: 'Hearthvale',
+    title: 'Cosycorp',
     render: () => {
       const prefs = loadPrefs();
       return h(
@@ -84,7 +85,7 @@ export function showMenu(game: Game, modals: Modals, renderer: Renderer, audio: 
 export function showTitle(game: Game, modals: Modals, hasSave: boolean): void {
   modals.show({
     id: 'title',
-    title: 'Hearthvale',
+    title: 'Cosycorp',
     noClose: true,
     render: () =>
       h('div.menu.title-card',

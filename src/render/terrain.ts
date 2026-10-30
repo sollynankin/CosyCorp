@@ -3,12 +3,13 @@
 import * as THREE from 'three';
 import type { SeasonId } from '../data/types';
 import type { ParsedMap } from '../world';
-import { jitter, merge, leaf, type Part } from './meshes/kit';
-import { terrainColor } from './palette';
+import { jitter, merge, leaf, noise2, type Part } from './meshes/kit';
+import { saturate } from './materials';
+import { SEASON_PALETTE, terrainColor } from './palette';
 
 const unitBox = new THREE.BoxGeometry(1, 1, 1);
 unitBox.translate(0, -0.5, 0);
-const groundMat = new THREE.MeshStandardMaterial({ roughness: 1 });
+const groundMat = saturate(new THREE.MeshStandardMaterial({ roughness: 1 }));
 
 /** Top height of each terrain (metres). */
 export function terrainTop(t: string): number {
@@ -36,7 +37,7 @@ export interface TerrainView {
 }
 
 let waterShader: { uniforms: { uTime: { value: number } } } | null = null;
-const waterMat = new THREE.MeshStandardMaterial({ color: '#5cb8e4', transparent: true, opacity: 0.8, roughness: 0.25, metalness: 0.1 });
+const waterMat = new THREE.MeshStandardMaterial({ color: '#5ce0f8', transparent: true, opacity: 0.78, roughness: 0.2, metalness: 0.05 });
 waterMat.onBeforeCompile = (shader) => {
   shader.uniforms.uTime = { value: 0 };
   shader.vertexShader = shader.vertexShader
@@ -52,10 +53,10 @@ waterMat.onBeforeCompile = (shader) => {
 
 const tuftGeo = (() => {
   const parts: Part[] = [];
-  for (let k = 0; k < 5; k++) parts.push(leaf(0.16, k % 2 ? '#f4f4f4' : '#dcdcdc', { ry: (k / 5) * Math.PI * 2, rx: -1.15 }));
+  for (let k = 0; k < 5; k++) parts.push(leaf(0.16, k % 2 ? '#ffffff' : '#e4e4e4', { ry: (k / 5) * Math.PI * 2, rx: -1.15 }));
   return merge(parts);
 })();
-const tuftMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
+const tuftMat = saturate(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
 
 export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): TerrainView {
   const group = new THREE.Group();
@@ -65,6 +66,7 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
   ground.castShadow = false;
   const mtx = new THREE.Matrix4();
   const col = new THREE.Color();
+  const tmp = new THREE.Color();
   const waterTiles: number[] = [];
   let k = 0;
   for (let y = 0; y < m.h; y++) {
@@ -77,10 +79,20 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
       mtx.setPosition(x + 0.5, top, y + 0.5);
       ground.setMatrixAt(k, mtx);
       const alt = ((x + y) & 1) === 0;
-      col.set(terrainColor(t, season, alt));
-      const j = (jitter(i * 3.1 + m.w) - 0.5) * 0.045;
-      col.offsetHSL(0, 0, j);
-      if (t === 'water' || t === 'lake' || t === 'boards') col.set('#2a4a5a');
+      const j = (jitter(i * 3.1 + m.w) - 0.5) * 0.03;
+      if (t === 'grass') {
+        // Broad two-hue patches plus a finer lightness ripple; only a whisper of checker survives.
+        const pal = SEASON_PALETTE[season];
+        const patch = Math.min(1, Math.max(0, (noise2(x * 0.16 + 3, y * 0.16 + 9) - 0.35) / 0.3));
+        col.set(pal.grass).lerp(tmp.set(pal.grassAlt), patch);
+        col.offsetHSL(0, 0, (noise2(x * 0.6, y * 0.6 + 40) - 0.5) * 0.07 + (alt ? 0.012 : 0) + j);
+      } else {
+        col.set(terrainColor(t, season, alt));
+        // Clay cliffs get big blotches of rose and gold; everything else just a little jitter.
+        if (t === 'cliff') col.offsetHSL((noise2(x * 0.3, y * 0.3) - 0.5) * 0.06, 0.05, (noise2(x * 0.5 + 9, y * 0.5) - 0.5) * 0.12);
+        else col.offsetHSL(0, 0, j);
+      }
+      if (t === 'water' || t === 'lake' || t === 'boards') col.set('#1a96c8');
       ground.setColorAt(k, col);
       k++;
       if (t === 'water' || t === 'lake' || t === 'boards') waterTiles.push(i);
@@ -102,8 +114,8 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
       q.translate(x + 0.5, -0.14, y + 0.5);
       geos.push(q);
       if (m.terrain[i] === 'boards') {
-        boards.push({ geo: new THREE.BoxGeometry(1, 0.1, 1).translate(x + 0.5, 0.0, y + 0.5), color: '#9a6c42' });
-        for (let p = 0; p < 3; p++) boards.push({ geo: new THREE.BoxGeometry(0.04, 0.02, 1.0).translate(x + 0.2 + p * 0.3, 0.06, y + 0.5), color: '#7a5034' });
+        boards.push({ geo: new THREE.BoxGeometry(1, 0.1, 1).translate(x + 0.5, 0.0, y + 0.5), color: '#d89a5a' });
+        for (let p = 0; p < 3; p++) boards.push({ geo: new THREE.BoxGeometry(0.04, 0.02, 1.0).translate(x + 0.2 + p * 0.3, 0.06, y + 0.5), color: '#b87444' });
       }
     }
     const merged = mergeGeos(geos);
@@ -113,7 +125,7 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
   }
   // Treat boards as part of the ground; their terrain box top is at the water bed, so add deck meshes.
   if (boards.length) {
-    const deck = new THREE.Mesh(merge(boards), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }));
+    const deck = new THREE.Mesh(merge(boards), saturate(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 })));
     deck.castShadow = true;
     deck.receiveShadow = true;
     group.add(deck);
@@ -131,7 +143,7 @@ export function buildTerrain(m: ParsedMap, season: SeasonId, quality: number): T
       mtx.makeRotationY(jitter(i) * 6.28);
       mtx.setPosition(x + 0.2 + jitter(i * 1.3) * 0.6, 0, y + 0.2 + jitter(i * 2.3) * 0.6);
       tufts.setMatrixAt(k2, mtx);
-      col.set(terrainColor('grass', season, false)).offsetHSL(0, 0.05, -0.08 + jitter(i * 5) * 0.06);
+      col.set(terrainColor('grass', season, jitter(i * 4.4) > 0.5)).offsetHSL((jitter(i * 6.1) - 0.5) * 0.05, 0.05, -0.05 + jitter(i * 5) * 0.08);
       tufts.setColorAt(k2, col);
     });
     tufts.receiveShadow = true;
