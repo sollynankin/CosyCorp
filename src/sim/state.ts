@@ -37,6 +37,8 @@ export interface FishingState {
   lenCm: number;
   size: number;
   difficulty: number;
+  /** ticks spent reeling: the fish tires as this grows (see FISH_TIRE_TICKS) */
+  reelTicks: number;
 }
 
 /** What you have caught of one species (the Fishing tab). */

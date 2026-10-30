@@ -5,7 +5,7 @@ import {
   ANIMAL_GOLD_AT, ANIMAL_MATURE_DAYS, ANIMAL_SILVER_AT, AUTO_SELL_MULT, BARN_CAPACITY, BIRTHDAY_GIFT_MULT, BOARD_MIN_REWARD, BOARD_POINTS,
   BOARD_REWARD_MULT, BOARD_SIZE, BUILD_BARN_COST, BUILD_COOP_COST, BUNNIES_PER_FLOOR, BUNNY_ENERGY, BUNNY_SIGHT, CAN_CAPACITY, CHICKEN_PRICE,
   COOP_CAPACITY, COW_PRICE, CROP_BALANCE, DATING_CAP_HEARTS, DAY_MINUTES, DAYS_PER_SEASON, ENGAGEMENT_DAYS, FERTILIZER_GOLD_BONUS,
-  FISH_GOLD_AT, FISH_LENGTH_SKILL_BONUS, FISH_SIZE_REEL_TIME, FISH_SILVER_AT, FISH_SIZE_DIFFICULTY, FISH_ZONE_SIZE, FORAGE_PER_DAY, GIFT_POINTS, GIFTS_PER_WEEK, HARDY_WINTER_GROWTH, HOTBAR_SLOTS,
+  FISH_GOLD_AT, FISH_LENGTH_SKILL_BONUS, FISH_SIZE_REEL_TIME, FISH_SIZE_TIRE_TIME, FISH_TIRE_TICKS, FISH_SILVER_AT, FISH_SIZE_DIFFICULTY, FISH_ZONE_SIZE, FORAGE_PER_DAY, GIFT_POINTS, GIFTS_PER_WEEK, HARDY_WINTER_GROWTH, HOTBAR_SLOTS,
   INVENTORY_SLOTS, ITEM_ENERGY, ITEM_VALUE, LIFT_FLOORS, MACHINE_BALANCE, MAX_ENERGY, MAX_HEARTS, MAX_SKILL_LEVEL, MINE_ORE_CHANCE,
   MINE_ORE_HP, MINE_ORE_TABLE, MINE_ROCK_HP, MINE_ROCKS_BASE, MINE_ROCKS_PER_FLOOR, MINING_BONUS_PER_LEVEL, PASS_OUT_ENERGY_FRAC, POD_COUNT,
   POD_PRIZE, POINTS_PER_HEART, QUALITY_GOLD_BASE, QUALITY_GOLD_PER_LEVEL, QUALITY_PRICE_MULT, REACH, SAPLING_PRICE, SECRET_FRIEND_POINTS,
@@ -390,6 +390,8 @@ level nudges the roll up by ${Math.round(FISH_LENGTH_SKILL_BONUS * 100)}% of the
 
 **Bigger fish take longer to reel in** (the catch meter fills ${Math.round((1 - 1 / (1 + FISH_SIZE_REEL_TIME)) * 100)}% slower for a record-length fish than for a tiny one) and **fight harder.** The fish's difficulty moves by ±${Math.round((FISH_SIZE_DIFFICULTY / 2) * 100)}% between the smallest and the biggest of its kind: a record-sized fish moves faster and changes direction more often. The
 **Fishing tab** of the book (backpack, journal, map and fishing log in one pull-up) records how many of each fish you have caught and your longest.
+
+**Fish tire.** A hooked fish wears down: it swims slower, the catch meter fills faster and drains less, and if it never breaks loose it is landed once it is spent, after about ${Math.round(FISH_TIRE_TICKS / 10)} seconds for a small fish and up to ${Math.round((FISH_TIRE_TICKS * (1 + FISH_SIZE_TIRE_TIME)) / 10)} seconds for a record-length one. Letting the meter run empty is the only way to lose a fish.
 
 **Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Raw fish are a modest meal; bigger species restore more. Cooked Fish Stew is better still.
 

@@ -34,6 +34,9 @@ export interface FishLook {
   whiskers?: boolean;
 }
 
+/** What you see on the line while reeling: every fish looks like this until it is landed. */
+export const GENERIC_FISH_LOOK: FishLook = { shape: 'standard', body: '#7ab4e0', belly: '#e8f4ff', fin: '#5a94d0', accent: '#4a80c0', pattern: 'stripe' };
+
 export const FISH_LOOKS: Record<string, FishLook> = {
   minnow: { shape: 'slim', body: '#8ad8f8', belly: '#ffffff', fin: '#ffa0c0', accent: '#2a78d8', pattern: 'stripe' },
   perch: { shape: 'standard', body: '#9ad840', belly: '#fff088', fin: '#ff7a2a', accent: '#2a6a2a', pattern: 'bars' },

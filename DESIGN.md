@@ -375,7 +375,9 @@ you leave.
   which is the fish's quality: silver from `FISH_SILVER_AT`, gold from `FISH_GOLD_AT`, selling at
   `QUALITY_PRICE_MULT` (+25% and +50%). **Bigger fish are harder:** the fish's difficulty moves by
   `(size - 0.5) × FISH_SIZE_DIFFICULTY`, and they take longer to reel in (the catch rate is divided by
-  `1 + size × FISH_SIZE_REEL_TIME`). There are 21 species (data/fish.ts). Fish can be eaten for energy
+  `1 + size × FISH_SIZE_REEL_TIME`). **A hooked fish tires:** fatigue grows with the ticks spent reeling
+  (`FISH_TIRE_TICKS`, longer for big fish). A tired fish swims slower, the meter fills faster and drains less, and
+  at full fatigue a fish that has not broken loose is landed. So no catch can drag on forever. There are 21 species (data/fish.ts). Fish can be eaten for energy
   (`ITEM_ENERGY`). `GameState.fishLog` keeps per-species catches and the longest length (the book's Fishing tab).
 - **Animals:** a Coop (chickens) and a Barn (cows) are built from the Joinery on fixed farm plots. Each animal
   needs feeding (hay in the building's feeder, refilled from your inventory; on sunny days outside winter they

@@ -297,6 +297,17 @@ export const FISH_CATCH_RATE = 0.014;
 /** a bigger fish takes longer to reel in: catch rate is divided by 1 + size × this */
 export const FISH_SIZE_REEL_TIME = 0.8;
 export const FISH_DRAIN_RATE = 0.011;
+/**
+ * A hooked fish tires. Fatigue grows with the ticks spent reeling: FISH_TIRE_TICKS (24 s at 10 Hz) for a small fish,
+ * longer for a big one (× 1 + size × FISH_SIZE_TIRE_TIME). As it tires the fish swims slower (down to
+ * 1 - FISH_TIRE_SLOWDOWN of its speed), the meter fills faster (up to 1 + FISH_TIRE_CATCH_BOOST) and drains less
+ * (down to 1 - FISH_TIRE_DRAIN_RELIEF). At full fatigue a fish that has not broken loose is landed.
+ */
+export const FISH_TIRE_TICKS = 240;
+export const FISH_SIZE_TIRE_TIME = 0.6;
+export const FISH_TIRE_SLOWDOWN = 0.7;
+export const FISH_TIRE_CATCH_BOOST = 1.5;
+export const FISH_TIRE_DRAIN_RELIEF = 0.8;
 export const FISH_START_PROGRESS = 0.3;
 /**
  * Fish sizes. A catch rolls a length fraction f in 0..1 of its species' range: roll^FISH_LENGTH_SKEW (so small

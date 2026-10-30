@@ -221,6 +221,8 @@ level nudges the roll up by 3% of the range. The length sets the size class, whi
 **Bigger fish take longer to reel in** (the catch meter fills 44% slower for a record-length fish than for a tiny one) and **fight harder.** The fish's difficulty moves by ±23% between the smallest and the biggest of its kind: a record-sized fish moves faster and changes direction more often. The
 **Fishing tab** of the book (backpack, journal, map and fishing log in one pull-up) records how many of each fish you have caught and your longest.
 
+**Fish tire.** A hooked fish wears down: it swims slower, the catch meter fills faster and drains less, and if it never breaks loose it is landed once it is spent, after about 24 seconds for a small fish and up to 38 seconds for a record-length one. Letting the meter run empty is the only way to lose a fish.
+
 **Eating fish.** Fish restore energy when eaten (right-click in the backpack, or Eat). Raw fish are a modest meal; bigger species restore more. Cooked Fish Stew is better still.
 
 | Fish | Where | Seasons | Time | Weather | Moves | Length | Silver / gold from | Base difficulty | Sells | Energy |

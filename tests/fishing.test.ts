@@ -1,12 +1,12 @@
 // Fish sizes, size classes and prices, harder big fish, species variety, records and eating fish.
 import { describe, expect, it } from 'vitest';
-import { FISH_GOLD_AT, FISH_SILVER_AT, ITEM_ENERGY, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
+import { FISH_GOLD_AT, FISH_SIZE_TIRE_TIME, FISH_SILVER_AT, FISH_TIRE_TICKS, ITEM_ENERGY, ITEM_VALUE, QUALITY_PRICE_MULT } from '../src/data/balance';
 import { FISH } from '../src/data/fish';
 import { FISH_LOOKS } from '../src/data/fishLook';
 import { getItem } from '../src/data';
 import { applyCommand, sellPrice, step } from '../src/sim';
 import { dayFor } from '../src/sim/calendar';
-import { fishAvailable, fishDifficulty, rollLength, sizeClass, sizeThresholds, tickFishing } from '../src/sim/fishing';
+import { fishAvailable, fishDifficulty, fishFatigue, rollLength, sizeClass, sizeThresholds, tickFishing } from '../src/sim/fishing';
 import { deserialize, serialize } from '../src/sim/serialize';
 import { act, sandbox, selectItem, stand, type Sandbox } from './helpers';
 
@@ -181,12 +181,60 @@ describe('reeling', () => {
     const gain = (size: number): number => {
       const sb = sandbox();
       const { s } = sb;
-      s.player.fishing = { phase: 'reel', biteIn: 0, fish: 'perch', fishPos: 0.5, fishVel: 0, zonePos: 0.4, zoneVel: 0, progress: 0.3, tx: 3, ty: 12, derby: false, holding: false, retarget: 99, fishTarget: 0.5, lenCm: 20, size, difficulty: 0.2 };
+      s.player.fishing = { phase: 'reel', biteIn: 0, fish: 'perch', fishPos: 0.5, fishVel: 0, zonePos: 0.4, zoneVel: 0, progress: 0.3, tx: 3, ty: 12, derby: false, holding: false, retarget: 99, fishTarget: 0.5, lenCm: 20, size, difficulty: 0.2, reelTicks: 0 };
       tickFishing(s, sb.ctx);
       return s.player.fishing ? s.player.fishing.progress - 0.3 : 0;
     };
     expect(gain(0)).toBeGreaterThan(0);
     expect(gain(1)).toBeGreaterThan(0);
     expect(gain(1)).toBeLessThan(gain(0));
+  });
+});
+
+describe('a hooked fish tires', () => {
+  const hook = (sb: Sandbox, size: number, extra: Partial<NonNullable<Sandbox['s']['player']['fishing']>> = {}) => {
+    sb.s.player.fishing = { phase: 'reel', biteIn: 0, fish: 'emberscale', fishPos: 0.5, fishVel: 0, zonePos: 0.4, zoneVel: 0, progress: 0.5, tx: 3, ty: 12, derby: false, holding: false, retarget: 99, fishTarget: 0.5, lenCm: 25, size, difficulty: 0.7, reelTicks: 0, ...extra };
+  };
+
+  it('fatigue grows with time reeling, and a bigger fish takes longer to tire', () => {
+    expect(fishFatigue({ reelTicks: 0, size: 0 })).toBe(0);
+    expect(fishFatigue({ reelTicks: FISH_TIRE_TICKS, size: 0 })).toBe(1);
+    expect(fishFatigue({ reelTicks: 100, size: 0 })).toBeGreaterThan(fishFatigue({ reelTicks: 50, size: 0 }));
+    expect(fishFatigue({ reelTicks: 150, size: 1 })).toBeLessThan(fishFatigue({ reelTicks: 150, size: 0 }));
+  });
+
+  it('a fish that never breaks loose is landed once it is spent, however badly you play', () => {
+    const sb = sandbox();
+    hook(sb, 0.7);
+    const limit = Math.ceil(FISH_TIRE_TICKS * (1 + 0.7 * FISH_SIZE_TIRE_TIME)) + 2;
+    let ticks = 0;
+    while (sb.s.player.fishing && ticks < limit + 50) {
+      sb.s.player.fishing.progress = Math.max(sb.s.player.fishing.progress, 0.4); // the line holds
+      step(sb.s, sb.ctx, []); // never reeling at all
+      ticks++;
+    }
+    expect(sb.s.player.fishing).toBeNull();
+    expect(ticks).toBeLessThanOrEqual(limit);
+    expect(sb.ctx.events.some((e) => e.type === 'catch')).toBe(true);
+    expect(sb.ctx.events.some((e) => e.type === 'toast' && e.text.includes('tired out'))).toBe(true);
+  });
+
+  it('a fresh fish that breaks loose still gets away', () => {
+    const sb = sandbox();
+    hook(sb, 0.5, { progress: 0.05 });
+    for (let t = 0; t < 40 && sb.s.player.fishing; t++) step(sb.s, sb.ctx, []);
+    expect(sb.ctx.events.some((e) => e.type === 'escape')).toBe(true);
+  });
+
+  it('a tired fish gives ground: the meter fills faster inside the zone and drains slower outside it', () => {
+    const delta = (reelTicks: number, inside: boolean) => {
+      const sb = sandbox();
+      hook(sb, 0, inside ? { reelTicks, zonePos: 0.4, fishPos: 0.5 } : { reelTicks, zonePos: 0.05, fishPos: 0.9 });
+      tickFishing(sb.s, sb.ctx);
+      return sb.s.player.fishing ? sb.s.player.fishing.progress - 0.5 : 1;
+    };
+    expect(delta(200, true)).toBeGreaterThan(delta(0, true));
+    expect(delta(200, false)).toBeGreaterThan(delta(0, false)); // less negative
+    expect(delta(0, false)).toBeLessThan(0);
   });
 });

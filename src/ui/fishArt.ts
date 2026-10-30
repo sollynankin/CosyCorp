@@ -490,10 +490,14 @@ function crayfish(g: CanvasRenderingContext2D, look: FishLook): void {
 export function drawFish(g: CanvasRenderingContext2D, id: string): boolean {
   const look = FISH_LOOKS[id];
   if (!look) return false;
+  drawFishLook(g, look);
+  return true;
+}
+
+export function drawFishLook(g: CanvasRenderingContext2D, look: FishLook): void {
   g.save();
   if (look.shape === 'eel') eelFish(g, look);
   else if (look.shape === 'crayfish') crayfish(g, look);
   else standardFish(g, look);
   g.restore();
-  return true;
 }

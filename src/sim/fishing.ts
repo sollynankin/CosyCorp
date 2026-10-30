@@ -11,7 +11,12 @@ import {
   FISH_SILVER_AT,
   FISH_SIZE_DIFFICULTY,
   FISH_SIZE_REEL_TIME,
+  FISH_SIZE_TIRE_TIME,
   FISH_START_PROGRESS,
+  FISH_TIRE_CATCH_BOOST,
+  FISH_TIRE_DRAIN_RELIEF,
+  FISH_TIRE_SLOWDOWN,
+  FISH_TIRE_TICKS,
   FISH_ZONE_DAMP,
   FISH_ZONE_GRAVITY,
   FISH_ZONE_LIFT,
@@ -79,6 +84,7 @@ export function startFishing(state: GameState, ctx: DayContext, x: number, y: nu
     lenCm,
     size,
     difficulty: fishDifficulty(def, size),
+    reelTicks: 0,
   };
   emit(ctx, { type: 'fx', fx: 'splash', map: p.map, x, y });
   return true;
@@ -91,6 +97,11 @@ function fishDef(item: string): FishDef {
 /** A big fish fights harder than an average one of its kind, a small one softer. */
 export function fishDifficulty(def: FishDef, size: number): number {
   return Math.min(0.98, Math.max(0.05, def.difficulty + (size - 0.5) * FISH_SIZE_DIFFICULTY));
+}
+
+/** How worn out the hooked fish is, 0 (fresh) to 1 (spent). Bigger fish take longer to tire. */
+export function fishFatigue(fs: { reelTicks: number; size: number }): number {
+  return Math.min(1, fs.reelTicks / (FISH_TIRE_TICKS * (1 + fs.size * FISH_SIZE_TIRE_TIME)));
 }
 
 /** Size class of a catch from its place in the species' length range: 0 normal, 1 silver, 2 gold. */
@@ -138,12 +149,14 @@ export function tickFishing(state: GameState, ctx: DayContext): void {
     return;
   }
   const f = fishDef(fs.fish);
-  // Fish: moves toward a target, picking a new one every so often (faster for harder fish).
+  fs.reelTicks += 1;
+  const tired = fishFatigue(fs);
+  // Fish: moves toward a target, picking a new one every so often (faster for harder fish, slower once tired).
   if (--fs.retarget <= 0) {
     fs.fishTarget = nextTarget(state, f, fs.fishPos);
-    fs.retarget = Math.round(14 - fs.difficulty * 9);
+    fs.retarget = Math.round((14 - fs.difficulty * 9) * (1 + tired * 1.5));
   }
-  const speed = 0.006 + fs.difficulty * 0.02;
+  const speed = (0.006 + fs.difficulty * 0.02) * (1 - FISH_TIRE_SLOWDOWN * tired);
   fs.fishVel = fs.fishVel * 0.8 + Math.sign(fs.fishTarget - fs.fishPos) * speed * 0.2 * 5;
   fs.fishPos = Math.min(1, Math.max(0, fs.fishPos + Math.max(-speed, Math.min(speed, fs.fishVel))));
   // Zone: lift while held, gravity otherwise, bounce gently off the ends.
@@ -159,22 +172,31 @@ export function tickFishing(state: GameState, ctx: DayContext): void {
     fs.zoneVel = 0;
   }
   const inside = fs.fishPos >= fs.zonePos && fs.fishPos <= fs.zonePos + size;
-  fs.progress += inside ? FISH_CATCH_RATE / (1 + fs.size * FISH_SIZE_REEL_TIME) : -FISH_DRAIN_RATE;
-  if (fs.progress >= 1) {
-    const q = sizeClass(fs.size);
-    p.fishing = null;
-    giveItem(state, ctx, fs.fish, 1, q);
-    gainXp(state, ctx, 'fishing', XP_FISH * (1 + fs.difficulty));
-    const record = logCatch(state, fs.fish, fs.lenCm, q);
-    const bonus = Math.round((QUALITY_PRICE_MULT[q] - 1) * 100);
-    toast(ctx, `${getItem(fs.fish).name}: ${fs.lenCm} cm${q ? `, ${q === 2 ? 'gold' : 'silver'} size (+${bonus}% price)` : ''}${record ? '. A new record!' : ''}`);
-    emit(ctx, { type: 'catch', item: fs.fish, q, cm: fs.lenCm, record });
-    if (p.map === 'town') derbyCatch(state, ctx);
+  fs.progress += inside
+    ? (FISH_CATCH_RATE / (1 + fs.size * FISH_SIZE_REEL_TIME)) * (1 + tired * FISH_TIRE_CATCH_BOOST)
+    : -FISH_DRAIN_RATE * (1 - tired * FISH_TIRE_DRAIN_RELIEF);
+  // Landed: the meter filled, or the fish is spent and never broke loose.
+  if (fs.progress >= 1 || tired >= 1) {
+    landFish(state, ctx, fs, tired >= 1 && fs.progress < 1);
   } else if (fs.progress <= 0) {
     p.fishing = null;
     emit(ctx, { type: 'escape' });
     toast(ctx, 'It got away.');
   }
+}
+
+function landFish(state: GameState, ctx: DayContext, fs: NonNullable<GameState['player']['fishing']>, wornOut: boolean): void {
+  const p = state.player;
+  const q = sizeClass(fs.size);
+  p.fishing = null;
+  giveItem(state, ctx, fs.fish, 1, q);
+  gainXp(state, ctx, 'fishing', XP_FISH * (1 + fs.difficulty));
+  const record = logCatch(state, fs.fish, fs.lenCm, q);
+  const bonus = Math.round((QUALITY_PRICE_MULT[q] - 1) * 100);
+  if (wornOut) toast(ctx, 'The fish tired out and you reeled it in.');
+  toast(ctx, `${getItem(fs.fish).name}: ${fs.lenCm} cm${q ? `, ${q === 2 ? 'gold' : 'silver'} size (+${bonus}% price)` : ''}${record ? '. A new record!' : ''}`);
+  emit(ctx, { type: 'catch', item: fs.fish, q, cm: fs.lenCm, record });
+  if (p.map === 'town') derbyCatch(state, ctx);
 }
 
 /** Update the species record. Returns true when this is the longest one so far (a first catch counts). */

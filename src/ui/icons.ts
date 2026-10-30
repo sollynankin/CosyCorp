@@ -2,7 +2,8 @@
 // colour from ItemDef.color; tools and machines get their own little drawings.
 import { getItem } from '../data';
 import { machineIconUrl } from '../render/iconRender';
-import { drawFish } from './fishArt';
+import { drawFish, drawFishLook } from './fishArt';
+import { GENERIC_FISH_LOOK } from '../data/fishLook';
 
 const cache = new Map<string, string>();
 const S = 48;
@@ -29,6 +30,17 @@ function outline(g: CanvasRenderingContext2D): void {
   g.lineWidth = 2;
   g.strokeStyle = 'rgba(40,28,20,0.75)';
   g.stroke();
+}
+
+/** A plain small fish: shown on the line while reeling, so the species stays a surprise until it is landed. */
+export function genericFishIcon(): string {
+  const hit = cache.get('generic-fish');
+  if (hit) return hit;
+  const [c, g] = ctx2d();
+  drawFishLook(g, GENERIC_FISH_LOOK);
+  const url = c.toDataURL();
+  cache.set('generic-fish', url);
+  return url;
 }
 
 export function itemIcon(id: string): string {

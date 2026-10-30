@@ -628,18 +628,20 @@ table.mtable td:first-child {
 
 /* ---------- Fishing, upgrades ---------- */
 .fishing {
-  position: absolute; right: 70px; top: 50%; transform: translateY(-50%);
-  background: rgba(20, 40, 60, 0.88); color: #eef6ff; border-radius: var(--radius); padding: 16px;
-  display: flex; flex-direction: column; gap: 10px; align-items: center; width: 240px;
-  border: 3px solid #a8c8e8; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  /* bottom right: clear of the clock and buttons at the top, and of the energy bar at the edge */
+  position: absolute; right: 64px; bottom: 100px;
+  background: rgba(20, 40, 60, 0.88); color: #eef6ff; border-radius: var(--radius); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px; align-items: center; width: 104px;
+  border: 2px solid #a8c8e8; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
-.fish-label { font-size: 15px; font-weight: 700; text-align: center; line-height: 1.25; }
-.fish-row { display: flex; gap: 14px; }
-.fish-bar { position: relative; width: 96px; height: min(460px, calc(60vh / var(--ui-scale, 1))); background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 48px; border: 3px solid #a8c8e8; overflow: hidden; }
-.fish-zone { position: absolute; left: 4px; right: 4px; background: rgba(120, 220, 120, 0.45); border: 3px solid #8ae08a; border-radius: 24px; }
+.fish-label { font-size: 12px; font-weight: 700; text-align: center; line-height: 1.2; }
+.fish-row { display: flex; gap: 8px; }
+/* A long, thin bar: the same fish and catch zone cover more screen distance, so it is harder to keep on target. */
+.fish-bar { position: relative; width: 34px; height: min(560px, calc((100vh - 440px) / var(--ui-scale, 1))); background: linear-gradient(#3a6a9a, #1a3a5a); border-radius: 17px; border: 2px solid #a8c8e8; overflow: hidden; }
+.fish-zone { position: absolute; left: 2px; right: 2px; background: rgba(120, 220, 120, 0.45); border: 2px solid #8ae08a; border-radius: 12px; }
 .fish-zone.hit { background: rgba(140, 255, 140, 0.7); }
-.fish-marker { position: absolute; left: 12px; width: 72px; height: 72px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4)); }
-.fish-meter { width: 24px; height: min(460px, calc(60vh / var(--ui-scale, 1))); background: #1a2a3a; border-radius: 14px; border: 2px solid #a8c8e8; display: flex; flex-direction: column-reverse; overflow: hidden; }
+.fish-marker { position: absolute; left: 1px; width: 28px; height: 28px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)); }
+.fish-meter { width: 10px; height: min(560px, calc((100vh - 440px) / var(--ui-scale, 1))); background: #1a2a3a; border-radius: 6px; border: 2px solid #a8c8e8; display: flex; flex-direction: column-reverse; overflow: hidden; }
 .fish-meter div { background: linear-gradient(#f0e040, #5ad06a); width: 100%; }
 .upgrades { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
 .title-card { min-width: 320px; }

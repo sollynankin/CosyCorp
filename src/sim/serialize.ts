@@ -32,7 +32,7 @@ export function migrate(s: GameState): GameState {
   }
   // A cast saved mid-reel from before sizes existed has no length; drop it rather than reel a NaN fish.
   const f = s.player.fishing;
-  if (f && (f.lenCm === undefined || f.difficulty === undefined)) s.player.fishing = null;
+  if (f && (f.lenCm === undefined || f.difficulty === undefined || f.reelTicks === undefined)) s.player.fishing = null;
   s.version = SAVE_VERSION;
   return s;
 }
